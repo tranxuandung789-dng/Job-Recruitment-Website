@@ -1,0 +1,22 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+
+# Database cục bộ
+*.mdf
+*.ldf
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.bak
+
+# Thư viện, log
+packages/
+node_modules/
+*.log
