@@ -7,24 +7,8 @@
       "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\role\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|d:\\duanlaptrinhwebn05\\job-recruitment-website\\job_recruitment_website\\views\\role\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\role\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\views\\role\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\role\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|d:\\duanlaptrinhwebn05\\job-recruitment-website\\job_recruitment_website\\views\\role\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\role\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\controllers\\rolecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:controllers\\rolecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|d:\\duanlaptrinhwebn05\\job-recruitment-website\\job_recruitment_website\\views\\role\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\role\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,60 +18,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Details.cshtml",
-              "DocumentMoniker": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Details.cshtml",
-              "RelativeDocumentMoniker": "Views\\Role\\Details.cshtml",
-              "ToolTip": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Details.cshtml",
-              "RelativeToolTip": "Views\\Role\\Details.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-10-28T10:17:15.397Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "Delete.cshtml",
-              "DocumentMoniker": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Delete.cshtml",
-              "RelativeDocumentMoniker": "Views\\Role\\Delete.cshtml",
-              "ToolTip": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Delete.cshtml",
-              "RelativeToolTip": "Views\\Role\\Delete.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-10-28T10:09:24.629Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Create.cshtml",
-              "DocumentMoniker": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Create.cshtml",
-              "RelativeDocumentMoniker": "Views\\Role\\Create.cshtml",
-              "ToolTip": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Create.cshtml",
-              "RelativeToolTip": "Views\\Role\\Create.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-10-27T19:00:24.858Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Edit.cshtml",
-              "DocumentMoniker": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Edit.cshtml",
-              "RelativeDocumentMoniker": "Views\\Role\\Edit.cshtml",
-              "ToolTip": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Edit.cshtml",
-              "RelativeToolTip": "Views\\Role\\Edit.cshtml",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-10-28T09:54:35.543Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -96,20 +28,20 @@
               "RelativeDocumentMoniker": "Views\\Role\\Index.cshtml",
               "ToolTip": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Index.cshtml",
               "RelativeToolTip": "Views\\Role\\Index.cshtml",
-              "ViewState": "AgIAABEAAAAAAAAAAADwvxwAAABIAAAAAAAAAA==",
+              "ViewState": "AgIAAAIAAAAAAAAAAADwvxwAAABIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-10-27T18:58:18.19Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "RoleController.cs",
               "DocumentMoniker": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\RoleController.cs",
               "RelativeDocumentMoniker": "Controllers\\RoleController.cs",
               "ToolTip": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\RoleController.cs",
               "RelativeToolTip": "Controllers\\RoleController.cs",
-              "ViewState": "AgIAADMAAAAAAAAAAAAEwEgAAAAeAAAAAAAAAA==",
+              "ViewState": "AgIAAH0AAAAAAAAAAAAswK8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-10-27T18:54:39.221Z",
               "EditorCaption": ""
