@@ -1,0 +1,235 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="RecruitmentDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="APPLICATIONS">
+    <Key>
+      <PropertyRef Name="ApplicationId" />
+    </Key>
+    <Property Name="ApplicationId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="JobId" Type="int" Nullable="false" />
+    <Property Name="CandidateId" Type="int" Nullable="false" />
+    <Property Name="CoverLetter" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="AppliedDate" Type="date" Nullable="false" />
+    <Property Name="Status" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="UserId" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CANDIDATEPROFILES">
+    <Key>
+      <PropertyRef Name="ProfileId" />
+    </Key>
+    <Property Name="ProfileId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="UserId" Type="int" Nullable="false" />
+    <Property Name="Education" Type="nvarchar" MaxLength="255" Nullable="false" />
+    <Property Name="Skills" Type="nvarchar" MaxLength="255" Nullable="false" />
+    <Property Name="CV_Url" Type="varchar" MaxLength="255" Nullable="false" />
+    <Property Name="UpdatedAt" Type="date" Nullable="false" />
+    <Property Name="Experience" Type="nvarchar" MaxLength="255" Nullable="false" />
+  </EntityType>
+  <EntityType Name="CATEGORIES">
+    <Key>
+      <PropertyRef Name="CategoryId" />
+    </Key>
+    <Property Name="CategoryId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="CategoryName" Type="nvarchar" MaxLength="150" Nullable="false" />
+  </EntityType>
+  <EntityType Name="COMPANIES">
+    <Key>
+      <PropertyRef Name="CompanyId" />
+    </Key>
+    <Property Name="CompanyId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="UserId" Type="int" Nullable="false" />
+    <Property Name="CompanyName" Type="nvarchar" MaxLength="200" Nullable="false" />
+    <Property Name="Logo_Url" Type="varchar" MaxLength="255" Nullable="false" />
+    <Property Name="Address" Type="nvarchar" MaxLength="255" Nullable="false" />
+    <Property Name="Website" Type="varchar" MaxLength="255" Nullable="false" />
+    <Property Name="Description" Type="nvarchar(max)" Nullable="false" />
+  </EntityType>
+  <EntityType Name="JOBS">
+    <Key>
+      <PropertyRef Name="JobId" />
+    </Key>
+    <Property Name="JobId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="CompanyId" Type="int" Nullable="false" />
+    <Property Name="Title" Type="nvarchar" MaxLength="200" Nullable="false" />
+    <Property Name="Description" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="SalaryRange" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="Location" Type="nvarchar" MaxLength="150" Nullable="false" />
+    <Property Name="Deadline" Type="date" Nullable="false" />
+    <Property Name="Status" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="PostedDate" Type="date" Nullable="false" />
+    <Property Name="CategoryId" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="ROLES">
+    <Key>
+      <PropertyRef Name="RoleId" />
+    </Key>
+    <Property Name="RoleId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="RoleName" Type="nvarchar" MaxLength="100" Nullable="false" />
+  </EntityType>
+  <EntityType Name="USERS">
+    <Key>
+      <PropertyRef Name="UserId" />
+    </Key>
+    <Property Name="UserId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Email" Type="varchar" MaxLength="150" Nullable="false" />
+    <Property Name="PasswordHash" Type="varchar" MaxLength="255" Nullable="false" />
+    <Property Name="FullName" Type="nvarchar" MaxLength="150" Nullable="false" />
+    <Property Name="Phone" Type="varchar" MaxLength="20" Nullable="false" />
+    <Property Name="RoleId" Type="int" Nullable="false" />
+    <Property Name="IsActive" Type="bit" Nullable="false" />
+    <Property Name="CreatedAt" Type="date" Nullable="false" />
+    <Property Name="CompanyId" Type="int" />
+  </EntityType>
+  <Association Name="FK_APPLICATIONS_CANDIDATEPROFILES">
+    <End Role="CANDIDATEPROFILES" Type="Self.CANDIDATEPROFILES" Multiplicity="1" />
+    <End Role="APPLICATIONS" Type="Self.APPLICATIONS" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="CANDIDATEPROFILES">
+        <PropertyRef Name="ProfileId" />
+      </Principal>
+      <Dependent Role="APPLICATIONS">
+        <PropertyRef Name="CandidateId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_APPLICATIONS_JOBS">
+    <End Role="JOBS" Type="Self.JOBS" Multiplicity="1" />
+    <End Role="APPLICATIONS" Type="Self.APPLICATIONS" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="JOBS">
+        <PropertyRef Name="JobId" />
+      </Principal>
+      <Dependent Role="APPLICATIONS">
+        <PropertyRef Name="JobId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_APPLICATIONS_USERS">
+    <End Role="USERS" Type="Self.USERS" Multiplicity="1" />
+    <End Role="APPLICATIONS" Type="Self.APPLICATIONS" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="USERS">
+        <PropertyRef Name="UserId" />
+      </Principal>
+      <Dependent Role="APPLICATIONS">
+        <PropertyRef Name="UserId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_CANDIDATEPROFILES_USERS">
+    <End Role="USERS" Type="Self.USERS" Multiplicity="1" />
+    <End Role="CANDIDATEPROFILES" Type="Self.CANDIDATEPROFILES" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="USERS">
+        <PropertyRef Name="UserId" />
+      </Principal>
+      <Dependent Role="CANDIDATEPROFILES">
+        <PropertyRef Name="UserId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_COMPANIES_USERS">
+    <End Role="USERS" Type="Self.USERS" Multiplicity="1" />
+    <End Role="COMPANIES" Type="Self.COMPANIES" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="USERS">
+        <PropertyRef Name="UserId" />
+      </Principal>
+      <Dependent Role="COMPANIES">
+        <PropertyRef Name="UserId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_JOBS_CATEGORIES">
+    <End Role="CATEGORIES" Type="Self.CATEGORIES" Multiplicity="1" />
+    <End Role="JOBS" Type="Self.JOBS" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="CATEGORIES">
+        <PropertyRef Name="CategoryId" />
+      </Principal>
+      <Dependent Role="JOBS">
+        <PropertyRef Name="CategoryId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_JOBS_COMPANIES">
+    <End Role="COMPANIES" Type="Self.COMPANIES" Multiplicity="1" />
+    <End Role="JOBS" Type="Self.JOBS" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="COMPANIES">
+        <PropertyRef Name="CompanyId" />
+      </Principal>
+      <Dependent Role="JOBS">
+        <PropertyRef Name="CompanyId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_USERS_COMPANIES">
+    <End Role="COMPANIES" Type="Self.COMPANIES" Multiplicity="0..1" />
+    <End Role="USERS" Type="Self.USERS" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="COMPANIES">
+        <PropertyRef Name="CompanyId" />
+      </Principal>
+      <Dependent Role="USERS">
+        <PropertyRef Name="CompanyId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_USERS_ROLES">
+    <End Role="ROLES" Type="Self.ROLES" Multiplicity="1" />
+    <End Role="USERS" Type="Self.USERS" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="ROLES">
+        <PropertyRef Name="RoleId" />
+      </Principal>
+      <Dependent Role="USERS">
+        <PropertyRef Name="RoleId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="RecruitmentDBModelStoreContainer">
+    <EntitySet Name="APPLICATIONS" EntityType="Self.APPLICATIONS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CANDIDATEPROFILES" EntityType="Self.CANDIDATEPROFILES" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CATEGORIES" EntityType="Self.CATEGORIES" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="COMPANIES" EntityType="Self.COMPANIES" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="JOBS" EntityType="Self.JOBS" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ROLES" EntityType="Self.ROLES" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="USERS" EntityType="Self.USERS" Schema="dbo" store:Type="Tables" />
+    <AssociationSet Name="FK_APPLICATIONS_CANDIDATEPROFILES" Association="Self.FK_APPLICATIONS_CANDIDATEPROFILES">
+      <End Role="CANDIDATEPROFILES" EntitySet="CANDIDATEPROFILES" />
+      <End Role="APPLICATIONS" EntitySet="APPLICATIONS" />
+    </AssociationSet>
+    <AssociationSet Name="FK_APPLICATIONS_JOBS" Association="Self.FK_APPLICATIONS_JOBS">
+      <End Role="JOBS" EntitySet="JOBS" />
+      <End Role="APPLICATIONS" EntitySet="APPLICATIONS" />
+    </AssociationSet>
+    <AssociationSet Name="FK_APPLICATIONS_USERS" Association="Self.FK_APPLICATIONS_USERS">
+      <End Role="USERS" EntitySet="USERS" />
+      <End Role="APPLICATIONS" EntitySet="APPLICATIONS" />
+    </AssociationSet>
+    <AssociationSet Name="FK_CANDIDATEPROFILES_USERS" Association="Self.FK_CANDIDATEPROFILES_USERS">
+      <End Role="USERS" EntitySet="USERS" />
+      <End Role="CANDIDATEPROFILES" EntitySet="CANDIDATEPROFILES" />
+    </AssociationSet>
+    <AssociationSet Name="FK_COMPANIES_USERS" Association="Self.FK_COMPANIES_USERS">
+      <End Role="USERS" EntitySet="USERS" />
+      <End Role="COMPANIES" EntitySet="COMPANIES" />
+    </AssociationSet>
+    <AssociationSet Name="FK_JOBS_CATEGORIES" Association="Self.FK_JOBS_CATEGORIES">
+      <End Role="CATEGORIES" EntitySet="CATEGORIES" />
+      <End Role="JOBS" EntitySet="JOBS" />
+    </AssociationSet>
+    <AssociationSet Name="FK_JOBS_COMPANIES" Association="Self.FK_JOBS_COMPANIES">
+      <End Role="COMPANIES" EntitySet="COMPANIES" />
+      <End Role="JOBS" EntitySet="JOBS" />
+    </AssociationSet>
+    <AssociationSet Name="FK_USERS_COMPANIES" Association="Self.FK_USERS_COMPANIES">
+      <End Role="COMPANIES" EntitySet="COMPANIES" />
+      <End Role="USERS" EntitySet="USERS" />
+    </AssociationSet>
+    <AssociationSet Name="FK_USERS_ROLES" Association="Self.FK_USERS_ROLES">
+      <End Role="ROLES" EntitySet="ROLES" />
+      <End Role="USERS" EntitySet="USERS" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>
