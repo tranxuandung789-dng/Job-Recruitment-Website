@@ -34,3 +34,4 @@ namespace Job_Recruitment_Website.Controllers
             return View(role);
         }
     }
+}
