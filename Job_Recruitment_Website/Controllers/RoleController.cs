@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -31,7 +31,6 @@ namespace Job_Recruitment_Website.Controllers
                 database.SaveChanges();
                 return RedirectToAction("Index");
             }
-            return View(role); hjfksdkf
+            return View(role);
         }
     }
-}
