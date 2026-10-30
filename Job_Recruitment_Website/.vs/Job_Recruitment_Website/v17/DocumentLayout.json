@@ -1,13 +1,61 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\",
+  "WorkspaceRootPath": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|d:\\duanlaptrinhwebn05\\job-recruitment-website\\job_recruitment_website\\views\\role\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|c:\\github\\job-recruitment-website\\job_recruitment_website\\views\\about\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\about\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|c:\\github\\job-recruitment-website\\job_recruitment_website\\views\\job\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\job\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|c:\\github\\job-recruitment-website\\job_recruitment_website\\views\\job\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\job\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|c:\\github\\job-recruitment-website\\job_recruitment_website\\controllers\\jobcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:controllers\\jobcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|c:\\github\\job-recruitment-website\\job_recruitment_website\\views\\shared\\_layoutpagetrangchu.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\shared\\_layoutpagetrangchu.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|c:\\github\\job-recruitment-website\\job_recruitment_website\\controllers\\aboutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:controllers\\aboutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|c:\\github\\job-recruitment-website\\job_recruitment_website\\controllers\\companycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:controllers\\companycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|c:\\github\\job-recruitment-website\\job_recruitment_website\\views\\company\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\company\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|c:\\github\\job-recruitment-website\\job_recruitment_website\\views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|c:\\github\\job-recruitment-website\\job_recruitment_website\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|c:\\github\\job-recruitment-website\\job_recruitment_website\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\views\\role\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\role\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\controllers\\rolecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\controllers\\rolecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:controllers\\rolecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -18,33 +66,187 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Index.cshtml",
-              "RelativeDocumentMoniker": "Views\\Role\\Index.cshtml",
-              "ToolTip": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Index.cshtml",
-              "RelativeToolTip": "Views\\Role\\Index.cshtml",
-              "ViewState": "AgIAAAIAAAAAAAAAAADwvxwAAABIAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Job\\Details.cshtml",
+              "RelativeDocumentMoniker": "Views\\Job\\Details.cshtml",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Job\\Details.cshtml",
+              "RelativeToolTip": "Views\\Job\\Details.cshtml",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAwD4AAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-10-27T18:58:18.19Z",
+              "WhenOpened": "2026-10-30T13:54:16.545Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "JobController.cs",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\JobController.cs",
+              "RelativeDocumentMoniker": "Controllers\\JobController.cs",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\JobController.cs",
+              "RelativeToolTip": "Controllers\\JobController.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAYwDMAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-30T13:22:35.778Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "RoleController.cs",
-              "DocumentMoniker": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\RoleController.cs",
-              "RelativeDocumentMoniker": "Controllers\\RoleController.cs",
-              "ToolTip": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\RoleController.cs",
-              "RelativeToolTip": "Controllers\\RoleController.cs",
-              "ViewState": "AgIAAH0AAAAAAAAAAAAswK8AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-27T18:54:39.221Z",
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Job\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Job\\Index.cshtml",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Job\\Index.cshtml",
+              "RelativeToolTip": "Views\\Job\\Index.cshtml",
+              "ViewState": "AgIAACUAAAAAAAAAAAAmwE0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-10-30T13:20:40.689Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "_LayoutPageTrangChu.cshtml",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Shared\\_LayoutPageTrangChu.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_LayoutPageTrangChu.cshtml",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Shared\\_LayoutPageTrangChu.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_LayoutPageTrangChu.cshtml",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAACYAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-10-29T06:55:20.35Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\About\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\About\\Index.cshtml",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\About\\Index.cshtml",
+              "RelativeToolTip": "Views\\About\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-10-30T13:47:53.573Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AboutController.cs",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\AboutController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AboutController.cs",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\AboutController.cs",
+              "RelativeToolTip": "Controllers\\AboutController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-30T13:48:57.128Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAACoAAAAAAAAAAAAAAIYAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-10-29T08:01:52.58Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "CompanyController.cs",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\CompanyController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CompanyController.cs",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\CompanyController.cs",
+              "RelativeToolTip": "Controllers\\CompanyController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-30T13:42:03.784Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Company\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Company\\Index.cshtml",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Company\\Index.cshtml",
+              "RelativeToolTip": "Views\\Company\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-10-30T13:39:31.444Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Login.cshtml",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Account\\Login.cshtml",
+              "RelativeDocumentMoniker": "Views\\Account\\Login.cshtml",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Account\\Login.cshtml",
+              "RelativeToolTip": "Views\\Account\\Login.cshtml",
+              "ViewState": "AgIAADAAAAAAAAAAAAAAAA0AAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-10-30T13:02:58.121Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Register.cshtml",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Account\\Register.cshtml",
+              "RelativeDocumentMoniker": "Views\\Account\\Register.cshtml",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Account\\Register.cshtml",
+              "RelativeToolTip": "Views\\Account\\Register.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-10-30T12:42:13.192Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AccountController.cs",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "Controllers\\AccountController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAcwB4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-30T12:46:23.187Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Role\\Index.cshtml",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Role\\Index.cshtml",
+              "RelativeToolTip": "Views\\Role\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-10-27T18:58:18.19Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "RoleController.cs",
+              "DocumentMoniker": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\RoleController.cs",
+              "RelativeDocumentMoniker": "Controllers\\RoleController.cs",
+              "ToolTip": "C:\\github\\Job-Recruitment-Website\\Job_Recruitment_Website\\Controllers\\RoleController.cs",
+              "RelativeToolTip": "Controllers\\RoleController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAK8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-27T18:54:39.221Z"
             }
           ]
         }

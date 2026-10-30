@@ -27,17 +27,22 @@
             <!-- MENU -->
             <nav>
                 <ul>
-                    <li><a href="#">Trang chủ</a></li>
-                    <li><a href="#">Việc làm</a></li>
-                    <li><a href="#">Công ty</a></li>
-                    <li><a href="#">Về chúng tôi</a></li>
+
+                    <li><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+
+                    <li><a href="@Url.Action("Index", "Job")">Việc làm</a></li>
+
+                    <li><a href="@Url.Action("Index", "Company")">Công ty</a></li>
+
+                    <li><a href="@Url.Action("Index", "About")">Về chúng tôi</a></li>
                 </ul>
             </nav>
 
             <!-- LOGIN / REGISTER -->
             <div class="auth-buttons">
-                <button>Đăng nhập</button>
-                <button>Đăng ký</button>
+                <a href="@Url.Action("Login", "Account")">Đăng nhập</a>
+
+                <a href="@Url.Action("Register", "Account")">Đăng ký</a>
             </div>
 
         </div>

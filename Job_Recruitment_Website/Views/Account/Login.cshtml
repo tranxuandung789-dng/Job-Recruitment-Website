@@ -1,0 +1,83 @@
+﻿
+@{
+    ViewBag.Title = "Đăng nhập";
+    Layout = "~/Views/Shared/_LayoutPageTrangChu.cshtml";
+}
+
+<!-- TRANG ĐĂNG NHẬP -->
+<main id="login-page">
+
+    <!-- PHẦN GIỚI THIỆU -->
+    <section id="login-introduction">
+        <h1>Chào mừng bạn đến với D-Jobs</h1>
+        <p>
+            Đăng nhập vào tài khoản để khám phá cơ hội việc làm và kết nối với các nhà tuyển dụng.
+        </p>
+    </section>
+
+    <!-- PHẦN FORM ĐĂNG NHẬP -->
+    <section id="login-section">
+
+        <h2>Đăng nhập tài khoản</h2>
+        <p>Vui lòng nhập thông tin tài khoản của bạn.</p>
+
+        <form id="login-form" method="post">
+
+            <!-- EMAIL -->
+            <div class="form-group">
+                <label for="Email">Email</label>
+                <input type="email"
+                       id="Email"
+                       name="Email"
+                       placeholder="Nhập địa chỉ email"
+                       required>
+            </div>
+
+            <!-- MẬT KHẨU -->
+            <div class="form-group">
+                <label for="Password">Mật khẩu</label>
+                <input type="password"
+                       id="Password"
+                       name="Password"
+                       placeholder="Nhập mật khẩu"
+                       required>
+            </div>
+
+            <!-- GHI NHỚ ĐĂNG NHẬP -->
+            <div class="form-group">
+                <input type="checkbox"
+                       id="RememberMe"
+                       name="RememberMe">
+
+                <label for="RememberMe">
+                    Ghi nhớ đăng nhập
+                </label>
+            </div>
+
+            <!-- QUÊN MẬT KHẨU -->
+            <div class="form-group">
+                <a href="#" id="forgot-password">
+                    Quên mật khẩu?
+                </a>
+            </div>
+
+            <!-- NÚT ĐĂNG NHẬP -->
+            <div class="form-group">
+                <button type="submit">
+                    Đăng nhập
+                </button>
+            </div>
+
+        </form>
+
+        <!-- LIÊN KẾT ĐĂNG KÝ -->
+        <p>
+            Bạn chưa có tài khoản?
+            <a href="@Url.Action("Register", "Account")">
+                Đăng ký ngay
+            </a>
+        </p>
+
+    </section>
+
+</main>

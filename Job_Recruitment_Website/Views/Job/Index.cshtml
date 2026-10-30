@@ -1,0 +1,77 @@
+﻿
+@{
+    ViewBag.Title = "Tìm kiếm việc làm";
+    Layout = "~/Views/Shared/_LayoutPageTrangChu.cshtml";
+}
+
+<main id="job-page">
+
+    <!-- Tiêu đề trang -->
+    <section id="job-page-header">
+        <h1>Tìm kiếm công việc phù hợp</h1>
+        <p>Khám phá cơ hội nghề nghiệp và tìm công việc phù hợp với bạn tại D-Jobs.</p>
+    </section>
+
+    <!-- Khu vực tìm kiếm -->
+    <section id="job-search">
+        <h2>Bạn đang tìm kiếm công việc nào?</h2>
+
+        <form method="get">
+            <div class="form-group">
+                <label for="Keyword">Tên công việc</label>
+                <input type="text" id="Keyword" name="keyword"
+                       placeholder="Ví dụ: Nhân viên kinh doanh">
+            </div>
+
+            <div class="form-group">
+                <label for="Location">Địa điểm</label>
+                <input type="text" id="Location" name="location"
+                       placeholder="Nhập tỉnh/thành phố">
+            </div>
+
+            <button type="submit">Tìm việc</button>
+        </form>
+    </section>
+
+    <!-- Danh sách kết quả việc làm -->
+    <section id="job-list">
+        <h2>Kết quả việc làm</h2>
+
+        <!-- Tin tuyển dụng 1 -->
+        <article class="job-item">
+            <h3>Nhân viên kinh doanh</h3>
+            <p>Công ty: Công ty KIM HỒNG</p>
+            <p>Địa điểm: Thành phố Hồ Chí Minh</p>
+            <p>Mức lương: Thỏa thuận</p>
+            <a href="@Url.Action("Details", "Job", new { id = 1 })">
+                Xem chi tiết
+            </a>
+        </article>
+
+        <!-- Tin tuyển dụng 2 -->
+        <article class="job-item">
+            <h3>Nhân viên Marketing</h3>
+            <p>Công ty: Công ty TNHH</p>
+            <p>Địa điểm: Hà Nội</p>
+            <p>Mức lương: Thỏa thuận</p>
+            <a href="@Url.Action("Details", "Job", new { id = 2 })">
+                Xem chi tiết
+            </a>
+        </article>
+
+        <!-- Tin tuyển dụng 3 -->
+        <article class="job-item">
+            <h3>Lập trình viên Web</h3>
+            <p>Công ty: Công ty DEF</p>
+            <p>Địa điểm: Thành phố Hồ Chí Minh</p>
+            <p>Mức lương: Thỏa thuận</p>
+            <a href="@Url.Action("Details", "Job", new { id = 3 })">
+                Xem chi tiết
+            </a>
+        </article>
+
+        <!-- Backend: Thay tin minh họa bằng dữ liệu từ SQL Server -->
+
+    </section>
+
+</main>

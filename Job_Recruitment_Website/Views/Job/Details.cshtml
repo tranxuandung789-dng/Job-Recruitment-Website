@@ -1,0 +1,63 @@
+﻿@{
+    ViewBag.Title = "Chi tiết công việc";
+    Layout = "~/Views/Shared/_LayoutPageTrangChu.cshtml";
+}
+
+<main id="job-details-page">
+
+    <section id="job-details-header">
+        <h1>@ViewBag.Job</h1>
+        <h2>@ViewBag.Company</h2>
+
+        <p>Địa điểm: @ViewBag.Location</p>
+        <p>Mức lương: @ViewBag.Salary</p>
+        <p>Hình thức: Toàn thời gian</p>
+
+        <a href="#application-section">Ứng tuyển ngay</a>
+    </section>
+
+    <section id="job-description">
+        <h2>Mô tả công việc</h2>
+        <p>@ViewBag.Description</p>
+    </section>
+
+    <section id="job-requirements">
+        <h2>Yêu cầu ứng viên</h2>
+        <ul>
+            <li>Có kiến thức phù hợp với vị trí ứng tuyển.</li>
+            <li>Có kỹ năng giao tiếp và làm việc nhóm.</li>
+            <li>Có tinh thần trách nhiệm trong công việc.</li>
+            <li>Có khả năng học hỏi và phát triển bản thân.</li>
+        </ul>
+    </section>
+
+    <section id="job-benefits">
+        <h2>Quyền lợi và chế độ đãi ngộ</h2>
+        <ul>
+            <li>Được hưởng chế độ bảo hiểm theo quy định.</li>
+            <li>Được thưởng theo hiệu quả công việc.</li>
+            <li>Được đào tạo và nâng cao chuyên môn.</li>
+            <li>Có cơ hội thăng tiến trong công việc.</li>
+        </ul>
+    </section>
+
+    <section id="job-information">
+        <h2>Thông tin tuyển dụng</h2>
+        <p>Số lượng tuyển: 02 người</p>
+        <p>Kinh nghiệm: Không yêu cầu</p>
+        <p>Hạn nộp hồ sơ: Theo thông báo tuyển dụng</p>
+    </section>
+
+    <section id="application-section">
+        <h2>Bạn quan tâm đến công việc này?</h2>
+        <p>Hãy gửi hồ sơ để có cơ hội trở thành thành viên của công ty.</p>
+        <a href="#">Ứng tuyển ngay</a>
+    </section>
+
+    <section id="back-to-jobs">
+        <a href="@Url.Action("Index", "Job")">
+            Quay lại danh sách việc làm
+        </a>
+    </section>
+
+</main>

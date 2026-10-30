@@ -1,0 +1,94 @@
+﻿
+@{
+    ViewBag.Title = "Đăng ký tài khoản";
+    Layout = "~/Views/Shared/_LayoutPageTrangChu.cshtml";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Đăng ký tài khoản D-Jobs</title>
+</head>
+<body>
+
+    <main id="register-page">
+
+        <!-- PHẦN GIỚI THIỆU -->
+        <section id="register-introduction">
+            <h1>Tham gia cùng D-Jobs</h1>
+            <p>
+                Tạo tài khoản để khám phá cơ hội việc làm và kết nối với nhà tuyển dụng.
+            </p>
+        </section>
+
+        <!-- PHẦN ĐĂNG KÝ -->
+        <section id="register-section">
+
+            <h2>Tạo tài khoản mới</h2>
+            <p>Vui lòng điền thông tin bên dưới.</p>
+
+            <form id="register-form" method="post">
+
+                <div class="form-group">
+                    <label for="AccountType">Loại tài khoản</label>
+                    <select id="AccountType" name="AccountType" required>
+                        <option value="">-- Chọn loại tài khoản --</option>
+                        <option value="Candidate">Người tìm việc</option>
+                        <option value="Employer">Nhà tuyển dụng</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="FullName">Họ và tên</label>
+                    <input type="text" id="FullName"
+                           name="FullName" placeholder="Nhập họ và tên" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="Email">Email</label>
+                    <input type="email" id="Email"
+                           name="Email" placeholder="Nhập email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="Phone">Số điện thoại</label>
+                    <input type="tel" id="Phone"
+                           name="Phone" placeholder="Nhập số điện thoại">
+                </div>
+
+                <div class="form-group">
+                    <label for="Password">Mật khẩu</label>
+                    <input type="password" id="Password"
+                           name="Password" placeholder="Nhập mật khẩu" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="ConfirmPassword">Xác nhận mật khẩu</label>
+                    <input type="password" id="ConfirmPassword"
+                           name="ConfirmPassword" placeholder="Nhập lại mật khẩu" required>
+                </div>
+
+                <div class="form-group">
+                    <input type="checkbox" id="AgreeTerms"
+                           name="AgreeTerms" required>
+                    <label for="AgreeTerms">
+                        Tôi đồng ý với điều khoản sử dụng.
+                    </label>
+                </div>
+
+                <button type="submit">Đăng ký</button>
+
+            </form>
+
+            <p>
+                Đã có tài khoản?
+                <a href="@Url.Action("Login", "Account")">Đăng nhập</a>
+            </p>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
