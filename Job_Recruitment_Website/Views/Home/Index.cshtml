@@ -1,33 +1,377 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+﻿
+@{
+    // Khai báo tiêu đề trang chủ
+    ViewBag.Title = "NEXJOB";
+
+    // Sử dụng layout trang chủ đã tạo
+    Layout = "~/Views/Shared/_LayoutPageTrangChu.cshtml";
 }
 
 <main>
-    <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
+
+    <!-- PHẦN 1: BANNER GIỚI THIỆU -->
+    <section id="banner">
+
+        <h1>Chào mừng đến với D-JOBS Recruitment Agency</h1>
+
+        <p>
+            Kết nối ứng viên với những cơ hội nghề nghiệp phù hợp.
+        </p>
+
+        <a href="#tim-kiem-viec-lam">
+            Khám phá việc làm
+        </a>
+
     </section>
 
-    <div class="row">
-        <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-            <h2 id="gettingStartedTitle">Getting started</h2>
+
+    <!-- PHẦN 2: TÌM KIẾM VIỆC LÀM -->
+    <section id="tim-kiem-viec-lam">
+
+        <h2>Tìm kiếm việc làm</h2>
+
+        <form>
+
+            <input type="text"
+                   name="keyword"
+                   placeholder="Nhập tên công việc..." />
+
+            <input type="text"
+                   name="location"
+                   placeholder="Nhập địa điểm..." />
+
+            <button type="submit">
+                Tìm kiếm
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- PHẦN 3: VIỆC LÀM NỔI BẬT -->
+    <section id="viec-lam-noi-bat">
+
+        <h2>Việc làm nổi bật</h2>
+
+        <p>
+            Khám phá những cơ hội nghề nghiệp phù hợp với bạn.
+        </p>
+
+        <!-- Khu vực hiển thị danh sách việc làm từ SQL Server -->
+        <div id="featured-job-list">
+
+            <!-- Backend sẽ hiển thị các thẻ việc làm tại đây -->
+
+        </div>
+
+        <a href="@Url.Action("Index", "Job")">
+            Xem tất cả việc làm
+        </a>
+
+    </section>
+
+
+    <!-- PHẦN 4: DANH MỤC NGÀNH NGHỀ -->
+    <section id="danh-muc-nghe-nghiep">
+
+        <h2>Danh mục ngành nghề</h2>
+
+        <p>
+            Tìm kiếm cơ hội việc làm theo lĩnh vực nghề nghiệp.
+        </p>
+
+        <!-- Khu vực hiển thị danh mục ngành nghề từ SQL Server -->
+        <div id="category-list">
+
+            <!-- Backend sẽ hiển thị các danh mục tại đây -->
+
+        </div>
+
+    </section>
+
+
+    <!-- PHẦN 5: CÔNG TY TUYỂN DỤNG -->
+    <section id="cong-ty-tuyen-dung">
+
+        <h2>Công ty tuyển dụng</h2>
+
+        <p>
+            Khám phá các doanh nghiệp đang tìm kiếm nhân tài.
+        </p>
+
+        <!-- Khu vực hiển thị thông tin công ty từ SQL Server -->
+        <div id="company-list">
+
+            <!-- Backend sẽ hiển thị thông tin công ty tại đây -->
+
+        </div>
+
+    </section>
+
+
+    <!-- PHẦN 6: DÀNH CHO NHÀ TUYỂN DỤNG -->
+    <section id="nha-tuyen-dung">
+
+        <h2>Bạn là nhà tuyển dụng?</h2>
+
+        <p>
+            Đăng tin tuyển dụng và tiếp cận những ứng viên
+            tiềm năng cùng D-Jobs Recruitment Agency.
+        </p>
+
+        <div>
+
+            <a href="@Url.Action("Index", "Job")">
+                Quản lý tin tuyển dụng
+            </a>
+
+            <a href="@Url.Action("Index", "Home")">
+                Tìm hiểu thêm
+            </a>
+
+        </div>
+
+    </section>
+
+    <!-- PHẦN 7: TIN TUYỂN DỤNG -->
+    <section id="tin-tuyen-dung">
+
+        <!-- TIÊU ĐỀ KHU VỰC -->
+        <div class="job-section-header">
+            <h2>Tin tuyển dụng</h2>
+
             <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
+                Khám phá những cơ hội nghề nghiệp mới nhất
+                dành cho bạn tại D-Jobs.
             </p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="librariesTitle">
-            <h2 id="librariesTitle">Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="hostingTitle">
-            <h2 id="hostingTitle">Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-        </section>
-    </div>
+        </div>
+
+
+        <!-- THANH TÌM KIẾM TIN TUYỂN DỤNG -->
+        <div class="job-search">
+
+            <form>
+
+                <div>
+                    <label for="job-keyword">
+                        Từ khóa công việc
+                    </label>
+
+                    <input type="text"
+                           id="job-keyword"
+                           name="keyword"
+                           placeholder="Nhập tên công việc hoặc vị trí..." />
+                </div>
+
+                <div>
+                    <label for="job-location">
+                        Địa điểm
+                    </label>
+
+                    <input type="text"
+                           id="job-location"
+                           name="location"
+                           placeholder="Nhập tỉnh/thành phố..." />
+                </div>
+
+                <button type="submit">
+                    Tìm kiếm
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- KHU VỰC BỘ LỌC VÀ DANH SÁCH VIỆC LÀM -->
+        <div class="job-content">
+
+
+            <!-- BỘ LỌC BÊN TRÁI -->
+            <aside class="job-filter">
+
+                <h3>Bộ lọc tìm kiếm</h3>
+
+
+                <!-- LỌC THEO NGÀNH NGHỀ -->
+                <div class="filter-group">
+
+                    <h4>Ngành nghề</h4>
+
+                    <label>
+                        <input type="radio" name="category" value="it" />
+                        Công nghệ thông tin
+                    </label>
+
+                    <label>
+                        <input type="radio" name="category" value="business" />
+                        Kinh doanh
+                    </label>
+
+                    <label>
+                        <input type="radio" name="category" value="marketing" />
+                        Marketing
+                    </label>
+
+                    <label>
+                        <input type="radio" name="category" value="design" />
+                        Thiết kế
+                    </label>
+
+                    <label>
+                        <input type="radio" name="category" value="accounting" />
+                        Kế toán
+                    </label>
+
+                </div>
+
+
+                <!-- LỌC THEO ĐỊA ĐIỂM -->
+                <div class="filter-group">
+
+                    <h4>Địa điểm</h4>
+
+                    <label>
+                        <input type="radio" name="location" value="hcm" />
+                        Hồ Chí Minh
+                    </label>
+
+                    <label>
+                        <input type="radio" name="location" value="hanoi" />
+                        Hà Nội
+                    </label>
+
+                    <label>
+                        <input type="radio" name="location" value="danang" />
+                        Đà Nẵng
+                    </label>
+
+                </div>
+
+
+                <!-- LỌC THEO HÌNH THỨC LÀM VIỆC -->
+                <div class="filter-group">
+
+                    <h4>Hình thức làm việc</h4>
+
+                    <label>
+                        <input type="radio" name="workType" value="fulltime" />
+                        Toàn thời gian
+                    </label>
+
+                    <label>
+                        <input type="radio" name="workType" value="parttime" />
+                        Bán thời gian
+                    </label>
+
+                    <label>
+                        <input type="radio" name="workType" value="remote" />
+                        Làm việc từ xa
+                    </label>
+
+                    <label>
+                        <input type="radio" name="workType" value="internship" />
+                        Thực tập
+                    </label>
+
+                </div>
+
+
+                <!-- LỌC THEO MỨC LƯƠNG -->
+                <div class="filter-group">
+
+                    <h4>Mức lương</h4>
+
+                    <label>
+                        <input type="radio" name="salary" value="under10" />
+                        Dưới 10 triệu
+                    </label>
+
+                    <label>
+                        <input type="radio" name="salary" value="10to20" />
+                        10 - 20 triệu
+                    </label>
+
+                    <label>
+                        <input type="radio" name="salary" value="20to30" />
+                        20 - 30 triệu
+                    </label>
+
+                    <label>
+                        <input type="radio" name="salary" value="above30" />
+                        Trên 30 triệu
+                    </label>
+
+                </div>
+
+
+                <!-- NÚT ÁP DỤNG BỘ LỌC -->
+                <button type="submit">
+                    Áp dụng bộ lọc
+                </button>
+
+            </aside>
+
+
+            <!-- DANH SÁCH TIN TUYỂN DỤNG BÊN PHẢI -->
+            <div class="job-list-container">
+
+                <div class="job-list-header">
+
+                    <h3>Danh sách việc làm</h3>
+
+                    <div>
+                        <label for="job-sort">
+                            Sắp xếp:
+                        </label>
+
+                        <select id="job-sort" name="sort">
+                            <option value="newest">Mới nhất</option>
+                            <option value="oldest">Cũ nhất</option>
+                        </select>
+                    </div>
+
+                </div>
+
+
+                <!-- NƠI HIỂN THỊ CÁC TIN TUYỂN DỤNG TỪ SQL SERVER -->
+                <div id="job-list-results">
+
+                    <!-- Backend sẽ kết nối SQL Server
+                         và hiển thị các tin tuyển dụng tại đây -->
+
+                </div>
+
+
+                <!-- PHÂN TRANG -->
+                <div class="job-pagination">
+
+                    <button type="button" disabled>
+                        Trước
+                    </button>
+
+                    <button type="button">
+                        1
+                    </button>
+
+                    <button type="button">
+                        2
+                    </button>
+
+                    <button type="button">
+                        3
+                    </button>
+
+                    <button type="button">
+                        Sau
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
 </main>

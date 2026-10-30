@@ -1,0 +1,76 @@
+﻿
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <!-- CSS -->
+    <link href="~/Content/nexjob.css" rel="stylesheet" />
+
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+
+        <div class="container">
+
+            <!-- LOGO D-JOBS -->
+            <div class="logo">
+                <a href="@Url.Action("Index", "Home")">
+                    <img src="@Url.Content("~/Content/Image/Logo.jpg")" alt="D-Jobs Recruitment Agency" width="180" />
+                </a>
+            </div>
+
+            <!-- MENU -->
+            <nav>
+                <ul>
+                    <li><a href="#">Trang chủ</a></li>
+                    <li><a href="#">Việc làm</a></li>
+                    <li><a href="#">Công ty</a></li>
+                    <li><a href="#">Về chúng tôi</a></li>
+                </ul>
+            </nav>
+
+            <!-- LOGIN / REGISTER -->
+            <div class="auth-buttons">
+                <button>Đăng nhập</button>
+                <button>Đăng ký</button>
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- MAIN CONTENT -->
+    <div>
+
+        @RenderBody()
+
+    </div>
+
+
+    <!-- FOOTER -->
+    <footer>
+
+        <div class="container">
+
+            <div class="footer-logo">
+                <h2>D-JOBS Recruitment Agency</h2>
+            </div>
+
+            <div class="footer-info">
+                <p>Website tuyển dụng  D-JOBS Recruitment Agency</p>
+                <p>Kết nối nhân tài với cơ hội nghề nghiệp.</p>
+                <p>© 2026  D-JOBS Recruitment Agency. All rights reserved.</p>
+            </div>
+
+        </div>
+
+    </footer>
+
+</body>
+</html>
