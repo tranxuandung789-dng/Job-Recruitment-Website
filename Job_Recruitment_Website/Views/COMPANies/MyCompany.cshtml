@@ -1,0 +1,48 @@
+﻿@model Job_Recruitment_Website.Models.COMPANy
+
+@{
+    ViewBag.Title = "Thông tin công ty";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Thông tin công ty của tôi</h2>
+
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>Tên công ty</dt>
+        <dd>
+            @Html.DisplayFor(model => model.CompanyName)
+        </dd>
+
+        <dt>Logo công ty</dt>
+        <dd>
+            @if (!string.IsNullOrEmpty(Model.Logo_Url))
+            {
+                <img src="@Model.Logo_Url" alt="Logo công ty" style="max-width: 200px; max-height: 150px; object-fit: contain;" />
+            }
+            else
+            {
+                <span class="text-muted">Chưa cập nhật logo</span>
+            }
+        </dd>
+
+        <dt>Địa chỉ</dt>
+        <dd>
+            @Html.DisplayFor(model => model.Address)
+        </dd>
+
+        <dt>Website</dt>
+        <dd>
+            <a href="@Model.Website" target="_blank">@Model.Website</a>
+        </dd>
+
+        <dt>Mô tả</dt>
+        <dd>
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+    </dl>
+</div>
+<p style="margin-top: 20px;">
+    @Html.ActionLink("Chỉnh sửa thông tin", "Edit", "Companies", null, new { @class = "btn btn-primary" })
+</p>

@@ -1,0 +1,61 @@
+﻿@model IEnumerable<Job_Recruitment_Website.Models.JOB>
+
+@{
+    ViewBag.Title = "Danh sách việc làm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Danh sách việc làm mới nhất</h2>
+
+<!-- Form bộ lọc tìm kiếm -->
+@using (Html.BeginForm("Index", "Jobs", FormMethod.Get))
+{
+    <div class="form-inline" style="margin-bottom: 20px; display: flex; gap: 10px;">
+        <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control" placeholder="Tìm theo tên công việc..." style="min-width: 300px;" />
+        @Html.DropDownList("categoryId", (SelectList)ViewBag.CategoryId, "-- Tất cả ngành nghề --", new { @class = "form-control" })
+        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+    </div>
+}
+
+<table class="table table-bordered table-striped table-hover">
+    <tr>
+        <th>Tiêu đề công việc</th>
+        <th>Mức lương</th>
+        <th>Địa điểm</th>
+        <th>Hạn nộp</th>
+        <th>Ngày đăng</th>
+        <th>Ngành nghề</th>
+        <th>Công ty</th>
+        <th>Thao tác</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td style="font-weight: bold;">
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SalaryRange)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Location)
+            </td>
+            <td>
+                @item.Deadline.ToString("dd/MM/yyyy")
+            </td>
+            <td>
+                @item.PostedDate.ToString("dd/MM/yyyy")
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CATEGORy.CategoryName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.COMPANy.CompanyName)
+            </td>
+            <td>
+                @Html.ActionLink("Xem chi tiết", "Details", new { id = item.JobId }, new { @class = "btn btn-info btn-sm" })
+            </td>
+        </tr>
+    }
+</table>

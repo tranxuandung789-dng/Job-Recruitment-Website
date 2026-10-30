@@ -1,0 +1,80 @@
+﻿@model IEnumerable<Job_Recruitment_Website.Models.JOB>
+
+@{
+    ViewBag.Title = "Quản lý tin tuyển dụng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Danh sách tin tuyển dụng của công ty</h2>
+
+<p style="margin-bottom: 15px;">
+    @Html.ActionLink("Đăng tin mới", "Create", null, new { @class = "btn btn-primary" })
+</p>
+
+<table class="table table-bordered table-striped">
+    <tr>
+        <th>Tiêu đề công việc</th>
+        <th>Mô tả</th>
+        <th>Mức lương</th>
+        <th>Địa điểm</th>
+        <th>Hạn nộp</th>
+        <th>Trạng thái</th>
+        <th>Ngày đăng</th>
+        <th>Ngành nghề</th>
+        <th style="min-width: 180px;">Thao tác</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SalaryRange)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Location)
+            </td>
+            <td>
+                @item.Deadline.ToString("dd/MM/yyyy")
+            </td>
+            <td>
+                @if (item.Status == "Open")
+                {
+                    <span class="label label-success">Đang mở</span>
+                }
+                else
+                {
+                    <span class="label label-default">Đã đóng</span>
+                }
+            </td>
+            <td>
+                @item.PostedDate.ToString("dd/MM/yyyy")
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CATEGORy.CategoryName)
+            </td>
+            <td>
+                @Html.ActionLink("Sửa", "Edit", new { id = item.JobId }) |
+                @Html.ActionLink("Chi tiết", "Details", new { id = item.JobId }) |
+
+                @if (item.Status == "Open")
+                {
+                    using (Html.BeginForm("Close", "Jobs", FormMethod.Post, new { style = "display:inline;" }))
+                    {
+                        <input type="hidden" name="id" value="@item.JobId" />
+                        <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('Bạn có chắc muốn đóng tin này? Ứng viên sẽ không thể nộp đơn nữa.');" style="background:none; border:none; color:red; padding:0; font-weight:normal; text-decoration:underline;">Đóng tin</button>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted" style="font-style: italic;">Đã đóng</span>
+                }
+            </td>
+        </tr>
+    }
+</table>
