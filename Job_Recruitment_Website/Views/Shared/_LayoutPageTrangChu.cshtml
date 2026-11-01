@@ -1,81 +1,70 @@
-﻿
-<!DOCTYPE html>
-
+﻿<!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewBag.Title</title>
 
-    <!-- CSS -->
-    <link href="~/Content/nexjob.css" rel="stylesheet" />
+    <!-- 1. THÊM BOOTSTRAP 5 CSS (Lệnh 1) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CSS riêng của bạn -->
+    <link href="~/StyleRecuitment.css" rel="stylesheet" />
 
 </head>
 <body>
 
     <!-- HEADER -->
-    <header>
-
-        <div class="container">
+    <header class="py-3 border-bottom bg-white sticky-top">
+        <div class="container d-flex align-items-center justify-content-between">
 
             <!-- LOGO D-JOBS -->
             <div class="logo">
                 <a href="@Url.Action("Index", "Home")">
-                    <img src="@Url.Content("~/Content/Image/Logo.jpg")" alt="D-Jobs Recruitment Agency" width="180" />
+                    <img src="@Url.Content("~/Content/Image/Logo.png")" alt="D-Jobs Recruitment Agency" width="180" />
                 </a>
             </div>
 
-            <!-- MENU -->
+            <!-- MENU (Sử dụng class flex và gap của Bootstrap) -->
             <nav>
-                <ul>
-
-                    <li><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
-
-                    <li><a href="@Url.Action("Index", "Job")">Việc làm</a></li>
-
-                    <li><a href="@Url.Action("Index", "Company")">Công ty</a></li>
-
-                    <li><a href="@Url.Action("Index", "About")">Về chúng tôi</a></li>
+                <ul class="nav gap-4">
+                    <li class="nav-item"><a class="nav-link text-dark px-0 fw-semibold" href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link text-dark px-0 fw-semibold" href="@Url.Action("Index", "Job")">Việc làm</a></li>
+                    <li class="nav-item"><a class="nav-link text-dark px-0 fw-semibold" href="@Url.Action("Index", "Company")">Công ty</a></li>
+                    <li class="nav-item"><a class="nav-link text-dark px-0 fw-semibold" href="@Url.Action("Index", "About")">Về chúng tôi</a></li>
                 </ul>
             </nav>
 
             <!-- LOGIN / REGISTER -->
-            <div class="auth-buttons">
-                <a href="@Url.Action("Login", "Account")">Đăng nhập</a>
-
-                <a href="@Url.Action("Register", "Account")">Đăng ký</a>
+            <div class="auth-buttons d-flex align-items-center gap-3">
+                <a class="text-decoration-none text-dark fw-semibold" href="@Url.Action("Login", "Account")">Đăng nhập</a>
+                <a class="btn btn-warning text-white fw-semibold px-3 py-2" style="background-color: #f7931e;" href="@Url.Action("Register", "Account")">Đăng ký</a>
             </div>
 
         </div>
-
     </header>
 
 
     <!-- MAIN CONTENT -->
-    <div>
-
+    <div class="my-4">
         @RenderBody()
-
     </div>
 
 
     <!-- FOOTER -->
-    <footer>
-
-        <div class="container">
-
+    <footer class="bg-white border-top py-4 mt-auto">
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
             <div class="footer-logo">
-                <h2>D-JOBS Recruitment Agency</h2>
+                <h2 class="h5 fw-bold text-warning mb-0">D-JOBS Recruitment Agency</h2>
             </div>
-
-            <div class="footer-info">
-                <p>Website tuyển dụng  D-JOBS Recruitment Agency</p>
-                <p>Kết nối nhân tài với cơ hội nghề nghiệp.</p>
-                <p>© 2026  D-JOBS Recruitment Agency. All rights reserved.</p>
+            <div class="footer-info text-center text-md-end text-muted small">
+                <p class="mb-1">Website tuyển dụng D-JOBS Recruitment Agency - Kết nối nhân tài với cơ hội nghề nghiệp.</p>
+                <p class="mb-0">© 2026 D-JOBS Recruitment Agency. All rights reserved.</p>
             </div>
-
         </div>
-
     </footer>
+
+    <!-- 2. THÊM BOOTSTRAP 5 JS BUNDLE (Lệnh 2 - Giúp hỗ trợ các thành phần tương tác) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
