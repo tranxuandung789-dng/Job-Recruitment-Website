@@ -2,81 +2,95 @@
 
 @{
     ViewBag.Title = "Chi tiết công việc";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
 }
 
-<h2>Chi tiết tin tuyển dụng</h2>
-
-<div>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>Tiêu đề công việc</dt>
-        <dd style="font-weight: bold; font-size: 16px;">@Html.DisplayFor(model => model.Title)</dd>
-
-        <dt>Tên công ty</dt>
-        <dd>@Html.DisplayFor(model => model.COMPANy.CompanyName)</dd>
-
-        <dt>Ngành nghề</dt>
-        <dd>@Html.DisplayFor(model => model.CATEGORy.CategoryName)</dd>
-
-        <dt>Mức lương</dt>
-        <dd>@Html.DisplayFor(model => model.SalaryRange)</dd>
-
-        <dt>Địa điểm</dt>
-        <dd>@Html.DisplayFor(model => model.Location)</dd>
-
-        <dt>Hạn nộp hồ sơ</dt>
-        <dd>@Model.Deadline.ToString("dd/MM/yyyy")</dd>
-
-        <dt>Ngày đăng</dt>
-        <dd>@Model.PostedDate.ToString("dd/MM/yyyy")</dd>
-
-        <dt>Trạng thái</dt>
-        <dd>
-            @if (Model.Status == "Open")
-            {
-                <span class="text-success" style="font-weight:bold;">Đang mở</span>
-            }
-            else
-            {
-                <span class="text-danger">Đã đóng</span>
-            }
-        </dd>
-
-        <dt>Mô tả công việc</dt>
-        <dd style="white-space: pre-line; margin-top: 10px; background: #f9f9f9; padding: 15px; border-radius: 5px;">@Html.DisplayFor(model => model.Description)</dd>
-    </dl>
-</div>
-
-<!-- Khu vực nút Ứng tuyển dành riêng cho Ứng viên -->
-<div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
-    @if ((string)Session["Role"] == "Candidate")
+<div class="container my-4" style="max-width: 900px;">
+    <!-- Thông báo lỗi hoặc thành công nếu có -->
+    @if (TempData["Error"] != null)
     {
-        if (Model.Status == "Open")
-        {
-            <!-- Tạm thời dùng thẻ form GET, sẽ kết nối với hàm Apply ở Phần 6 sau -->
-            using (Html.BeginForm("Apply", "Applications", FormMethod.Get, new { style = "display:inline;" }))
-            {
-                <input type="hidden" name="jobId" value="@Model.JobId" />
-                <button type="submit" class="btn btn-success">Nộp đơn ứng tuyển</button>
-            }
-            @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-default", style = "margin-left: 5px;" })
-        }
-        else
-        {
-            <button class="btn btn-default" disabled>Tin đã đóng</button>
-            @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-default", style = "margin-left: 5px;" })
-        }
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+        </div>
     }
-    else if (Session["Role"] == null)
+    @if (TempData["Success"] != null)
     {
-        <span class="text-muted">Vui lòng đăng nhập tài khoản Ứng viên để nộp hồ sơ.</span>
-        <br /><br />
-        @Html.ActionLink("Đăng nhập", "Login", "Account", null, new { @class = "btn btn-primary" })
-        @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-default", style = "margin-left: 5px;" })
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+        </div>
     }
-    else
-    {
-        @Html.ActionLink("Quay lại danh sách", "Index", null, new { @class = "btn btn-default" })
-    }
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h2 class="text-primary fw-bold mb-1">@Model.Title</h2>
+                    <h5 class="text-muted mb-0">
+                        <i class="bi bi-building"></i> @(Model.COMPANy != null ? Model.COMPANy.CompanyName : "Chưa cập nhật")
+                    </h5>
+                </div>
+                <div>
+                    @if (Model.Status == "Open")
+                    {
+                        <span class="badge bg-success fs-6 px-3 py-2">Đang mở ứng tuyển</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary fs-6 px-3 py-2">Đã đóng</span>
+                    }
+                </div>
+            </div>
+
+            <hr />
+
+            <!-- Thông tin nhanh về công việc -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <p class="mb-2"><strong>Ngành nghề:</strong> @(Model.CATEGORy != null ? Model.CATEGORy.CategoryName : "Chưa phân loại")</p>
+                    <p class="mb-2"><strong>Mức lương:</strong> <span class="text-danger fw-bold">@(string.IsNullOrEmpty(Model.SalaryRange) ? "Thỏa thuận" : Model.SalaryRange)</span></p>
+                    <p class="mb-2"><strong>Địa điểm làm việc:</strong> @Model.Location</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-2"><strong>Ngày đăng tin:</strong> @Model.PostedDate.ToString("dd/MM/yyyy")</p>
+                    <p class="mb-2"><strong>Hạn chót nộp hồ sơ:</strong> <span class="text-primary fw-bold">@Model.Deadline.ToString("dd/MM/yyyy")</span></p>
+                </div>
+            </div>
+
+            <!-- Khung mô tả chi tiết công việc -->
+            <div class="mb-4">
+                <h5 class="fw-bold text-dark">Mô tả chi tiết công việc:</h5>
+                <div class="p-3 bg-light rounded border" style="white-space: pre-line; line-height: 1.6;">
+                    @Model.Description
+                </div>
+            </div>
+
+            <!-- Khu vực thao tác nút Ứng tuyển & Quay lại -->
+            <div class="pt-3 border-top d-flex align-items-center justify-content-between">
+                <div>
+                    @Html.ActionLink("← Quay lại danh sách việc làm", "Index", "Jobs", null, new { @class = "btn btn-outline-secondary" })
+                </div>
+
+                <div>
+                    @if (Session["Role"] != null && Session["Role"].ToString() == "Candidate")
+                    {
+                        if (Model.Status == "Open")
+                        {
+                            <a href="@Url.Action("Apply", "Applications", new { jobId = Model.JobId })" class="btn btn-primary btn-lg px-4 shadow-sm">
+                                Ứng tuyển ngay
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary btn-lg" disabled>Tin đã đóng</button>
+                        }
+                    }
+                    else if (Session["Role"] == null)
+                    {
+                        <span class="text-muted me-2 small">Đăng nhập tài khoản Ứng viên để nộp hồ sơ:</span>
+                        @Html.ActionLink("Đăng nhập để ứng tuyển", "Login", "Account", null, new { @class = "btn btn-primary" })
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

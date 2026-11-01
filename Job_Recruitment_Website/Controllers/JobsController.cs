@@ -16,27 +16,26 @@ namespace Job_Recruitment_Website.Controllers
         // 1. DÀNH CHO TẤT CẢ MỌI NGƯỜI (ỨNG VIÊN & KHÁCH)
         // ==========================================
 
-        public ActionResult Index(string keyword, int? categoryId)
+        public ActionResult Index(string search, int? categoryId, string location)
         {
-            // 1. Lấy danh sách việc làm đang mở
-            var jobs = db.JOBS.Include(j => j.COMPANy).Include(j => j.CATEGORy)
-                              .Where(j => j.Status == "Open").AsQueryable();
+            var jobs = db.JOBS.Where(j => j.Status == "Open");
 
-            // 2. Lọc theo từ khóa
-            if (!string.IsNullOrEmpty(keyword))
+            if (!string.IsNullOrEmpty(search))
             {
-                jobs = jobs.Where(j => j.Title.Contains(keyword));
+                jobs = jobs.Where(j => j.Title.Contains(search)
+                                    || j.COMPANy.CompanyName.Contains(search)
+                                    || j.Location.Contains(search));
             }
 
-            // 3. Lọc theo ngành nghề
             if (categoryId.HasValue)
             {
-                jobs = jobs.Where(j => j.CategoryId == categoryId);
+                jobs = jobs.Where(j => j.CategoryId == categoryId.Value);
             }
 
-            // 4. DÒNG NÀY RẤT QUAN TRỌNG: Truyền danh sách ngành nghề sang View để hết lỗi Dropdown
-            ViewBag.CategoryId = new SelectList(db.CATEGORIES, "CategoryId", "CategoryName", categoryId);
-            ViewBag.Keyword = keyword;
+            if (!string.IsNullOrEmpty(location))
+            {
+                jobs = jobs.Where(j => j.Location.Contains(location));
+            }
 
             return View(jobs.OrderByDescending(j => j.PostedDate).ToList());
         }

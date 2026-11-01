@@ -21,7 +21,6 @@ namespace Job_Recruitment_Website.Controllers
             // 1. Kiểm tra xem 2 mật khẩu có khớp nhau không
             if (password != confirmPassword)
             {
-                // "PasswordError" ở đây sẽ khớp với thẻ @Html.ValidationMessage("PasswordError") bên giao diện
                 ModelState.AddModelError("PasswordError", "Mật khẩu nhập lại không khớp!");
                 return View(user);
             }
@@ -30,6 +29,13 @@ namespace Job_Recruitment_Website.Controllers
             if (db.USERS.Any(u => u.Email == user.Email))
             {
                 ModelState.AddModelError("Email", "Email này đã được sử dụng!");
+                return View(user);
+            }
+
+            // 2.1 Kiểm tra trùng Số điện thoại để tránh lỗi UQ_USERS_Phone
+            if (db.USERS.Any(u => u.Phone == user.Phone))
+            {
+                ModelState.AddModelError("Phone", "Số điện thoại này đã được sử dụng!");
                 return View(user);
             }
 
@@ -53,16 +59,34 @@ namespace Job_Recruitment_Website.Controllers
         {
             string hash = PasswordHelper.Hash(password);
             var user = db.USERS.FirstOrDefault(u => u.Email == email
-                           && u.PasswordHash == hash && u.IsActive == true);
+                               && u.PasswordHash == hash && u.IsActive == true);
             if (user == null)
             {
-                ViewBag.Error = "Sai email hoặc mật khẩu";
+                ViewBag.Error = "Sai email hoặc mật khẩu, hoặc tài khoản đã bị khóa";
                 return View();
             }
+
+            // Lưu thông tin vào Session
             Session["UserId"] = user.UserId;
             Session["FullName"] = user.FullName;
             Session["Role"] = user.ROLE.RoleName;
-            return RedirectToAction("Index", "Home");
+
+            // TỰ ĐỘNG CHUYỂN HƯỚNG THEO VAI TRÒ NGAY KHI ĐĂNG NHẬP:
+            if (user.ROLE.RoleName == "Admin")
+            {
+                // Nếu là Admin -> Chuyển thẳng vào trang Admin Dashboard
+                return RedirectToAction("Index", "Admin");
+            }
+            else if (user.ROLE.RoleName == "Recruiter")
+            {
+                // Nếu là Nhà tuyển dụng -> Chuyển thẳng vào trang Quản lý tin (MyJobs)
+                return RedirectToAction("MyJobs", "Jobs");
+            }
+            else
+            {
+                // Nếu là Ứng viên (Candidate) -> Chuyển thẳng ra trang Danh sách việc làm
+                return RedirectToAction("Index", "Jobs");
+            }
         }
 
         public ActionResult Logout()

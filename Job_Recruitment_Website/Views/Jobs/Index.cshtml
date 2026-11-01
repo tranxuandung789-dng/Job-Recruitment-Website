@@ -1,61 +1,83 @@
 ﻿@model IEnumerable<Job_Recruitment_Website.Models.JOB>
+@using Job_Recruitment_Website.Models
 
 @{
-    ViewBag.Title = "Danh sách việc làm";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Tin tuyển dụng";
+    Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+
+    var db = new RecruitmentDBEntities();
+    var categories = db.CATEGORIES.ToList();
+    int? selectedCat = Request.QueryString["categoryId"] != null ? int.Parse(Request.QueryString["categoryId"]) : (int?)null;
+    string searchKeyword = Request.QueryString["search"];
 }
 
-<h2>Danh sách việc làm mới nhất</h2>
+<!-- TIÊU ĐỀ TRANG -->
+<div class="job-section-header">
+    <h2>Tin tuyển dụng</h2>
+</div>
 
-<!-- Form bộ lọc tìm kiếm -->
-@using (Html.BeginForm("Index", "Jobs", FormMethod.Get))
-{
-    <div class="form-inline" style="margin-bottom: 20px; display: flex; gap: 10px;">
-        <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control" placeholder="Tìm theo tên công việc..." style="min-width: 300px;" />
-        @Html.DropDownList("categoryId", (SelectList)ViewBag.CategoryId, "-- Tất cả ngành nghề --", new { @class = "form-control" })
-        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-    </div>
-}
+<!-- THANH TÌM KIẾM VÀ DROPDOWN NGÀNH NGHỀ -->
+<form method="get" action="@Url.Action("Index", "Jobs")" class="filter-bar-top">
+    <input type="text" name="search" value="@searchKeyword" placeholder="Tìm theo vị trí, công ty, địa điểm..." />
+    <select name="categoryId" onchange="this.form.submit()">
+        <option value="">Tất cả ngành nghề</option>
+        @foreach (var cat in categories)
+        {
+            <option value="@cat.CategoryId" @(selectedCat == cat.CategoryId ? "selected" : "")>
+                @cat.CategoryName
+            </option>
+        }
+    </select>
+</form>
 
-<table class="table table-bordered table-striped table-hover">
-    <tr>
-        <th>Tiêu đề công việc</th>
-        <th>Mức lương</th>
-        <th>Địa điểm</th>
-        <th>Hạn nộp</th>
-        <th>Ngày đăng</th>
-        <th>Ngành nghề</th>
-        <th>Công ty</th>
-        <th>Thao tác</th>
-    </tr>
-
-    @foreach (var item in Model)
+<!-- LƯỚI CARD VIỆC LÀM 2 CỘT -->
+<div id="job-list-results">
+    @if (Model == null || !Model.Any())
     {
-        <tr>
-            <td style="font-weight: bold;">
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SalaryRange)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Location)
-            </td>
-            <td>
-                @item.Deadline.ToString("dd/MM/yyyy")
-            </td>
-            <td>
-                @item.PostedDate.ToString("dd/MM/yyyy")
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CATEGORy.CategoryName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.COMPANy.CompanyName)
-            </td>
-            <td>
-                @Html.ActionLink("Xem chi tiết", "Details", new { id = item.JobId }, new { @class = "btn btn-info btn-sm" })
-            </td>
-        </tr>
+        <div class="p-4 bg-white border rounded-3 text-muted">
+            Không tìm thấy tin tuyển dụng nào phù hợp.
+        </div>
     }
-</table>
+    else
+    {
+        foreach (var item in Model)
+        {
+            <div class="job-card">
+                <div>
+                    <div class="job-card-top">
+                        <h3 class="title">
+                            <a href="@Url.Action("Details", "Jobs", new { id = item.JobId })">@item.Title</a>
+                        </h3>
+                        <span class="badge-open">@item.Status</span>
+                    </div>
+
+                    <div class="company">
+                        <strong>@(item.COMPANy != null ? item.COMPANy.CompanyName : "Đang cập nhật")</strong>
+                        <span>@item.Location</span>
+                    </div>
+
+                    <div class="salary">
+                        @(string.IsNullOrEmpty(item.SalaryRange) ? "Thỏa thuận" : item.SalaryRange)
+                    </div>
+
+                    <p class="desc">@item.Description</p>
+                </div>
+
+                <div>
+                    <div class="job-card-meta">
+                        <span class="badge-category">
+                            @(item.CATEGORy != null ? item.CATEGORy.CategoryName : "Chưa phân loại")
+                        </span>
+                        <span class="deadline">
+                            Hạn nộp: @item.Deadline.ToString("dd/MM/yyyy")
+                        </span>
+                    </div>
+
+                    <a href="@Url.Action("Apply", "Applications", new { jobId = item.JobId })" class="btn-apply">
+                        Ứng tuyển
+                    </a>
+                </div>
+            </div>
+        }
+    }
+</div>

@@ -1,0 +1,173 @@
+﻿@using Job_Recruitment_Website.Models
+@{
+    var db = new RecruitmentDBEntities();
+    var categories = db.CATEGORIES.ToList();
+    int totalOpenJobs = db.JOBS.Count(j => j.Status == "Open");
+    int countHN = db.JOBS.Count(j => j.Status == "Open" && j.Location.Contains("Hà Nội"));
+    int countHCM = db.JOBS.Count(j => j.Status == "Open" && (j.Location.Contains("Hồ Chí Minh") || j.Location.Contains("TP.HCM")));
+
+    int myAppCount = 0;
+    if (Session["UserId"] != null)
+    {
+        int uid = (int)Session["UserId"];
+        myAppCount = db.APPLICATIONS.Count(a => a.UserId == uid);
+    }
+
+    string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    int? selectedCat = Request.QueryString["categoryId"] != null ? int.Parse(Request.QueryString["categoryId"]) : (int?)null;
+    string selectedLoc = Request.QueryString["location"];
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewBag.Title - D-JOBS Recruitment Agency</title>
+
+    <!-- 1. BOOTSTRAP 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- 2. NHÚNG ĐÚNG ĐƯỜNG DẪN TỚI THƯ MỤC CONTENT -->
+    <link href="@Url.Content("~/Content/StyleLayoutRecruitment.css?v=4")" rel="stylesheet" />
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="py-2 border-bottom bg-white sticky-top">
+        <div class="container d-flex align-items-center justify-content-between">
+
+            <!-- LOGO D-JOBS -->
+            <div class="logo">
+                <a href="@Url.Action("Index", "Jobs")">
+                    <img src="@Url.Content("~/Content/Images/Logo.png")" alt="D-Jobs Recruitment Agency" />
+                </a>
+            </div>
+
+            <!-- MENU -->
+            <nav>
+                <ul class="nav gap-4 mb-0">
+                    <li class="nav-item">
+                        <a class="nav-link @(currentController == "Jobs" ? "active-menu" : "")" href="@Url.Action("Index", "Jobs")">Việc làm</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(currentController == "COMPANies" || currentController == "Companies" ? "active-menu" : "")" href="@Url.Action("Index", "COMPANies")">Công ty</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(currentController == "CATEGORies" || currentController == "Categories" ? "active-menu" : "")" href="@Url.Action("Index", "CATEGORies")">Ngành nghề</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(currentController == "Candidate" ? "active-menu" : "")" href="@Url.Action("Index", "Jobs")">Hồ sơ ứng viên</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(currentController == "Applications" ? "active-menu" : "")" href="@Url.Action("MyApplications", "Applications")">Đơn ứng tuyển</a>
+                    </li>
+
+                    @if (Session["Role"] != null && Session["Role"].ToString() == "Recruiter")
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link fw-bold" style="color: #f7931e !important;" href="@Url.Action("MyJobs", "Jobs")">Quản lý tin đăng</a>
+                        </li>
+                    }
+                    else if (Session["Role"] != null && Session["Role"].ToString() == "Admin")
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link fw-bold text-danger" href="@Url.Action("Index", "Admin")">Quản trị Admin</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+
+            <!-- LOGIN / REGISTER -->
+            <div class="auth-buttons d-flex align-items-center gap-3">
+                @if (Session["UserId"] != null)
+                {
+                    <span class="text-dark small fw-semibold">
+                        Xin chào, <strong>@Session["FullName"]</strong> (@Session["Role"])
+                    </span>
+                    <a class="btn btn-warning text-white fw-semibold px-3 py-2" style="background-color: #f7931e; border: none;" href="@Url.Action("Logout", "Account")">Đăng xuất</a>
+                }
+                else
+                {
+                    <a class="btn-login-soft" href="@Url.Action("Login", "Account")">Đăng nhập</a>
+                    <a class="btn btn-warning text-white fw-semibold px-3 py-2" style="background-color: #f7931e; border: none;" href="@Url.Action("Register", "Account")">Đăng ký</a>
+                }
+            </div>
+
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="container my-4 flex-grow-1">
+        <div class="job-content">
+            <!-- CỘT ASIDE BÊN TRÁI -->
+            <aside class="job-filter">
+                <div class="filter-group">
+                    <h4>NGÀNH NGHỀ</h4>
+                    <a href="@Url.Action("Index", "Jobs")" class="aside-item @(selectedCat == null ? "active" : "")">
+                        <span>Tất cả</span>
+                        <span class="aside-count">@totalOpenJobs</span>
+                    </a>
+                    @foreach (var cat in categories)
+                    {
+                        int count = cat.JOBS.Count(j => j.Status == "Open");
+                        <a href="@Url.Action("Index", "Jobs", new { categoryId = cat.CategoryId, location = selectedLoc })"
+                           class="aside-item @(selectedCat == cat.CategoryId ? "active" : "")">
+                            <span>@cat.CategoryName</span>
+                            <span class="aside-count">@count</span>
+                        </a>
+                    }
+                </div>
+
+                <div class="filter-group">
+                    <h4>ĐỊA ĐIỂM</h4>
+                    <a href="@Url.Action("Index", "Jobs", new { categoryId = selectedCat })" class="aside-item @(string.IsNullOrEmpty(selectedLoc) ? "active" : "")">
+                        <span>Tất cả</span>
+                        <span class="aside-count">@totalOpenJobs</span>
+                    </a>
+                    <a href="@Url.Action("Index", "Jobs", new { location = "Hà Nội", categoryId = selectedCat })" class="aside-item @(selectedLoc == "Hà Nội" ? "active" : "")">
+                        <span>Hà Nội</span>
+                        <span class="aside-count">@countHN</span>
+                    </a>
+                    <a href="@Url.Action("Index", "Jobs", new { location = "Hồ Chí Minh", categoryId = selectedCat })" class="aside-item @(selectedLoc == "Hồ Chí Minh" ? "active" : "")">
+                        <span>TP. Hồ Chí Minh</span>
+                        <span class="aside-count">@countHCM</span>
+                    </a>
+                </div>
+
+                <div class="filter-group">
+                    <h4>LỐI TẮT</h4>
+                    <a href="@Url.Action("Index", "Jobs")" class="aside-item">
+                        <span>Hồ sơ của tôi</span>
+                    </a>
+                    <a href="@Url.Action("MyApplications", "Applications")" class="aside-item">
+                        <span>Đơn ứng tuyển</span>
+                        <span class="aside-count">@myAppCount</span>
+                    </a>
+                </div>
+            </aside>
+
+            <!-- CỘT NỘI DUNG BÊN PHẢI -->
+            <div class="job-list-container">
+                @RenderBody()
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-top py-4 mt-auto">
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            <div class="footer-logo">
+                <h2 class="h5 fw-bold text-warning mb-0" style="color: #f7931e !important;">D-JOBS Recruitment Agency</h2>
+            </div>
+            <div class="footer-info text-center text-md-end text-muted small">
+                <p class="mb-1">Website tuyển dụng D-JOBS Recruitment Agency - Kết nối nhân tài với cơ hội nghề nghiệp.</p>
+                <p class="mb-0">© 2026 D-JOBS Recruitment Agency. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/Scripts/recruitment.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>
