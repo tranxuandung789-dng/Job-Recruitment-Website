@@ -44,13 +44,34 @@ header {
     position: sticky;
     top: 0;
     z-index: 1000;
+    height: 95px !important; /* Mở rộng chiều cao header để chứa logo to */
 }
 
+    header .container {
+        height: 100% !important;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
 .logo img {
-    height: 56px !important;
+    height: 150px !important;
     width: auto !important;
     display: block;
     object-fit: contain;
+}
+.banner-container {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.banner-img {
+    width: 100%;
+    height: 220px; 
+    object-fit: cover; 
+    display: block;
 }
 
 nav ul li a.nav-link {

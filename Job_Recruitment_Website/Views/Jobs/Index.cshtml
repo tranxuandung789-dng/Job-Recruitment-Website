@@ -10,7 +10,10 @@
     int? selectedCat = Request.QueryString["categoryId"] != null ? int.Parse(Request.QueryString["categoryId"]) : (int?)null;
     string searchKeyword = Request.QueryString["search"];
 }
-
+<!-- KHU VỰC HIỂN THỊ BANNER -->
+<div class="banner-container mb-4">
+    <img src="@Url.Content("~/Content/Images/banner.jpg")" alt="Banner Tuyển Dụng" class="banner-img" />
+</div>
 <!-- TIÊU ĐỀ TRANG -->
 <div class="job-section-header">
     <h2>Tin tuyển dụng</h2>

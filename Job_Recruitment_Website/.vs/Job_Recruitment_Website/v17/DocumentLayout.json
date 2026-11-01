@@ -7,15 +7,15 @@
       "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\jobs\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|d:\\duanlaptrinhwebn05\\job-recruitment-website\\job_recruitment_website\\views\\shared\\_layoutpagerecruitment.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\views\\shared\\_layoutpagerecruitment.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\shared\\_layoutpagerecruitment.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|d:\\duanlaptrinhwebn05\\job-recruitment-website\\job_recruitment_website\\content\\stylelayoutrecruitment.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\content\\stylelayoutrecruitment.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
       "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:content\\stylelayoutrecruitment.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|d:\\duanlaptrinhwebn05\\job-recruitment-website\\job_recruitment_website\\controllers\\jobscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\controllers\\jobscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:controllers\\jobscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -49,7 +49,7 @@
               "RelativeDocumentMoniker": "Content\\StyleLayoutRecruitment.css",
               "ToolTip": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Content\\StyleLayoutRecruitment.css",
               "RelativeToolTip": "Content\\StyleLayoutRecruitment.css",
-              "ViewState": "AgIAADAAAAAAAAAAAAAAAGsBAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEcAAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
               "WhenOpened": "2026-11-01T08:32:05.911Z",
               "EditorCaption": ""
@@ -62,7 +62,7 @@
               "RelativeDocumentMoniker": "Views\\Jobs\\Index.cshtml",
               "ToolTip": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Jobs\\Index.cshtml",
               "RelativeToolTip": "Views\\Jobs\\Index.cshtml",
-              "ViewState": "AgIAAC0AAAAAAAAAAAAAAA8AAAAbAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-11-01T08:33:34.728Z",
               "EditorCaption": ""
@@ -75,7 +75,7 @@
               "RelativeDocumentMoniker": "Views\\Shared\\_LayoutPageRecruitment.cshtml",
               "ToolTip": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Shared\\_LayoutPageRecruitment.cshtml",
               "RelativeToolTip": "Views\\Shared\\_LayoutPageRecruitment.cshtml",
-              "ViewState": "AgIAAHIAAAAAAAAAAAAYwKwAAAAHAAAAAAAAAA==",
+              "ViewState": "AgIAAE0AAAAAAAAAAAAkwF4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-11-01T08:27:01.547Z",
               "EditorCaption": ""
