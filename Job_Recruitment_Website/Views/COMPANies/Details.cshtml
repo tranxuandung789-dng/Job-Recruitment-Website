@@ -1,0 +1,78 @@
+﻿@model Job_Recruitment_Website.Models.COMPANy
+
+@{
+    ViewBag.Title = Model.CompanyName;
+    Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+}
+
+<div class="container my-4">
+    <!-- KHUNG THÔNG TIN CÔNG TY -->
+    <div class="card shadow-sm border-0 rounded-4 p-4 mb-4 bg-white">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center mb-3 mb-md-0">
+                @{
+                    string logoUrl = Model.Logo_Url;
+                    if (string.IsNullOrEmpty(logoUrl))
+                    {
+                        logoUrl = "https://via.placeholder.com/150";
+                    }
+                }
+                <img src="@logoUrl" alt="@Model.CompanyName" class="img-fluid rounded-3 border p-2" style="max-height: 120px; object-fit: contain;" />
+            </div>
+            <div class="col-md-9">
+                <h2 class="fw-bold text-dark mb-2">@Model.CompanyName</h2>
+                <p class="text-muted mb-2"><strong>Địa chỉ:</strong> @(string.IsNullOrEmpty(Model.Address) ? "Đang cập nhật" : Model.Address)</p>
+                @if (!string.IsNullOrEmpty(Model.Website))
+                {
+                    <p class="mb-2"><strong>Website:</strong> <a href="@Model.Website" target="_blank" class="text-orange">@Model.Website</a></p>
+                }
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <div>
+            <h5 class="fw-bold text-dark mb-2">Giới thiệu công ty</h5>
+            <p class="text-secondary" style="line-height: 1.6;">@(Model.Description ?? "Chưa có thông tin mô tả chi tiết cho công ty này.")</p>
+        </div>
+    </div>
+
+    <!-- DANH SÁCH VIỆC LÀM DO CÔNG TY NÀY ĐĂNG TUYỂN -->
+    <div class="job-section-header mb-3">
+        <h3 class="fw-bold">Việc làm đang tuyển dụng từ @Model.CompanyName</h3>
+    </div>
+
+    <div class="row g-3">
+        @if (Model.JOBS == null || !Model.JOBS.Any(j => j.Status == "Open"))
+        {
+            <div class="col-12">
+                <div class="p-4 bg-white border rounded-3 text-muted">
+                    Hiện tại công ty chưa có tin tuyển dụng nào đang mở.
+                </div>
+            </div>
+        }
+        else
+        {
+            foreach (var job in Model.JOBS.Where(j => j.Status == "Open"))
+            {
+                <div class="col-md-6">
+                    <div class="job-card h-100 p-3 bg-white border rounded-3 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="title mb-0">
+                                <a href="@Url.Action("Details", "Jobs", new { id = job.JobId })" class="text-decoration-none text-dark fw-bold">@job.Title</a>
+                            </h5>
+                            <span class="badge-open">@job.Status</span>
+                        </div>
+                        <p class="salary text-success fw-bold mb-2">@(string.IsNullOrEmpty(job.SalaryRange) ? "Thỏa thuận" : job.SalaryRange)</p>
+                        <p class="text-muted small mb-3"> @job.Location</p>
+                        <a href="@Url.Action("Apply", "Applications", new { jobId = job.JobId })" class="btn-apply btn btn-sm">Ứng tuyển ngay</a>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="mt-4">
+        <a href="@Url.Action("Index", "Companies")" class="btn btn-outline-secondary px-4 py-2 rounded-3">← Quay lại danh sách công ty</a>
+    </div>
+</div>

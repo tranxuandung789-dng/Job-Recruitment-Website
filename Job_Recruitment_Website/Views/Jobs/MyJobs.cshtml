@@ -1,0 +1,111 @@
+﻿@model IEnumerable<Job_Recruitment_Website.Models.JOB>
+
+@{
+    ViewBag.Title = "Quản lý tin tuyển dụng";
+    Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold">Danh sách tin tuyển dụng của công ty</h2>
+        @Html.ActionLink("Đăng tin mới", "Create", null, new { @class = "btn btn-primary shadow-sm" })
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+        </div>
+    }
+
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-bordered table-hover align-middle mb-0 bg-white">
+            <thead class="table-light">
+                <tr class="text-nowrap text-center">
+                    <th>Tiêu đề công việc</th>
+                    <th style="max-width: 250px;">Mô tả</th>
+                    <th>Mức lương</th>
+                    <th>Địa điểm</th>
+                    <th>Hạn nộp</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày đăng</th>
+                    <th>Ngành nghề</th>
+                    <th style="min-width: 220px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">
+                            Chưa có tin tuyển dụng nào được đăng. Hãy bấm nút <strong>"Đăng tin mới"</strong> để tạo bài đăng đầu tiên!
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@item.Title</strong>
+                            </td>
+                            <td class="text-truncate" style="max-width: 250px;" title="@item.Description">
+                                @item.Description
+                            </td>
+                            <td class="text-center text-nowrap">
+                                @(string.IsNullOrEmpty(item.SalaryRange) ? "Thỏa thuận" : item.SalaryRange)
+                            </td>
+                            <td>
+                                @item.Location
+                            </td>
+                            <td class="text-center text-nowrap">
+                                @item.Deadline.ToString("dd/MM/yyyy")
+                            </td>
+                            <td class="text-center">
+                                @if (item.Status == "Open")
+                                {
+                                    <span class="badge bg-success">Đang mở</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Đã đóng</span>
+                                }
+                            </td>
+                            <td class="text-center text-nowrap">
+                                @item.PostedDate.ToString("dd/MM/yyyy")
+                            </td>
+                            <td>
+                                @(item.CATEGORy != null ? item.CATEGORy.CategoryName : "Chưa phân loại")
+                            </td>
+                            <td class="text-center text-nowrap">
+                                <!-- Nút liên kết sang Phần 6: Xem danh sách ứng viên đã nộp đơn -->
+                                <a href="@Url.Action("Candidates", "Applications", new { jobId = item.JobId })" class="btn btn-sm btn-info text-white me-1" title="Xem danh sách ứng viên nộp hồ sơ">
+                                    Ứng viên
+                                </a>
+
+                                @Html.ActionLink("Sửa", "Edit", new { id = item.JobId }, new { @class = "btn btn-sm btn-outline-secondary me-1" })
+                                @Html.ActionLink("Chi tiết", "Details", new { id = item.JobId }, new { @class = "btn btn-sm btn-outline-primary me-1" })
+
+                                @if (item.Status == "Open")
+                                {
+                                    using (Html.BeginForm("Close", "Jobs", FormMethod.Post, new { style = "display:inline;" }))
+                                    {
+                                        <input type="hidden" name="id" value="@item.JobId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger btn-close-job">
+                                            Đóng tin
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted small ps-1">(Đã đóng)</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

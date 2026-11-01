@@ -1,0 +1,65 @@
+﻿@model IEnumerable<Job_Recruitment_Website.Models.APPLICATION>
+
+@{
+    ViewBag.Title = "Việc làm đã nộp";
+    Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+}
+
+<div class="container my-4">
+    <h3 class="mb-4">Danh sách công việc đã ứng tuyển</h3>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Tên công việc</th>
+                    <th>Công ty</th>
+                    <th>Ngày nộp</th>
+                    <th>File CV</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Bạn chưa nộp hồ sơ vào công việc nào.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong>@item.JOB.Title</strong></td>
+                            <td>@item.JOB.COMPANy.CompanyName</td>
+                            <td>@item.AppliedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <a href="@Url.Content(item.CV_Url)" target="_blank" class="btn btn-sm btn-outline-info">Xem CV</a>
+                            </td>
+                            <td>
+                                @if (item.Status == "Submitted")
+                                {
+                                    <span class="badge bg-secondary">Đã nộp</span>
+                                }
+                                else if (item.Status == "Approved")
+                                {
+                                    <span class="badge bg-success">Đã được duyệt</span>
+                                }
+                                else if (item.Status == "Rejected")
+                                {
+                                    <span class="badge bg-danger">Bị từ chối</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

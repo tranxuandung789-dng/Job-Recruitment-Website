@@ -1,11 +1,10 @@
 ﻿-- =================================================================================
--- SQL SERVER (T-SQL) (7 BẢNG)
+-- SQL SERVER (T-SQL)
 -- =================================================================================
 
 USE master;
 GO
 
--- Xóa Database cũ nếu đã tồn tại để tránh lỗi khi bấm F5 nhiều lần
 IF EXISTS (SELECT name FROM sys.databases WHERE name = N'RecruitmentDB')
 BEGIN
     ALTER DATABASE RecruitmentDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
@@ -13,15 +12,26 @@ BEGIN
 END
 GO
 
--- 1. Tạo mới Database
 CREATE DATABASE RecruitmentDB;
 GO
 
 USE RecruitmentDB;
 GO
+
 -- =================================================================================
--- PHẦN 1: KHỞI TẠO 7 BẢNG VỚI ĐẦY ĐỦ RÀNG BUỘC (PK, FK, UNIQUE, CHECK, DEFAULT)
+-- PHẦN 1: KHỞI TẠO 7 BẢNG
 -- =================================================================================
+
+DROP TABLE IF EXISTS [dbo].[APPLICATIONS];
+DROP TABLE IF EXISTS [dbo].[JOBS];
+DROP TABLE IF EXISTS [dbo].[CATEGORIES];
+DROP TABLE IF EXISTS [dbo].[CANDIDATEPROFILES];
+IF OBJECT_ID('dbo.FK_COMPANIES_USERS', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[COMPANIES] DROP CONSTRAINT [FK_COMPANIES_USERS];
+DROP TABLE IF EXISTS [dbo].[USERS];
+DROP TABLE IF EXISTS [dbo].[COMPANIES];
+DROP TABLE IF EXISTS [dbo].[ROLES];
+GO
 
 -- 1. Bảng ROLES (Vai trò người dùng)
 CREATE TABLE [dbo].[ROLES]
@@ -41,20 +51,17 @@ CREATE TABLE [dbo].[COMPANIES]
     [CompanyId]   INT IDENTITY(1,1) NOT NULL,
     [UserId]      INT           NOT NULL,
     [CompanyName] NVARCHAR(200) NOT NULL,
-    [Logo_Url]    VARCHAR(255)  NOT NULL,
+    [Logo_Url]    VARCHAR(255)  NULL,
     [Address]     NVARCHAR(255) NOT NULL,
-    [Website]     VARCHAR(255)  NOT NULL,
-    [Description] NVARCHAR(MAX) NOT NULL,
+    [Website]     VARCHAR(255)  NULL,
+    [Description] NVARCHAR(MAX) NULL,
     CONSTRAINT [PK_COMPANIES] PRIMARY KEY CLUSTERED ([CompanyId] ASC),
     CONSTRAINT [UQ_COMPANIES_CompanyName] UNIQUE ([CompanyName]),
-    CONSTRAINT [CK_COMPANIES_CompanyId] CHECK ([CompanyId] > 0),
-    CONSTRAINT [CK_COMPANIES_LogoUrl] CHECK ([Logo_Url] LIKE 'http://%' OR [Logo_Url] LIKE 'https://%'),
-    CONSTRAINT [CK_COMPANIES_Website] CHECK ([Website] LIKE 'http://%' OR [Website] LIKE 'https://%')
+    CONSTRAINT [CK_COMPANIES_CompanyId] CHECK ([CompanyId] > 0)
 );
 GO
 
--- 3. Bảng USERS (Tài khoản người dùng / Ứng viên)
--- Lưu ý chuẩn hóa: CompanyId cho phép NULL để hỗ trợ ứng viên tự do không thuộc công ty nào
+-- 3. Bảng USERS (Tài khoản người dùng)
 CREATE TABLE [dbo].[USERS]
 (
     [UserId]       INT IDENTITY(1,1) NOT NULL,
@@ -79,16 +86,7 @@ CREATE TABLE [dbo].[USERS]
 );
 GO
 
--- Thiết lập khóa ngoại từ COMPANIES(UserId) tham chiếu tới USERS(UserId)
--- Tạm thời NOCHECK khi chưa có dữ liệu để tránh khóa vòng (Circular FK), sẽ bật lại ngay sau khi INSERT
-ALTER TABLE [dbo].[COMPANIES] WITH NOCHECK
-ADD CONSTRAINT [FK_COMPANIES_USERS] FOREIGN KEY ([UserId])
-    REFERENCES [dbo].[USERS]([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION;
-GO
-ALTER TABLE [dbo].[COMPANIES] NOCHECK CONSTRAINT [FK_COMPANIES_USERS];
-GO
-
--- 4. Bảng CANDIDATEPROFILES (Hồ sơ chi tiết của ứng viên - Quan hệ 1-1 với USERS)
+-- 4. Bảng CANDIDATEPROFILES (Hồ sơ chi tiết của ứng viên)
 CREATE TABLE [dbo].[CANDIDATEPROFILES]
 (
     [ProfileId]  INT IDENTITY(1,1) NOT NULL,
@@ -101,7 +99,6 @@ CREATE TABLE [dbo].[CANDIDATEPROFILES]
     CONSTRAINT [PK_CANDIDATEPROFILES] PRIMARY KEY CLUSTERED ([ProfileId] ASC),
     CONSTRAINT [UQ_CANDIDATEPROFILES_UserId] UNIQUE ([UserId]),
     CONSTRAINT [CK_CANDIDATEPROFILES_ProfileId] CHECK ([ProfileId] > 0),
-    CONSTRAINT [CK_CANDIDATEPROFILES_CVUrl] CHECK ([CV_Url] LIKE 'http://%' OR [CV_Url] LIKE 'https://%'),
     CONSTRAINT [FK_CANDIDATEPROFILES_USERS] FOREIGN KEY ([UserId])
         REFERENCES [dbo].[USERS]([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
@@ -143,125 +140,113 @@ CREATE TABLE [dbo].[JOBS]
 );
 GO
 
--- 7. Bảng APPLICATIONS (Đơn ứng tuyển của ứng viên vào vị trí công việc)
+-- 7. Bảng APPLICATIONS (Đơn ứng tuyển của ứng viên)
 CREATE TABLE [dbo].[APPLICATIONS]
 (
     [ApplicationId] INT IDENTITY(1,1) NOT NULL,
     [JobId]         INT           NOT NULL,
-    [CandidateId]   INT           NOT NULL,
-    [CoverLetter]   NVARCHAR(MAX) NOT NULL,
+    [CandidateId]   INT           NULL,
+    [CoverLetter]   NVARCHAR(MAX) NULL,
     [AppliedDate]   DATE          NOT NULL CONSTRAINT [DF_APPLICATIONS_AppliedDate] DEFAULT (CAST(GETDATE() AS DATE)),
     [Status]        NVARCHAR(50)  NOT NULL CONSTRAINT [DF_APPLICATIONS_Status] DEFAULT (N'Pending'),
     [UserId]        INT           NOT NULL,
+    [CV_Url]        VARCHAR(255)  NULL,
     CONSTRAINT [PK_APPLICATIONS] PRIMARY KEY CLUSTERED ([ApplicationId] ASC),
     CONSTRAINT [UQ_APPLICATIONS_Job_User] UNIQUE ([JobId], [UserId]),
     CONSTRAINT [CK_APPLICATIONS_ApplicationId] CHECK ([ApplicationId] > 0),
-    CONSTRAINT [CK_APPLICATIONS_Status] CHECK ([Status] IN (N'Pending', N'Reviewed', N'Interview', N'Accepted', N'Rejected')),
-    CONSTRAINT [CK_APPLICATIONS_Candidate_User_Sync] CHECK ([CandidateId] = [UserId]),
+    CONSTRAINT [CK_APPLICATIONS_Status] CHECK ([Status] IN (N'Pending', N'Submitted', N'Reviewed', N'Interview', N'Accepted', N'Approved', N'Rejected')),
     CONSTRAINT [FK_APPLICATIONS_JOBS] FOREIGN KEY ([JobId])
         REFERENCES [dbo].[JOBS]([JobId]) ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT [FK_APPLICATIONS_USERS] FOREIGN KEY ([UserId])
-        REFERENCES [dbo].[USERS]([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT [FK_APPLICATIONS_CANDIDATEPROFILES] FOREIGN KEY ([CandidateId])
-        REFERENCES [dbo].[CANDIDATEPROFILES]([ProfileId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+        REFERENCES [dbo].[USERS]([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 GO
 
 -- =================================================================================
--- PHẦN 2: THÊM DỮ LIỆU MẪU GIỮ NGUYÊN 5 BẢN GHI / BẢNG (35 BẢN GHI TỔNG CỘNG)
+-- PHẦN 2: THÊM DỮ LIỆU MẪU & ĐỒNG BỘ LOGO CÔNG TY
 -- =================================================================================
 
--- 1. Thêm dữ liệu bảng ROLES (5 dòng)
+-- 1. Thêm dữ liệu bảng ROLES (3 vai trò chuẩn)
 INSERT INTO [dbo].[ROLES] ([RoleName]) VALUES
-(N'Admin - Quản trị viên'),
-(N'Employer - Nhà tuyển dụng'),
-(N'Candidate - Ứng viên'),
-(N'HR Manager - Quản lý nhân sự'),
-(N'Moderator - Kiểm duyệt viên');
+(N'Admin'),
+(N'Recruiter'),
+(N'Candidate');
 GO
 
--- 2. Thêm dữ liệu bảng COMPANIES (5 dòng)
+-- 2. Thêm dữ liệu bảng COMPANIES (5 công ty)
 INSERT INTO [dbo].[COMPANIES] ([UserId], [CompanyName], [Logo_Url], [Address], [Website], [Description]) VALUES
-(1, N'FPT Software', 'https://fptsoftware.com/logo.png', N'Khu Công nghệ cao Hòa Lạc, Hà Nội', 'https://fptsoftware.com', N'Công ty xuất khẩu phần mềm và chuyển đổi số hàng đầu Việt Nam.'),
+(1, N'FPT Software', 'https://fptsoftware.com/logo.png', N'Khu Công nghệ cao Quận 9, TP.HCM', 'https://fptsoftware.com', N'Công ty xuất khẩu phần mềm và chuyển đổi số hàng đầu Việt Nam.'),
 (2, N'VNG Corporation', 'https://vng.com.vn/logo.png', N'Z06 Đường số 13, Quận 7, TP.HCM', 'https://vng.com.vn', N'Tập đoàn công nghệ kỳ lân chuyên về Zalo, AI, Cloud và trò chơi trực tuyến.'),
 (3, N'Viettel Solutions', 'https://solutions.viettel.vn/logo.png', N'Số 1 Trần Hữu Dực, Nam Từ Liêm, Hà Nội', 'https://solutions.viettel.vn', N'Tổng công ty Giải pháp Doanh nghiệp Viettel, tiên phong chuyển đổi số.'),
 (4, N'MoMo (M_Service)', 'https://momo.vn/logo.png', N'Phú Mỹ Hưng Tower, Quận 7, TP.HCM', 'https://momo.vn', N'Siêu ứng dụng tài chính và thanh toán điện tử hàng đầu Việt Nam.'),
 (5, N'Tiki Corporation', 'https://tiki.vn/logo.png', N'52 Út Tịch, Quận Tân Bình, TP.HCM', 'https://tiki.vn', N'Nền tảng thương mại điện tử và chuỗi cung ứng kho vận thông minh.');
 GO
 
--- 3. Thêm dữ liệu bảng USERS (5 dòng)
+-- Cập nhật tự động Logo_Url của các công ty sang chuẩn Placeholder màu cam (#f7931e)
+UPDATE [dbo].[COMPANIES]
+SET [Logo_Url] = 'https://via.placeholder.com/150/f7931e/ffffff?text=' + REPLACE([CompanyName], ' ', '+')
+WHERE [Logo_Url] LIKE 'http%';
+GO
+
+-- 3. Thêm dữ liệu bảng USERS (5 người dùng)
 INSERT INTO [dbo].[USERS] ([Email], [PasswordHash], [FullName], [Phone], [RoleId], [IsActive], [CreatedAt], [CompanyId]) VALUES
-('nguyen.van.an@gmail.com', '$2b$12$HashPass001', N'Nguyễn Văn An', '0901234567', 3, 1, '2025-01-10', 1),
+('nguyen.van.an@gmail.com', '$2b$12$HashPass001', N'Nguyễn Văn An', '0901234567', 1, 1, '2025-01-10', 1),
 ('tran.thi.bich@gmail.com', '$2b$12$HashPass002', N'Trần Thị Bích', '0912345678', 3, 1, '2025-01-12', 2),
 ('le.hoang.nam@gmail.com', '$2b$12$HashPass003', N'Lê Hoàng Nam', '0987654321', 3, 1, '2025-01-15', 3),
 ('pham.minh.tuan@gmail.com', '$2b$12$HashPass004', N'Phạm Minh Tuấn', '0933445566', 2, 1, '2025-01-18', 4),
 ('hoang.thu.trang@gmail.com', '$2b$12$HashPass005', N'Hoàng Thu Trang', '0977889900', 3, 1, '2025-01-20', 5);
 GO
 
--- Kích hoạt và kiểm tra toàn vẹn khóa ngoại FK_COMPANIES_USERS sau khi cả 2 bảng đã có dữ liệu
-ALTER TABLE [dbo].[COMPANIES] WITH CHECK CHECK CONSTRAINT [FK_COMPANIES_USERS];
+-- Thiết lập khóa ngoại từ COMPANIES(UserId) tham chiếu tới USERS(UserId)
+ALTER TABLE [dbo].[COMPANIES]
+ADD CONSTRAINT [FK_COMPANIES_USERS] FOREIGN KEY ([UserId])
+    REFERENCES [dbo].[USERS]([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION;
 GO
 
--- 4. Thêm dữ liệu bảng CANDIDATEPROFILES (5 dòng)
+-- 4. Thêm dữ liệu bảng CANDIDATEPROFILES (5 hồ sơ)
 INSERT INTO [dbo].[CANDIDATEPROFILES] ([UserId], [Education], [Skills], [CV_Url], [UpdatedAt], [Experience]) VALUES
-(1, N'Cử nhân CNTT - ĐH Bách Khoa Hà Nội', N'Java, Spring Boot, Microservices, SQL Server', 'https://cv.vn/nguyen-van-an.pdf', '2025-02-01', N'3 năm kinh nghiệm Backend Developer'),
+(1, N'Cử nhân CNTT - ĐH Bách Khoa', N'C#, ASP.NET MVC, SQL Server', 'https://cv.vn/nguyen-van-an.pdf', '2025-02-01', N'3 năm kinh nghiệm Backend Developer'),
 (2, N'Cử nhân KHMT - ĐH KHTN TP.HCM', N'ReactJS, TypeScript, Next.js, TailwindCSS', 'https://cv.vn/tran-thi-bich.pdf', '2025-02-03', N'2 năm kinh nghiệm Frontend Developer'),
-(3, N'Kỹ sư HTTT - ĐH Công nghệ ĐHQGHN', N'Python, PyTorch, SQL, Spark, Data Engineering', 'https://cv.vn/le-hoang-nam.pdf', '2025-02-05', N'4 năm kinh nghiệm AI / Data Engineer'),
-(4, N'Cử nhân QTKD - ĐH Kinh tế Quốc dân', N'Agile/Scrum, UML, BPMN, Jira, Figma', 'https://cv.vn/pham-minh-tuan.pdf', '2025-02-07', N'5 năm kinh nghiệm Business Analyst & PO'),
-(5, N'Kỹ sư Phần mềm - ĐH FPT', N'Docker, Kubernetes, AWS, CI/CD, Linux', 'https://cv.vn/hoang-thu-trang.pdf', '2025-02-10', N'3 năm kinh nghiệm DevOps Engineer');
+(3, N'Cử nhân Marketing - ĐH Kinh tế TP.HCM', N'SEO, SEM, Google Ads, Content Marketing', 'https://cv.vn/le-hoang-nam.pdf', '2025-02-05', N'3 năm kinh nghiệm Digital Marketing'),
+(4, N'Cử nhân Kinh doanh Quốc tế - ĐH Ngoại thương', N'Logistics, Incoterms, Xuất nhập khẩu, Tiếng Anh', 'https://cv.vn/pham-minh-tuan.pdf', '2025-02-07', N'4 năm kinh nghiệm Xuất nhập khẩu'),
+(5, N'Kỹ sư Cơ khí - ĐH Sư phạm Kỹ thuật', N'AutoCAD, SolidWorks, CNC, Gia công chế tạo', 'https://cv.vn/hoang-thu-trang.pdf', '2025-02-10', N'3 năm kinh nghiệm Kỹ sư Cơ khí');
 GO
 
--- 5. Thêm dữ liệu bảng CATEGORIES (5 dòng)
+-- 5. Thêm dữ liệu bảng CATEGORIES (5 ngành nghề theo đúng yêu cầu)
 INSERT INTO [dbo].[CATEGORIES] ([CategoryName]) VALUES
-(N'Phát triển phần mềm (Software Development)'),
-(N'Khoa học dữ liệu & AI (Data Science & AI)'),
-(N'Hạ tầng & Điện toán đám mây (DevOps & Cloud)'),
-(N'Phân tích nghiệp vụ & Sản phẩm (BA / Product)'),
-(N'Kiểm thử phần mềm (QA / QC Testing)');
+(N'Công nghệ thông tin'),
+(N'Marketing'),
+(N'Kinh doanh quốc tế'),
+(N'Cơ khí'),
+(N'Thiết kế đồ họa');
 GO
 
--- 6. Thêm dữ liệu bảng JOBS (5 dòng)
+-- 6. Thêm dữ liệu bảng JOBS (5 dòng chia theo tỷ lệ: CNTT 2, Marketing 1, KDQT 1, Cơ khí 1, Thiết kế đồ họa 0)
 INSERT INTO [dbo].[JOBS] ([CompanyId], [Title], [Description], [SalaryRange], [Location], [Deadline], [Status], [PostedDate], [CategoryId]) VALUES
-(1, N'Senior Java Backend Developer', N'Phát triển hệ thống Core Banking và Microservices cho khách hàng toàn cầu.', N'25 - 40 triệu VNĐ', N'Hà Nội', '2025-04-30', N'Open', '2025-02-01', 1),
-(2, N'Frontend Engineer (ReactJS/Next.js)', N'Xây dựng giao diện web hiệu năng cao cho hệ sinh thái ứng dụng người dùng.', N'20 - 35 triệu VNĐ', N'TP. Hồ Chí Minh', '2025-04-15', N'Open', '2025-02-05', 1),
-(3, N'AI / Machine Learning Engineer', N'Nghiên cứu và triển khai các mô hình NLP và Computer Vision.', N'30 - 50 triệu VNĐ', N'Hà Nội', '2025-05-10', N'Open', '2025-02-08', 2),
-(4, N'Senior Business Analyst (Fintech)', N'Phân tích nghiệp vụ ví điện tử, viết tài liệu SRS/BRD và quản lý backlog.', N'22 - 38 triệu VNĐ', N'TP. Hồ Chí Minh', '2025-04-20', N'Open', '2025-02-10', 4),
-(5, N'DevOps / Cloud Engineer (AWS/K8s)', N'Vận hành hạ tầng Kubernetes, tối ưu CI/CD pipeline và giám sát hệ thống.', N'28 - 45 triệu VNĐ', N'TP. Hồ Chí Minh', '2025-05-01', N'Open', '2025-02-12', 3);
+(1, N'Lập trình viên C# / ASP.NET MVC', N'Phát triển hệ thống web ứng dụng sử dụng C#, ASP.NET MVC, Entity Framework và SQL Server.', N'15 - 25 triệu VNĐ', N'TP. Hồ Chí Minh', '2026-12-30', N'Open', '2025-02-01', 1),
+(2, N'Frontend Engineer (ReactJS/Next.js)', N'Xây dựng giao diện web hiệu năng cao cho hệ sinh thái ứng dụng người dùng.', N'20 - 35 triệu VNĐ', N'TP. Hồ Chí Minh', '2026-12-15', N'Open', '2025-02-05', 1),
+(3, N'Chuyên viên Digital Marketing', N'Lên kế hoạch chiến dịch quảng cáo, tối ưu SEO/SEM và quản trị nội dung đa kênh.', N'12 - 20 triệu VNĐ', N'Hà Nội', '2026-12-10', N'Open', '2025-02-08', 2),
+(4, N'Chuyên viên Xuất nhập khẩu & Logistics', N'Đàm phán hợp đồng thương mại quốc tế, xử lý chứng từ hải quan và chuỗi cung ứng.', N'18 - 30 triệu VNĐ', N'TP. Hồ Chí Minh', '2026-12-20', N'Open', '2025-02-10', 3),
+(5, N'Kỹ sư Thiết kế Cơ khí Chế tạo máy', N'Thiết kế bản vẽ kỹ thuật 2D/3D trên AutoCAD, SolidWorks và giám sát gia công sản xuất.', N'16 - 28 triệu VNĐ', N'TP. Hồ Chí Minh', '2026-12-01', N'Open', '2025-02-12', 4);
 GO
 
--- 7. Thêm dữ liệu bảng APPLICATIONS (5 dòng)
-INSERT INTO [dbo].[APPLICATIONS] ([JobId], [CandidateId], [CoverLetter], [AppliedDate], [Status], [UserId]) VALUES
-(1, 1, N'Mong muốn đóng góp 3 năm kinh nghiệm Java Spring Boot vào các dự án quốc tế tại FPT Software.', '2025-02-15', N'Pending', 1),
-(2, 2, N'Rất ấn tượng với các sản phẩm của VNG, tôi tự tin với kỹ năng ReactJS và tối ưu UI/UX.', '2025-02-16', N'Reviewed', 2),
-(3, 3, N'Tôi có kinh nghiệm thực chiến triển khai mô hình AI/NLP và mong muốn gia nhập Viettel Solutions.', '2025-02-17', N'Interview', 3),
-(4, 4, N'Với 5 năm kinh nghiệm BA/PO mảng Fintech, tôi hy vọng được đồng hành cùng siêu ứng dụng MoMo.', '2025-02-18', N'Accepted', 4),
-(5, 5, N'Đam mê tự động hóa hạ tầng Cloud và K8s, tôi mong muốn ứng tuyển vị trí DevOps tại Tiki.', '2025-02-19', N'Pending', 5);
+-- 7. Thêm dữ liệu bảng APPLICATIONS (5 đơn ứng tuyển mẫu)
+INSERT INTO [dbo].[APPLICATIONS] ([JobId], [CandidateId], [CoverLetter], [AppliedDate], [Status], [UserId], [CV_Url]) VALUES
+(1, 1, N'Mong muốn đóng góp kinh nghiệm lập trình C# ASP.NET MVC vào các dự án tại FPT Software.', '2025-02-15', N'Pending', 1, 'https://cv.vn/nguyen-van-an.pdf'),
+(2, 2, N'Rất ấn tượng với các sản phẩm của VNG, tôi tự tin với kỹ năng ReactJS và tối ưu UI/UX.', '2025-02-16', N'Reviewed', 2, 'https://cv.vn/tran-thi-bich.pdf'),
+(3, 3, N'Tôi có kinh nghiệm triển khai chiến dịch Digital Marketing và mong muốn gia nhập Viettel.', '2025-02-17', N'Interview', 3, 'https://cv.vn/le-hoang-nam.pdf'),
+(4, 4, N'Với 4 năm kinh nghiệm Logistics và Ngoại thương, tôi hy vọng được đồng hành cùng công ty.', '2025-02-18', N'Accepted', 4, 'https://cv.vn/pham-minh-tuan.pdf'),
+(5, 5, N'Thành thạo AutoCAD và SolidWorks, tôi mong muốn ứng tuyển vị trí Kỹ sư Cơ khí.', '2025-02-19', N'Pending', 5, 'https://cv.vn/hoang-thu-trang.pdf');
 GO
 
 -- =================================================================================
--- PHẦN 3: CÂU LỆNH SELECT 
+-- PHẦN 3: TRUY VẤN KIỂM TRA DỮ LIỆU
 -- =================================================================================
-USE [RecruitmentDB];
-GO
-
--- 1. Xem danh sách Vai trò người dùng (Bảng ROLES)
 SELECT * FROM [dbo].[ROLES];
-
--- 2. Xem danh sách Công ty tuyển dụng (Bảng COMPANIES)
 SELECT * FROM [dbo].[COMPANIES];
-
--- 3. Xem danh sách Tài khoản người dùng / Ứng viên (Bảng USERS)
 SELECT * FROM [dbo].[USERS];
-
--- 4. Xem danh sách Hồ sơ chi tiết ứng viên (Bảng CANDIDATEPROFILES)
 SELECT * FROM [dbo].[CANDIDATEPROFILES];
-
--- 5. Xem danh sách Danh mục ngành nghề (Bảng CATEGORIES)
 SELECT * FROM [dbo].[CATEGORIES];
-
--- 6. Xem danh sách Tin tuyển dụng việc làm (Bảng JOBS)
 SELECT * FROM [dbo].[JOBS];
-
--- 7. Xem danh sách Đơn ứng tuyển (Bảng APPLICATIONS)
 SELECT * FROM [dbo].[APPLICATIONS];
 GO

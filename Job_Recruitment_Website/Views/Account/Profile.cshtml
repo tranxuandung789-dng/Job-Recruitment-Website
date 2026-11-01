@@ -1,0 +1,94 @@
+﻿@model Job_Recruitment_Website.Models.USER
+
+@{
+    ViewBag.Title = "Hồ sơ cá nhân";
+    Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+}
+
+<!-- TIÊU ĐỀ TRANG -->
+<div class="job-section-header mb-4">
+    <h2 class="fw-bold text-dark mb-1">Hồ sơ cá nhân</h2>
+    <p class="text-muted small mb-0">Quản lý và cập nhật thông tin tài khoản của bạn tại D-JOBS.</p>
+</div>
+
+<!-- KHUNG THÔNG TIN HỒ SƠ -->
+<div class="card shadow-sm border-0 rounded-4 p-4 p-md-5 bg-white mb-4" style="max-width: 720px; border: 1px solid #f1f5f9 !important;">
+
+    <!-- Avatar / Tóm tắt nhanh -->
+    <div class="d-flex align-items-center gap-3 pb-4 mb-4 border-bottom">
+        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
+             style="width: 64px; height: 64px; background-color: #f7931e; font-size: 24px; flex-shrink: 0;">
+            @(Model != null && !string.IsNullOrEmpty(Model.FullName) ? Model.FullName.Trim().Substring(0, 1).ToUpper() : "U")
+        </div>
+        <div>
+            <h4 class="fw-bold text-dark mb-1">@(Model != null ? Model.FullName : "Người dùng")</h4>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge rounded-pill px-3 py-1 fw-semibold" style="background-color: #fff3e0; color: #f7931e;">
+                    @(Model != null && Model.ROLE != null ? Model.ROLE.RoleName : (Session["Role"] != null ? Session["Role"].ToString() : "Candidate"))
+                </span>
+                <span class="text-muted small">• Mã TK: #@(Model != null ? Model.UserId : 0)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông báo Cập nhật thành công / lỗi -->
+    @if (ViewBag.Success != null)
+    {
+        <div class="alert alert-success rounded-3 py-2 small fw-semibold">
+            ✔ @ViewBag.Success
+        </div>
+    }
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger rounded-3 py-2 small fw-semibold">
+            ⚠ @ViewBag.Error
+        </div>
+    }
+
+    <!-- FORM CẬP NHẬT HỒ SƠ -->
+    @using (Html.BeginForm("Profile", "Account", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold small text-secondary">Họ và tên <span class="text-danger">*</span></label>
+                <input type="text" name="FullName" class="form-control rounded-3 py-2" value="@(Model != null ? Model.FullName : "")" placeholder="Nhập họ và tên..." required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-semibold small text-secondary">Số điện thoại <span class="text-danger">*</span></label>
+                <input type="text" name="Phone" class="form-control rounded-3 py-2" value="@(Model != null ? Model.Phone : "")" placeholder="Nhập số điện thoại..." required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-semibold small text-secondary">Email đăng nhập (Không thể thay đổi)</label>
+                <input type="email" class="form-control rounded-3 py-2 bg-light text-muted" value="@(Model != null ? Model.Email : "")" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-semibold small text-secondary">Ngày tham gia hệ thống</label>
+                <input type="text" class="form-control rounded-3 py-2 bg-light text-muted"
+                       value="@(Model != null ? string.Format("{0:dd/MM/yyyy}", Model.CreatedAt) : "Đang cập nhật")" readonly />
+            </div>
+        </div>
+
+        <hr class="my-4 text-muted opacity-25" />
+
+        <!-- NÚT THAO TÁC -->
+        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+            <button type="submit" class="btn text-white fw-bold px-4 py-2 rounded-3 shadow-sm" style="background-color: #f7931e; border: none;">
+                Lưu thay đổi
+            </button>
+
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("MyApplications", "Applications")" class="btn btn-outline-secondary fw-semibold px-3 py-2 rounded-3 small">
+                    Xem đơn ứng tuyển
+                </a>
+                <a href="@Url.Action("Index", "Jobs")" class="btn btn-light border fw-semibold px-3 py-2 rounded-3 small text-dark">
+                    Tìm việc làm
+                </a>
+            </div>
+        </div>
+    }
+</div>

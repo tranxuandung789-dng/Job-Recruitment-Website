@@ -1,0 +1,34 @@
+﻿@{
+    ViewBag.Title = "Nộp hồ sơ ứng tuyển";
+    Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+    var job = ViewBag.Job as Job_Recruitment_Website.Models.JOB;
+}
+
+<div class="container my-4" style="max-width: 650px;">
+    <div class="card shadow-sm p-4">
+        <h3 class="text-primary mb-3">Ứng tuyển vị trí: @job.Title</h3>
+        <p class="text-muted"><strong>Công ty:</strong> @job.COMPANy.CompanyName</p>
+        <hr />
+
+        @using (Html.BeginForm("Apply", "Applications", new { jobId = job.JobId }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">File CV đính kèm (Chỉ chấp nhận file PDF, tối đa 5MB) *</label>
+                <input type="file" name="cvFile" class="form-control" accept=".pdf" required />
+                @Html.ValidationMessage("cvFile", "", new { @class = "text-danger" })
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Thư giới thiệu ngắn (Cover Letter):</label>
+                <textarea name="coverLetter" class="form-control" rows="4" placeholder="Giới thiệu bản thân và lý do bạn phù hợp với công việc này..."></textarea>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="@Url.Action("Details", "Jobs", new { id = job.JobId })" class="btn btn-outline-secondary">Quay lại</a>
+                <button type="submit" class="btn btn-primary px-4">Gửi hồ sơ</button>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,85 @@
+﻿@model IEnumerable<Job_Recruitment_Website.Models.APPLICATION>
+
+@{
+    ViewBag.Title = "Danh sách ứng viên";
+    Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Hồ sơ ứng viên: <span class="text-primary">@ViewBag.JobTitle</span></h3>
+        <a href="@Url.Action("MyJobs", "Jobs")" class="btn btn-outline-secondary">Quay lại danh sách tin</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Họ và tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Ngày nộp</th>
+                    <th>Hồ sơ / Thư giới thiệu</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Chưa có ứng viên nào nộp hồ sơ vào vị trí này.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong>@item.USER.FullName</strong></td>
+                            <td>@item.USER.Email</td>
+                            <td>@item.USER.Phone</td>
+                            <td>@item.AppliedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <a href="@Url.Content(item.CV_Url)" target="_blank" class="btn btn-sm btn-info text-white me-2">Xem CV (PDF)</a>
+                                @if (!string.IsNullOrEmpty(item.CoverLetter))
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="alert('@item.CoverLetter')">Xem thư</button>
+                                }
+                            </td>
+                            <td>
+                                @if (item.Status == "Submitted")
+                                {
+                                    <span class="badge bg-secondary">Chờ duyệt</span>
+                                }
+                                else if (item.Status == "Approved")
+                                {
+                                    <span class="badge bg-success">Đã duyệt</span>
+                                }
+                                else if (item.Status == "Rejected")
+                                {
+                                    <span class="badge bg-danger">Đã từ chối</span>
+                                }
+                            </td>
+                            <td>
+                                @using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline-block;" }))
+                                {
+                                    <input type="hidden" name="applicationId" value="@item.ApplicationId" />
+                                    <input type="hidden" name="newStatus" value="Approved" />
+                                    <button type="submit" class="btn btn-sm btn-success">Duyệt</button>
+                                }
+
+                                @using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline-block;" }))
+                                {
+                                    <input type="hidden" name="applicationId" value="@item.ApplicationId" />
+                                    <input type="hidden" name="newStatus" value="Rejected" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Từ chối</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
