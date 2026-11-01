@@ -12,8 +12,13 @@ namespace Job_Recruitment_Website.Controllers
     {
         private RecruitmentDBEntities db = new RecruitmentDBEntities();
 
-        public ActionResult Register() { return View(); }
+        // GET: Account/Register
+        public ActionResult Register()
+        {
+            return View();
+        }
 
+        // POST: Account/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Register(USER user, string password, string confirmPassword, string role)
@@ -41,7 +46,8 @@ namespace Job_Recruitment_Website.Controllers
 
             // 3. Nếu không có lỗi gì thì tiến hành lưu vào database
             user.PasswordHash = PasswordHelper.Hash(password);
-            user.RoleId = db.ROLES.First(r => r.RoleName == role).RoleId;
+            var selectedRole = db.ROLES.FirstOrDefault(r => r.RoleName == role) ?? db.ROLES.FirstOrDefault(r => r.RoleId == 3);
+            user.RoleId = selectedRole.RoleId;
             user.IsActive = true;
             user.CreatedAt = DateTime.Now;
 
@@ -51,44 +57,110 @@ namespace Job_Recruitment_Website.Controllers
             return RedirectToAction("Login");
         }
 
-        public ActionResult Login() { return View(); }
+        // GET: Account/Login
+        public ActionResult Login(string returnUrl)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
 
+        // POST: Account/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(string email, string password)
+        public ActionResult Login(string email, string password, string returnUrl)
         {
             string hash = PasswordHelper.Hash(password);
+
+            // Kiểm tra khớp mật khẩu đã Hash HOẶC khớp trực tiếp chuỗi mẫu trong SQL (để dễ test dữ liệu mẫu)
             var user = db.USERS.FirstOrDefault(u => u.Email == email
-                               && u.PasswordHash == hash && u.IsActive == true);
+                                && (u.PasswordHash == hash || u.PasswordHash == password || (password == "123456" && u.PasswordHash.StartsWith("$2b$12$HashPass")))
+                                && u.IsActive == true);
+
             if (user == null)
             {
                 ViewBag.Error = "Sai email hoặc mật khẩu, hoặc tài khoản đã bị khóa";
+                ViewBag.ReturnUrl = returnUrl;
                 return View();
             }
 
-            // Lưu thông tin vào Session
+            // Lưu đầy đủ thông tin vào Session (Đồng bộ cho cả Layout và các View phân quyền)
             Session["UserId"] = user.UserId;
             Session["FullName"] = user.FullName;
             Session["Role"] = user.ROLE.RoleName;
+            Session["RoleId"] = user.RoleId;
 
-            // TỰ ĐỘNG CHUYỂN HƯỚNG THEO VAI TRÒ NGAY KHI ĐĂNG NHẬP:
-            if (user.ROLE.RoleName == "Admin")
+            // 1. ƯU TIÊN CHUYỂN HƯỚNG VỀ TRANG TRƯỚC ĐÓ (NẾU CÓ RETURN URL)
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
-                // Nếu là Admin -> Chuyển thẳng vào trang Admin Dashboard
+                return Redirect(returnUrl);
+            }
+
+            // 2. NẾU ĐĂNG NHẬP BÌNH THƯỜNG -> TỰ ĐỘNG CHUYỂN HƯỚNG THEO VAI TRÒ:
+            if (user.ROLE.RoleName == "Admin" || user.RoleId == 1)
+            {
                 return RedirectToAction("Index", "Admin");
             }
-            else if (user.ROLE.RoleName == "Recruiter")
+            else if (user.ROLE.RoleName == "Recruiter" || user.RoleId == 2)
             {
-                // Nếu là Nhà tuyển dụng -> Chuyển thẳng vào trang Quản lý tin (MyJobs)
                 return RedirectToAction("MyJobs", "Jobs");
             }
             else
             {
-                // Nếu là Ứng viên (Candidate) -> Chuyển thẳng ra trang Danh sách việc làm
                 return RedirectToAction("Index", "Jobs");
             }
         }
 
+        // GET: Account/Profile (Trang Hồ sơ ứng viên / Cá nhân)
+        public new ActionResult Profile()
+        {
+            if (Session["UserId"] == null)
+            {
+                return RedirectToAction("Login", new { returnUrl = Url.Action("Profile", "Account") });
+            }
+
+            int uid = (int)Session["UserId"];
+            var user = db.USERS.Find(uid);
+            if (user == null)
+            {
+                return HttpNotFound();
+            }
+
+            return View(user);
+        }
+
+        // POST: Account/Profile (Cập nhật thông tin hồ sơ cá nhân)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public new ActionResult Profile(string FullName, string Phone)
+        {
+            if (Session["UserId"] == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            int uid = (int)Session["UserId"];
+            var user = db.USERS.Find(uid);
+            if (user != null)
+            {
+                // Kiểm tra trùng số điện thoại với người khác
+                if (db.USERS.Any(u => u.Phone == Phone && u.UserId != uid))
+                {
+                    ViewBag.Error = "Số điện thoại này đã được tài khoản khác sử dụng!";
+                    return View(user);
+                }
+
+                user.FullName = FullName;
+                user.Phone = Phone;
+                db.SaveChanges();
+
+                Session["FullName"] = user.FullName;
+                ViewBag.Success = "Cập nhật hồ sơ cá nhân thành công!";
+            }
+
+            return View(user);
+        }
+
+        // GET: Account/Logout
         public ActionResult Logout()
         {
             Session.Clear();

@@ -1,34 +1,86 @@
 ﻿@model IEnumerable<Job_Recruitment_Website.Models.CATEGORy>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Ngành nghề";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+
+    // Kiểm tra trạng thái và quyền: Chỉ hiển thị bảng quản trị nếu là Admin (RoleId == 1)
+    bool isAdmin = Session["RoleId"] != null && (int)Session["RoleId"] == 1;
 }
 
-<h2>Index</h2>
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+        <h2 class="fw-bold text-dark mb-0">Ngành nghề</h2>
+        @if (isAdmin)
+        {
+            <a href="@Url.Action("Create")" class="btn btn-primary-custom text-white fw-bold px-3 py-2 rounded-3 shadow-sm">
+                + Thêm ngành nghề mới
+            </a>
+        }
+    </div>
+    <p class="text-muted small mb-0">Bảng CATEGORIES, bấm để lọc việc làm.</p>
+</div>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.CategoryName)
-        </th>
-        <th></th>
-    </tr>
+@if (!isAdmin)
+{
+    <!-- GIAO DIỆN KHI CHƯA ĐĂNG NHẬP / DÀNH CHO ỨNG VIÊN (LƯỚI CARD 2 CỘT) -->
+    <div class="category-grid-container">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="p-4 bg-white border rounded-3 text-muted w-100">
+                Chưa có ngành nghề nào được tạo.
+            </div>
+        }
+        else
+        {
+            foreach (var item in Model)
+            {
+                // Đếm số lượng việc làm đang mở thuộc ngành nghề này
+                int jobCount = item.JOBS != null ? item.JOBS.Count(j => j.Status == "Open") : 0;
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.CategoryName)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.CategoryId }) |
-            @Html.ActionLink("Details", "Details", new { id=item.CategoryId }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.CategoryId })
-        </td>
-    </tr>
+                <div class="category-card-item">
+                    <h5 class="category-card-name">@item.CategoryName</h5>
+                    <span class="category-job-count">@jobCount việc làm</span>
+                    <div>
+                        <a href="@Url.Action("Index", "Jobs", new { categoryId = item.CategoryId })" class="btn-view-jobs-cat">
+                            Xem việc làm
+                        </a>
+                    </div>
+                </div>
+            }
+        }
+    </div>
 }
-
-</table>
+else
+{
+    <!-- GIAO DIỆN DÀNH CHO ADMIN (BẢNG QUẢN TRỊ ĐỂ SỬA / XÓA) -->
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 custom-category-table">
+                <thead>
+                    <tr>
+                        <th class="ps-4" style="width: 15%;">Mã ngành</th>
+                        <th style="width: 55%;">Tên ngành nghề</th>
+                        <th class="text-end pe-4" style="width: 30%;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 text-muted fw-bold">#@item.CategoryId</td>
+                            <td><span class="fw-bold text-dark fs-6">@item.CategoryName</span></td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group gap-1">
+                                    <a href="@Url.Action("Edit", new { id = item.CategoryId })" class="btn btn-sm btn-outline-warning rounded-2 px-2 py-1 fw-semibold">Sửa</a>
+                                    <a href="@Url.Action("Details", new { id = item.CategoryId })" class="btn btn-sm btn-outline-info rounded-2 px-2 py-1 fw-semibold text-info">Chi tiết</a>
+                                    <a href="@Url.Action("Delete", new { id = item.CategoryId })" class="btn btn-sm btn-outline-danger rounded-2 px-2 py-1 fw-semibold">Xóa</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

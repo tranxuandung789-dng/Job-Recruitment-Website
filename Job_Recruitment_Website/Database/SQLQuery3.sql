@@ -163,7 +163,7 @@ CREATE TABLE [dbo].[APPLICATIONS]
 GO
 
 -- =================================================================================
--- PHẦN 2: THÊM DỮ LIỆU MẪU
+-- PHẦN 2: THÊM DỮ LIỆU MẪU & ĐỒNG BỘ LOGO CÔNG TY
 -- =================================================================================
 
 -- 1. Thêm dữ liệu bảng ROLES (3 vai trò chuẩn)
@@ -180,6 +180,12 @@ INSERT INTO [dbo].[COMPANIES] ([UserId], [CompanyName], [Logo_Url], [Address], [
 (3, N'Viettel Solutions', 'https://solutions.viettel.vn/logo.png', N'Số 1 Trần Hữu Dực, Nam Từ Liêm, Hà Nội', 'https://solutions.viettel.vn', N'Tổng công ty Giải pháp Doanh nghiệp Viettel, tiên phong chuyển đổi số.'),
 (4, N'MoMo (M_Service)', 'https://momo.vn/logo.png', N'Phú Mỹ Hưng Tower, Quận 7, TP.HCM', 'https://momo.vn', N'Siêu ứng dụng tài chính và thanh toán điện tử hàng đầu Việt Nam.'),
 (5, N'Tiki Corporation', 'https://tiki.vn/logo.png', N'52 Út Tịch, Quận Tân Bình, TP.HCM', 'https://tiki.vn', N'Nền tảng thương mại điện tử và chuỗi cung ứng kho vận thông minh.');
+GO
+
+-- Cập nhật tự động Logo_Url của các công ty sang chuẩn Placeholder màu cam (#f7931e)
+UPDATE [dbo].[COMPANIES]
+SET [Logo_Url] = 'https://via.placeholder.com/150/f7931e/ffffff?text=' + REPLACE([CompanyName], ' ', '+')
+WHERE [Logo_Url] LIKE 'http%';
 GO
 
 -- 3. Thêm dữ liệu bảng USERS (5 người dùng)

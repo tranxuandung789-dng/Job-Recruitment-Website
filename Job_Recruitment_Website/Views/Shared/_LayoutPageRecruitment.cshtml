@@ -14,6 +14,7 @@
     }
 
     string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    string currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
     int? selectedCat = Request.QueryString["categoryId"] != null ? int.Parse(Request.QueryString["categoryId"]) : (int?)null;
     string selectedLoc = Request.QueryString["location"];
 }
@@ -47,7 +48,7 @@
             <nav>
                 <ul class="nav gap-4 mb-0">
                     <li class="nav-item">
-                        <a class="nav-link @(currentController == "Jobs" ? "active-menu" : "")" href="@Url.Action("Index", "Jobs")">Việc làm</a>
+                        <a class="nav-link @(currentController == "Jobs" && currentAction == "Index" ? "active-menu" : "")" href="@Url.Action("Index", "Jobs")">Việc làm</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(currentController == "COMPANies" || currentController == "Companies" ? "active-menu" : "")" href="@Url.Action("Index", "COMPANies")">Công ty</a>
@@ -55,11 +56,29 @@
                     <li class="nav-item">
                         <a class="nav-link @(currentController == "CATEGORies" || currentController == "Categories" ? "active-menu" : "")" href="@Url.Action("Index", "CATEGORies")">Ngành nghề</a>
                     </li>
+
+                    <!-- XỬ LÝ CHUYỂN HƯỚNG MENU HỒ SƠ ỨNG VIÊN (CÓ RETURN URL) -->
                     <li class="nav-item">
-                        <a class="nav-link @(currentController == "Candidate" ? "active-menu" : "")" href="@Url.Action("Index", "Jobs")">Hồ sơ ứng viên</a>
+                        @if (Session["UserId"] == null)
+                        {
+                            <a class="nav-link" href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Profile", "Account") })">Hồ sơ ứng viên</a>
+                        }
+                        else
+                        {
+                            <a class="nav-link @(currentController == "Account" && currentAction == "Profile" ? "active-menu" : "")" href="@Url.Action("Profile", "Account")">Hồ sơ ứng viên</a>
+                        }
                     </li>
+
+                    <!-- XỬ LÝ CHUYỂN HƯỚNG MENU ĐƠN ỨNG TUYỂN (CÓ RETURN URL) -->
                     <li class="nav-item">
-                        <a class="nav-link @(currentController == "Applications" ? "active-menu" : "")" href="@Url.Action("MyApplications", "Applications")">Đơn ứng tuyển</a>
+                        @if (Session["UserId"] == null)
+                        {
+                            <a class="nav-link" href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("MyApplications", "Applications") })">Đơn ứng tuyển</a>
+                        }
+                        else
+                        {
+                            <a class="nav-link @(currentController == "Applications" ? "active-menu" : "")" href="@Url.Action("MyApplications", "Applications")">Đơn ứng tuyển</a>
+                        }
                     </li>
 
                     @if (Session["Role"] != null && Session["Role"].ToString() == "Recruiter")
@@ -142,13 +161,27 @@
 
                 <div class="filter-group">
                     <h4>LỐI TẮT</h4>
-                    <a href="@Url.Action("Index", "Jobs")" class="aside-item">
-                        <span>Hồ sơ của tôi</span>
-                    </a>
-                    <a href="@Url.Action("MyApplications", "Applications")" class="aside-item">
-                        <span>Đơn ứng tuyển</span>
-                        <span class="aside-count">@myAppCount</span>
-                    </a>
+                    <!-- XỬ LÝ CHUYỂN HƯỚNG BÊN CỘT LỐI TẮT (CÓ RETURN URL) -->
+                    @if (Session["UserId"] == null)
+                    {
+                        <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Profile", "Account") })" class="aside-item">
+                            <span>Hồ sơ của tôi</span>
+                        </a>
+                        <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("MyApplications", "Applications") })" class="aside-item">
+                            <span>Đơn ứng tuyển</span>
+                            <span class="aside-count">0</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Profile", "Account")" class="aside-item @(currentController == "Account" && currentAction == "Profile" ? "active" : "")">
+                            <span>Hồ sơ của tôi</span>
+                        </a>
+                        <a href="@Url.Action("MyApplications", "Applications")" class="aside-item @(currentController == "Applications" && currentAction == "MyApplications" ? "active" : "")">
+                            <span>Đơn ứng tuyển</span>
+                            <span class="aside-count">@myAppCount</span>
+                        </a>
+                    }
                 </div>
             </aside>
 

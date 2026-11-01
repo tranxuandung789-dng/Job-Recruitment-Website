@@ -199,7 +199,6 @@
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\Images\banner.jpg" />
     <Content Include="Content\Images\Logo.png" />
-    <Content Include="Content\Logos\images.png" />
     <Content Include="Content\StyleLayoutRecruitment.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
@@ -272,6 +271,9 @@
     <Content Include="Views\Applications\MyApplications.cshtml" />
     <Content Include="Views\Applications\Candidates.cshtml" />
     <Content Include="Views\Shared\_LayoutPageRecruitment.cshtml" />
+    <Content Include="Views\COMPANies\Index.cshtml" />
+    <Content Include="Views\COMPANies\Details.cshtml" />
+    <Content Include="Views\Account\Profile.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
