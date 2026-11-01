@@ -3,41 +3,44 @@
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
 }
 
-<h2>Đăng nhập hệ thống</h2>
+<div class="row justify-content-center my-5">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
 
-@using (Html.BeginForm("Login", "Account", FormMethod.Post))
-{
-    @Html.AntiForgeryToken()
-
-    <div class="form-horizontal">
-        <hr />
-        @if (ViewBag.Error != null)
-        {
-            <div class="alert alert-danger">@ViewBag.Error</div>
-        }
-
-        <div class="form-group">
-            <label class="control-label col-md-2">Email</label>
-            <div class="col-md-10">
-                <input type="email" name="email" class="form-control" required />
+            <div class="text-center mb-4">
+                <h3 class="fw-bold text-dark mb-1">Đăng nhập</h3>
+                <p class="text-muted small">Chào mừng bạn quay trở lại với D-JOBS</p>
             </div>
-        </div>
 
-        <div class="form-group" style="margin-top: 10px;">
-            <label class="control-label col-md-2">Mật khẩu</label>
-            <div class="col-md-10">
-                <input type="password" name="password" class="form-control" required />
-            </div>
-        </div>
+            @using (Html.BeginForm("Login", "Account", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
 
-        <div class="form-group" style="margin-top: 15px;">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Đăng nhập" class="btn btn-success" />
+                if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger py-2 small">@ViewBag.Error</div>
+                }
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-secondary">Email</label>
+                    <input type="email" name="email" class="form-control rounded-3 py-2" placeholder="name@example.com" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-secondary">Mật khẩu</label>
+                    <input type="password" name="password" class="form-control rounded-3 py-2" placeholder="••••••••" required />
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary-custom text-white fw-bold py-2 rounded-3">Đăng nhập</button>
+                </div>
+            }
+
+            <div class="text-center mt-4">
+                <span class="text-muted small">Chưa có tài khoản?</span>
+                <a href="@Url.Action("Register", "Account")" class="text-decoration-none fw-bold text-orange">Đăng ký ngay</a>
             </div>
+
         </div>
     </div>
-}
-
-<div style="margin-top: 15px;">
-    @Html.ActionLink("Chưa có tài khoản? Đăng ký ngay", "Register", "Account")
 </div>

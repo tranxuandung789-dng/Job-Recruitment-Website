@@ -3,6 +3,7 @@
 
 @{
     ViewBag.Title = "Tin tuyển dụng";
+    // Đã chuyển Banner lên Layout nên ở đây dùng chung layout chuẩn
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
 
     var db = new RecruitmentDBEntities();
@@ -10,10 +11,7 @@
     int? selectedCat = Request.QueryString["categoryId"] != null ? int.Parse(Request.QueryString["categoryId"]) : (int?)null;
     string searchKeyword = Request.QueryString["search"];
 }
-<!-- KHU VỰC HIỂN THỊ BANNER -->
-<div class="banner-container mb-4">
-    <img src="@Url.Content("~/Content/Images/banner.jpg")" alt="Banner Tuyển Dụng" class="banner-img" />
-</div>
+
 <!-- TIÊU ĐỀ TRANG -->
 <div class="job-section-header">
     <h2>Tin tuyển dụng</h2>
@@ -37,7 +35,7 @@
 <div id="job-list-results">
     @if (Model == null || !Model.Any())
     {
-        <div class="p-4 bg-white border rounded-3 text-muted">
+        <div class="p-4 bg-white border rounded-3 text-muted col-12">
             Không tìm thấy tin tuyển dụng nào phù hợp.
         </div>
     }

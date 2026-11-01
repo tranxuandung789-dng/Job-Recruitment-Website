@@ -44,7 +44,7 @@ header {
     position: sticky;
     top: 0;
     z-index: 1000;
-    height: 95px !important; /* Mở rộng chiều cao header để chứa logo to */
+    height: 95px !important;
 }
 
     header .container {
@@ -60,18 +60,28 @@ header {
     display: block;
     object-fit: contain;
 }
+
+/* ================= BANNER PHÍA TRÊN CÙNG ================= */
 .banner-container {
     width: 100%;
-    border-radius: 12px;
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    background-color: var(--white);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .banner-img {
     width: 100%;
-    height: 220px; 
-    object-fit: cover; 
+    height: 190px;
+    object-fit: cover;
     display: block;
+}
+
+@media (max-width: 768px) {
+    .banner-img {
+        height: 120px;
+    }
 }
 
 nav ul li a.nav-link {
@@ -381,4 +391,35 @@ nav ul li a.nav-link {
     #job-list-results {
         grid-template-columns: 1fr;
     }
+}
+/* ================= CSS TRANG ĐĂNG NHẬP & ĐĂNG KÝ ================= */
+.card {
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Nút bấm màu cam chủ đạo D-JOBS */
+.btn-primary-custom {
+    background-color: var(--primary-orange) !important;
+    border: none !important;
+    transition: background-color 0.2s ease;
+}
+
+    .btn-primary-custom:hover {
+        background-color: var(--primary-dark) !important;
+    }
+
+/* Link màu cam */
+.text-orange {
+    color: var(--primary-orange) !important;
+}
+
+    .text-orange:hover {
+        color: var(--primary-dark) !important;
+        text-decoration: underline !important;
+    }
+
+/* Viền input khi focus đổi sang màu cam */
+.form-control:focus {
+    border-color: var(--primary-orange) !important;
+    box-shadow: 0 0 0 0.25rem rgba(247, 147, 30, 0.15) !important;
 }
