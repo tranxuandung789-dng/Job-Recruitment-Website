@@ -1,12 +1,74 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\admin\\Documents\\GitHub\\Job-Recruitment-Website\\Job_Recruitment_Website\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|C:\\Users\\admin\\Documents\\GitHub\\Job-Recruitment-Website\\Job_Recruitment_Website\\views\\shared\\_layoutpagerecruitment.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\shared\\_layoutpagerecruitment.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|c:\\users\\admin\\documents\\github\\job-recruitment-website\\job_recruitment_website\\views\\jobs\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\jobs\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|C:\\Users\\admin\\Documents\\GitHub\\Job-Recruitment-Website\\Job_Recruitment_Website\\scripts\\recruitmentscript.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:scripts\\recruitmentscript.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Jobs\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Jobs\\Index.cshtml",
+              "ToolTip": "C:\\Users\\admin\\Documents\\GitHub\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Jobs\\Index.cshtml",
+              "RelativeToolTip": "Views\\Jobs\\Index.cshtml",
+              "ViewState": "AgIAADsAAAAAAAAAAAAAAD8AAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-11-02T14:30:50.228Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "RecruitmentScript.js",
+              "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Job-Recruitment-Website\\Job_Recruitment_Website\\Scripts\\RecruitmentScript.js",
+              "RelativeDocumentMoniker": "Scripts\\RecruitmentScript.js",
+              "ToolTip": "C:\\Users\\admin\\Documents\\GitHub\\Job-Recruitment-Website\\Job_Recruitment_Website\\Scripts\\RecruitmentScript.js",
+              "RelativeToolTip": "Scripts\\RecruitmentScript.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-11-02T14:23:14.572Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "_LayoutPageRecruitment.cshtml",
+              "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Shared\\_LayoutPageRecruitment.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_LayoutPageRecruitment.cshtml",
+              "ToolTip": "C:\\Users\\admin\\Documents\\GitHub\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Shared\\_LayoutPageRecruitment.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_LayoutPageRecruitment.cshtml",
+              "ViewState": "AgIAAM8AAAAAAAAAAAAAACoAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-11-02T14:19:39.426Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }
