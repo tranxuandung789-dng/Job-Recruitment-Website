@@ -111,15 +111,37 @@ namespace Job_Recruitment_Website.Controllers
                 string savePath = Path.Combine(folderPath, fileName);
                 cvFile.SaveAs(savePath);
 
-                // Lấy CandidateId (ProfileId) nếu ứng viên đã có hồ sơ chi tiết trong bảng CANDIDATEPROFILES
-                var profile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == CurrentUserId);
+                string cvVirtualPath = "/Content/CVs/" + fileName;
 
+                // Cập nhật hoặc tạo mới hồ sơ CANDIDATEPROFILES để lưu CV_Url và lấy ProfileId
+                var profile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == CurrentUserId);
+                if (profile == null)
+                {
+                    profile = new CANDIDATEPROFILE
+                    {
+                        UserId = CurrentUserId,
+                        Education = "Đang cập nhật",
+                        Skills = "Đang cập nhật",
+                        Experience = "Đang cập nhật",
+                        CV_Url = cvVirtualPath,
+                        UpdatedAt = DateTime.Today
+                    };
+                    db.CANDIDATEPROFILES.Add(profile);
+                    db.SaveChanges();
+                }
+                else
+                {
+                    profile.CV_Url = cvVirtualPath;
+                    profile.UpdatedAt = DateTime.Today;
+                    db.SaveChanges(); // Lưu cập nhật CV mới nhất vào Profile
+                }
+
+                // Khởi tạo đơn ứng tuyển (Tuyệt đối KHÔNG gán CV_Url ở đây để tránh lỗi CS0117)
                 APPLICATION app = new APPLICATION
                 {
                     JobId = jobId,
                     UserId = CurrentUserId,
-                    CandidateId = profile != null ? profile.ProfileId : 0, // Use 0 or another default int value if profile is null
-                    CV_Url = "/Content/CVs/" + fileName,
+                    CandidateId = profile.ProfileId,
                     CoverLetter = coverLetter,
                     Status = "Pending",
                     AppliedDate = DateTime.Today
