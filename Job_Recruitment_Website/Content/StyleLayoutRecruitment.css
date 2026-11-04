@@ -94,6 +94,28 @@ nav ul li a.nav-link {
             border-radius: 2px;
         }
 
+/* Chữ tên người đăng nhập màu đen rõ nét trên nền Header trắng */
+.auth-buttons span {
+    color: var(--text-color) !important;
+    font-size: 14.5px !important;
+}
+
+/* Đồng bộ 2 nút Đăng nhập & Đăng ký / Đăng xuất bằng nhau tuyệt đối */
+.auth-buttons .btn-login-soft,
+.auth-buttons .btn-primary-custom {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 40px !important;
+    min-width: 112px;
+    padding: 0 18px !important;
+    font-size: 14.5px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    border-radius: 8px !important;
+    box-sizing: border-box;
+}
+
 /* Nút Đăng nhập: nền kem cam, chữ cam */
 .btn-login-soft {
     background-color: var(--primary-light);

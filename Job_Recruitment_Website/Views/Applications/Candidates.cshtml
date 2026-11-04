@@ -39,31 +39,55 @@
                             <td><strong>@item.USER.FullName</strong></td>
                             <td>@item.USER.Email</td>
                             <td>@item.USER.Phone</td>
-                            <td>@item.AppliedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@item.AppliedDate.ToString("dd/MM/yyyy")</td>
                             <td>
-                                <a href="@Url.Content(item.CV_Url)" target="_blank" class="btn btn-sm btn-info text-white me-2">Xem CV (PDF)</a>
+                                @if (item.CANDIDATEPROFILE != null && !string.IsNullOrEmpty(item.CANDIDATEPROFILE.CV_Url))
+                                {
+                                    <a href="@Url.Content(item.CANDIDATEPROFILE.CV_Url)" target="_blank" class="btn btn-sm btn-info text-white me-2">Xem CV (PDF)</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small me-2">Chưa có CV</span>
+                                }
+
                                 @if (!string.IsNullOrEmpty(item.CoverLetter))
                                 {
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="alert('@item.CoverLetter')">Xem thư</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                            data-letter="@item.CoverLetter"
+                                            onclick="alert(this.getAttribute('data-letter'))">
+                                        Xem thư
+                                    </button>
                                 }
                             </td>
                             <td>
-                                @if (item.Status == "Submitted")
+                                @switch (item.Status)
                                 {
-                                    <span class="badge bg-secondary">Chờ duyệt</span>
-                                }
-                                else if (item.Status == "Approved")
-                                {
-                                    <span class="badge bg-success">Đã duyệt</span>
-                                }
-                                else if (item.Status == "Rejected")
-                                {
-                                    <span class="badge bg-danger">Đã từ chối</span>
+                                    case "Pending":
+                                    case "Submitted":
+                                        <span class="badge bg-secondary">Chờ duyệt</span>
+                                        break;
+                                    case "Reviewed":
+                                        <span class="badge bg-info text-dark">Đã xem xét</span>
+                                        break;
+                                    case "Interview":
+                                        <span class="badge bg-primary">Phỏng vấn</span>
+                                        break;
+                                    case "Accepted":
+                                    case "Approved":
+                                        <span class="badge bg-success">Đã duyệt</span>
+                                        break;
+                                    case "Rejected":
+                                        <span class="badge bg-danger">Đã từ chối</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-light text-dark">@item.Status</span>
+                                        break;
                                 }
                             </td>
                             <td>
                                 @using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline-block;" }))
                                 {
+                                    @Html.AntiForgeryToken()
                                     <input type="hidden" name="applicationId" value="@item.ApplicationId" />
                                     <input type="hidden" name="newStatus" value="Approved" />
                                     <button type="submit" class="btn btn-sm btn-success">Duyệt</button>
@@ -71,6 +95,7 @@
 
                                 @using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline-block;" }))
                                 {
+                                    @Html.AntiForgeryToken()
                                     <input type="hidden" name="applicationId" value="@item.ApplicationId" />
                                     <input type="hidden" name="newStatus" value="Rejected" />
                                     <button type="submit" class="btn btn-sm btn-danger">Từ chối</button>
