@@ -3,13 +3,35 @@
 
 @{
     ViewBag.Title = "Tin tuyển dụng";
-    // Đã chuyển Banner lên Layout nên ở đây dùng chung layout chuẩn
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
 
     var db = new RecruitmentDBEntities();
     var categories = db.CATEGORIES.ToList();
-    int? selectedCat = Request.QueryString["categoryId"] != null ? int.Parse(Request.QueryString["categoryId"]) : (int?)null;
+
+    // SỬA LỖI FORMAT EXCEPTION: Kiểm tra chuỗi không rỗng và dùng TryParse an toàn
+    int? selectedCat = null;
+    int parsedCat;
+    if (!string.IsNullOrEmpty(Request.QueryString["categoryId"]) && int.TryParse(Request.QueryString["categoryId"], out parsedCat))
+    {
+        selectedCat = parsedCat;
+    }
+
     string searchKeyword = Request.QueryString["search"];
+    string selectedLoc = Request.QueryString["location"];
+}
+
+<!-- THÔNG BÁO TRẠNG THÁI (NẾU CÓ) -->
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger rounded-3 py-2 small fw-semibold mb-3">
+        ⚠ @TempData["Error"]
+    </div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success rounded-3 py-2 small fw-semibold mb-3">
+        ✔ @TempData["Success"]
+    </div>
 }
 
 <!-- TIÊU ĐỀ TRANG -->
@@ -19,7 +41,11 @@
 
 <!-- THANH TÌM KIẾM VÀ DROPDOWN NGÀNH NGHỀ -->
 <form method="get" action="@Url.Action("Index", "Jobs")" class="filter-bar-top">
-    <input type="text" name="search" value="@searchKeyword" placeholder="Tìm theo vị trí, công ty, địa điểm..." />
+    @if (!string.IsNullOrEmpty(selectedLoc))
+    {
+        <input type="hidden" name="location" value="@selectedLoc" />
+    }
+    <input type="text" name="search" value="@searchKeyword" placeholder="Tìm theo công việc, công ty, địa điểm..." />
     <select name="categoryId" onchange="this.form.submit()">
         <option value="">Tất cả ngành nghề</option>
         @foreach (var cat in categories)
@@ -29,6 +55,9 @@
             </option>
         }
     </select>
+    <button type="submit" class="btn text-white fw-bold px-4 rounded-3 shadow-sm" style="background-color: #f7931e; border: none; white-space: nowrap;">
+        Tìm kiếm
+    </button>
 </form>
 
 <!-- LƯỚI CARD VIỆC LÀM 2 CỘT -->
@@ -70,13 +99,23 @@
                             @(item.CATEGORy != null ? item.CATEGORy.CategoryName : "Chưa phân loại")
                         </span>
                         <span class="deadline">
-                            Hạn nộp: @item.Deadline.ToString("dd/MM/yyyy")
+                            Hạn nộp: @string.Format("{0:dd/MM/yyyy}", item.Deadline)
                         </span>
                     </div>
 
-                    <a href="@Url.Action("Apply", "Applications", new { jobId = item.JobId })" class="btn-apply">
-                        Ứng tuyển
-                    </a>
+                    <!-- Nút Ứng tuyển: Tự động chuyển qua Login nếu chưa đăng nhập -->
+                    @if (Session["UserId"] == null)
+                    {
+                        <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Apply", "Applications", new { jobId = item.JobId }) })" class="btn-apply">
+                            Ứng tuyển
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Apply", "Applications", new { jobId = item.JobId })" class="btn-apply">
+                            Ứng tuyển
+                        </a>
+                    }
                 </div>
             </div>
         }

@@ -1,6 +1,7 @@
 ﻿using Job_Recruitment_Website.Helpers;
 using Job_Recruitment_Website.Models;
 using System;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -17,15 +18,34 @@ namespace Job_Recruitment_Website.Controllers
             get { return Session["UserId"] != null ? (int)Session["UserId"] : 0; }
         }
 
+        // Hàm hỗ trợ tìm Công ty của Nhà tuyển dụng hiện tại
+        private COMPANy GetRecruiterCompany()
+        {
+            int uid = CurrentUserId;
+            if (uid == 0) return null;
+
+            var user = db.USERS.Find(uid);
+            if (user != null && user.CompanyId.HasValue)
+            {
+                var compByUser = db.COMPANIES.Find(user.CompanyId.Value);
+                if (compByUser != null) return compByUser;
+            }
+
+            return db.COMPANIES.FirstOrDefault(c => c.UserId == uid);
+        }
+
         // ========================================================
         // 1. DÀNH CHO ỨNG VIÊN (CANDIDATE)
         // ========================================================
 
         // GET: Hiển thị form nộp đơn ứng tuyển
         [RoleAuthorize("Candidate")]
-        public ActionResult Apply(int jobId)
+        public ActionResult Apply(int? jobId)
         {
-            var job = db.JOBS.FirstOrDefault(j => j.JobId == jobId && j.Status == "Open");
+            if (jobId == null) return RedirectToAction("Index", "Jobs");
+
+            var job = db.JOBS.Include(j => j.COMPANy)
+                             .FirstOrDefault(j => j.JobId == jobId.Value && j.Status == "Open");
             if (job == null)
             {
                 TempData["Error"] = "Công việc không tồn tại hoặc đã đóng tuyển dụng.";
@@ -33,11 +53,11 @@ namespace Job_Recruitment_Website.Controllers
             }
 
             // Kiểm tra ứng viên đã từng nộp vào việc này chưa
-            bool alreadyApplied = db.APPLICATIONS.Any(a => a.JobId == jobId && a.UserId == CurrentUserId);
+            bool alreadyApplied = db.APPLICATIONS.Any(a => a.JobId == jobId.Value && a.UserId == CurrentUserId);
             if (alreadyApplied)
             {
                 TempData["Error"] = "Bạn đã nộp hồ sơ vào vị trí này rồi!";
-                return RedirectToAction("Details", "Jobs", new { id = jobId });
+                return RedirectToAction("Details", "Jobs", new { id = jobId.Value });
             }
 
             ViewBag.Job = job;
@@ -50,8 +70,16 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Candidate")]
         public ActionResult Apply(int jobId, string coverLetter, HttpPostedFileBase cvFile)
         {
-            var job = db.JOBS.FirstOrDefault(j => j.JobId == jobId && j.Status == "Open");
+            var job = db.JOBS.Include(j => j.COMPANy)
+                             .FirstOrDefault(j => j.JobId == jobId && j.Status == "Open");
             if (job == null) return HttpNotFound();
+
+            // Chặn nộp trùng ở phía POST (Tránh lỗi UQ_APPLICATIONS_Job_User trong SQL)
+            if (db.APPLICATIONS.Any(a => a.JobId == jobId && a.UserId == CurrentUserId))
+            {
+                TempData["Error"] = "Bạn đã nộp hồ sơ vào vị trí này rồi!";
+                return RedirectToAction("MyApplications");
+            }
 
             if (cvFile == null || cvFile.ContentLength == 0)
             {
@@ -72,19 +100,29 @@ namespace Job_Recruitment_Website.Controllers
 
             if (ModelState.IsValid)
             {
-                // Lưu file CV vào thư mục ~/Content/CVs/
+                // Đảm bảo thư mục ~/Content/CVs/ luôn tồn tại trước khi lưu file
+                string folderPath = Server.MapPath("~/Content/CVs/");
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+
                 string fileName = Guid.NewGuid().ToString() + Path.GetExtension(cvFile.FileName).ToLower();
-                string savePath = Server.MapPath("~/Content/CVs/" + fileName);
+                string savePath = Path.Combine(folderPath, fileName);
                 cvFile.SaveAs(savePath);
+
+                // Lấy CandidateId (ProfileId) nếu ứng viên đã có hồ sơ chi tiết trong bảng CANDIDATEPROFILES
+                var profile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == CurrentUserId);
 
                 APPLICATION app = new APPLICATION
                 {
                     JobId = jobId,
                     UserId = CurrentUserId,
+                    CandidateId = profile != null ? profile.ProfileId : 0, // Use 0 or another default int value if profile is null
                     CV_Url = "/Content/CVs/" + fileName,
                     CoverLetter = coverLetter,
-                    Status = "Submitted", // Trạng thái mặc định khi nộp
-                    AppliedDate = DateTime.Now
+                    Status = "Pending",
+                    AppliedDate = DateTime.Today
                 };
 
                 db.APPLICATIONS.Add(app);
@@ -98,11 +136,18 @@ namespace Job_Recruitment_Website.Controllers
             return View();
         }
 
-        // GET: Xem lịch sử các công việc ứng viên đã nộp
-        [RoleAuthorize("Candidate")]
+        // GET: Xem lịch sử các công việc đã nộp
         public ActionResult MyApplications()
         {
+            // Kiểm tra đăng nhập và tự động đẩy về trang Login kèm returnUrl
+            if (Session["UserId"] == null)
+            {
+                return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("MyApplications", "Applications") });
+            }
+
             var list = db.APPLICATIONS
+                         .Include(a => a.JOB)
+                         .Include(a => a.JOB.COMPANy)
                          .Where(a => a.UserId == CurrentUserId)
                          .OrderByDescending(a => a.AppliedDate)
                          .ToList();
@@ -115,17 +160,23 @@ namespace Job_Recruitment_Website.Controllers
 
         // GET: Xem danh sách ứng viên đã nộp vào 1 tin tuyển dụng cụ thể
         [RoleAuthorize("Recruiter")]
-        public ActionResult Candidates(int jobId)
+        public ActionResult Candidates(int? jobId)
         {
+            if (jobId == null) return RedirectToAction("MyJobs", "Jobs");
+
+            var company = GetRecruiterCompany();
+            if (company == null) return HttpNotFound();
+
             // Kiểm tra xem tin tuyển dụng này có thuộc về công ty của Recruiter đang đăng nhập không
-            var job = db.JOBS.FirstOrDefault(j => j.JobId == jobId && j.COMPANy.UserId == CurrentUserId);
+            var job = db.JOBS.FirstOrDefault(j => j.JobId == jobId.Value && j.CompanyId == company.CompanyId);
             if (job == null) return HttpNotFound();
 
             ViewBag.JobTitle = job.Title;
             ViewBag.JobId = job.JobId;
 
             var applicants = db.APPLICATIONS
-                               .Where(a => a.JobId == jobId)
+                               .Include(a => a.USER)
+                               .Where(a => a.JobId == jobId.Value)
                                .OrderByDescending(a => a.AppliedDate)
                                .ToList();
             return View(applicants);
@@ -136,12 +187,21 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Recruiter")]
         public ActionResult UpdateStatus(int applicationId, string newStatus)
         {
-            var app = db.APPLICATIONS.FirstOrDefault(a => a.ApplicationId == applicationId
-                                                       && a.JOB.COMPANy.UserId == CurrentUserId);
+            var company = GetRecruiterCompany();
+            if (company == null) return RedirectToAction("MyJobs", "Jobs");
+
+            var app = db.APPLICATIONS.Include(a => a.JOB)
+                                     .FirstOrDefault(a => a.ApplicationId == applicationId
+                                                       && a.JOB.CompanyId == company.CompanyId);
             if (app != null)
             {
-                app.Status = newStatus; // "Approved" hoặc "Rejected"
-                db.SaveChanges();
+                // Kiểm tra trạng thái hợp lệ theo đúng CHECK Constraint CK_APPLICATIONS_Status trong SQL
+                string[] validStatuses = { "Pending", "Submitted", "Reviewed", "Interview", "Accepted", "Approved", "Rejected" };
+                if (validStatuses.Contains(newStatus))
+                {
+                    app.Status = newStatus;
+                    db.SaveChanges();
+                }
             }
 
             return RedirectToAction("Candidates", new { jobId = app != null ? app.JobId : 0 });

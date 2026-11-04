@@ -13,9 +13,17 @@
         myAppCount = db.APPLICATIONS.Count(a => a.UserId == uid);
     }
 
-    string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
-    string currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
-    int? selectedCat = Request.QueryString["categoryId"] != null ? int.Parse(Request.QueryString["categoryId"]) : (int?)null;
+    string currentController = ViewContext.RouteData.Values["controller"] != null ? ViewContext.RouteData.Values["controller"].ToString() : "";
+    string currentAction = ViewContext.RouteData.Values["action"] != null ? ViewContext.RouteData.Values["action"].ToString() : "";
+
+    // XỬ LÝ AN TOÀN KHI LẤY CATEGORY ID TỪ URL (TRÁNH LỖI FORMAT EXCEPTION KHI TÌM KIẾM)
+    int? selectedCat = null;
+    int parsedCat;
+    if (!string.IsNullOrEmpty(Request.QueryString["categoryId"]) && int.TryParse(Request.QueryString["categoryId"], out parsedCat))
+    {
+        selectedCat = parsedCat;
+    }
+
     string selectedLoc = Request.QueryString["location"];
 }
 <!DOCTYPE html>
