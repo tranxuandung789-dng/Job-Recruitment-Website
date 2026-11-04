@@ -1,16 +1,19 @@
 ﻿/* ================= VARIABLES & RESET ================= */
 :root {
-    --primary-orange: #134e4a; /* Màu Teal đậm chủ đạo (giữ tên biến để tương thích HTML/CSS cũ) */
-    --primary-dark: #0f3f3c; /* Teal đậm hơn khi di chuột */
-    --primary-light: #e6f4f1; /* Nền xanh bạc hà nhạt cho mục đang chọn */
-    --accent-lime: #d9f99d; /* Màu vàng chanh cho các nút nhấn (Nộp, Tìm) */
-    --accent-lime-hover: #bef264; /* Vàng chanh đậm hơn khi hover */
-    --accent-lime-text: #1a2e05; /* Chữ xanh đen đậm trên nền vàng chanh */
-    --text-color: #134e4a; /* Chữ chính màu Teal đậm */
-    --text-muted: #5f7a76; /* Chữ phụ xám xanh */
-    --bg-light: #f2fbf9; /* Nền trang xanh mint cực nhạt */
-    --border-color: #d5e8e4; /* Đường viền xanh nhạt hài hòa */
+    --primary-orange: #f7901e; /* Cam chủ đạo (giữ tên biến để tương thích HTML/CSS cũ) */
+    --primary-dark: #e07b0b; /* Cam đậm hơn khi hover */
+    --primary-light: #fff0dd; /* Nền kem cam nhạt cho mục đang chọn, nút Đăng nhập */
+    --accent-lime: #f7901e; /* Nút nhấn (Đăng ký, Ứng tuyển, Tìm): nền cam */
+    --accent-lime-hover: #e07b0b; /* Cam đậm hơn khi hover */
+    --accent-lime-text: #ffffff; /* Chữ trắng trên nền cam */
+    --text-color: #1e293b; /* Chữ chính xanh đen đậm */
+    --text-muted: #64748b; /* Chữ phụ xám xanh */
+    --bg-light: #f8f9fc; /* Nền trang trắng xám nhạt */
+    --border-color: #e6e9ef; /* Viền xám nhạt */
     --white: #ffffff;
+    --green: #059669; /* Màu lương */
+    --green-bg: #dcfce7; /* Nền badge Open */
+    --green-text: #16a34a; /* Chữ badge Open */
 }
 
 * {
@@ -40,15 +43,15 @@ ul {
     padding-left: 0;
 }
 
-/* ================= HEADER (NỀN TEAL ĐẬM) ================= */
+/* ================= HEADER (NỀN TRẮNG) ================= */
 header {
-    background-color: var(--primary-orange);
-    border-bottom: 1px solid var(--primary-dark);
+    background-color: var(--white);
+    border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 1000;
     height: 95px !important;
-    box-shadow: 0 2px 10px rgba(19, 78, 74, 0.12);
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
 }
 
     header .container {
@@ -59,7 +62,7 @@ header {
     }
 
 .logo img {
-    height: 70px !important;
+    height: 135px !important;
     width: auto !important;
     display: block;
     object-fit: contain;
@@ -68,7 +71,7 @@ header {
 nav ul li a.nav-link {
     font-weight: 600;
     font-size: 15px;
-    color: rgba(255, 255, 255, 0.9) !important;
+    color: var(--text-color) !important;
     padding: 8px 4px !important;
     position: relative;
     transition: color 0.2s ease;
@@ -76,10 +79,10 @@ nav ul li a.nav-link {
 
     nav ul li a.nav-link:hover,
     nav ul li a.nav-link.active-menu {
-        color: var(--accent-lime) !important;
+        color: var(--primary-orange) !important;
     }
 
-        /* Gạch chân vàng chanh dưới menu đang chọn trên nền Header Teal */
+        /* Gạch chân cam dưới menu đang chọn */
         nav ul li a.nav-link.active-menu::after {
             content: "";
             position: absolute;
@@ -87,13 +90,14 @@ nav ul li a.nav-link {
             left: 0;
             right: 0;
             height: 3px;
-            background-color: var(--accent-lime);
+            background-color: var(--primary-orange);
             border-radius: 2px;
         }
 
+/* Nút Đăng nhập: nền kem cam, chữ cam */
 .btn-login-soft {
-    background-color: var(--accent-lime);
-    color: var(--accent-lime-text) !important;
+    background-color: var(--primary-light);
+    color: var(--primary-orange) !important;
     font-weight: 600;
     font-size: 14px;
     padding: 8px 18px;
@@ -102,8 +106,8 @@ nav ul li a.nav-link {
 }
 
     .btn-login-soft:hover {
-        background-color: var(--accent-lime-hover);
-        color: var(--accent-lime-text) !important;
+        background-color: #ffe4c2;
+        color: var(--primary-dark) !important;
     }
 
 /* ================= BANNER PHÍA TRÊN CÙNG ================= */
@@ -113,7 +117,7 @@ nav ul li a.nav-link {
     overflow: hidden;
     border: 1px solid var(--border-color);
     background-color: var(--white);
-    box-shadow: 0 2px 6px rgba(19, 78, 74, 0.04);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
 }
 
 .banner-img {
@@ -139,7 +143,7 @@ nav ul li a.nav-link {
     padding: 18px 14px;
     border-radius: 14px;
     border: 1px solid var(--border-color);
-    box-shadow: 0 1px 3px rgba(19, 78, 74, 0.03);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
     position: sticky;
     top: 115px; /* Giữ thanh lọc trượt theo khi cuộn trang */
 }
@@ -147,7 +151,7 @@ nav ul li a.nav-link {
 .filter-group {
     margin-bottom: 20px;
     padding-bottom: 16px;
-    border-bottom: 1px solid var(--primary-light);
+    border-bottom: 1px solid var(--border-color);
 }
 
     .filter-group:last-child {
@@ -160,7 +164,7 @@ nav ul li a.nav-link {
         font-size: 12px;
         font-weight: 800;
         text-transform: uppercase;
-        color: var(--text-muted);
+        color: var(--text-color);
         margin-bottom: 10px;
         padding: 0 10px;
         letter-spacing: 0.5px;
@@ -194,14 +198,14 @@ nav ul li a.nav-link {
     font-size: 12px;
     font-weight: 700;
     color: var(--text-muted);
-    background-color: var(--bg-light);
+    background-color: transparent;
     padding: 2px 8px;
     border-radius: 999px;
 }
 
 .aside-item.active .aside-count {
-    background-color: var(--primary-orange);
-    color: var(--white);
+    background-color: transparent;
+    color: var(--primary-orange);
 }
 
 /* CỘT CHÍNH BÊN PHẢI */
@@ -262,7 +266,7 @@ nav ul li a.nav-link {
         .filter-bar-top input[type="text"]:focus,
         .filter-bar-top select:focus {
             border-color: var(--primary-orange);
-            box-shadow: 0 0 0 3px rgba(19, 78, 74, 0.1);
+            box-shadow: 0 0 0 3px rgba(247, 144, 30, 0.12);
         }
 
 /* LƯỚI CARD VIỆC LÀM 2 CỘT */
@@ -286,7 +290,7 @@ nav ul li a.nav-link {
 
     .job-card:hover {
         border-color: var(--primary-orange);
-        box-shadow: 0 6px 16px rgba(19, 78, 74, 0.08);
+        box-shadow: 0 6px 16px rgba(247, 144, 30, 0.12);
         transform: translateY(-2px);
     }
 
@@ -310,12 +314,13 @@ nav ul li a.nav-link {
     }
 
         .job-card .title a:hover {
-            color: var(--primary-dark) !important;
+            color: var(--primary-orange) !important;
         }
 
+/* Badge Open: nền xanh lá nhạt, chữ xanh lá */
 .badge-open {
-    background-color: var(--accent-lime);
-    color: var(--accent-lime-text);
+    background-color: var(--green-bg);
+    color: var(--green-text);
     font-size: 12px;
     font-weight: 700;
     padding: 3px 10px;
@@ -334,8 +339,9 @@ nav ul li a.nav-link {
         margin-right: 8px;
     }
 
+/* Mức lương màu xanh lá */
 .job-card .salary {
-    color: var(--primary-orange);
+    color: var(--green);
     font-weight: 800;
     font-size: 16px;
     margin-bottom: 10px;
@@ -419,7 +425,7 @@ nav ul li a.nav-link {
 
 .form-control:focus {
     border-color: var(--primary-orange) !important;
-    box-shadow: 0 0 0 0.25rem rgba(19, 78, 74, 0.15) !important;
+    box-shadow: 0 0 0 0.25rem rgba(247, 144, 30, 0.15) !important;
 }
 
 /* ================= CSS CHO TRANG DANH SÁCH CÔNG TY ================= */
@@ -439,12 +445,12 @@ nav ul li a.nav-link {
     flex-direction: column;
     justify-content: space-between;
     transition: all 0.25s ease;
-    box-shadow: 0 1px 3px rgba(19, 78, 74, 0.02);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
 }
 
     .company-card:hover {
         border-color: var(--primary-orange);
-        box-shadow: 0 8px 20px rgba(19, 78, 74, 0.1);
+        box-shadow: 0 8px 20px rgba(247, 144, 30, 0.14);
         transform: translateY(-2px);
     }
 
@@ -476,7 +482,7 @@ nav ul li a.nav-link {
     }
 
         .company-title a:hover {
-            color: var(--primary-dark) !important;
+            color: var(--primary-orange) !important;
         }
 
 .company-address {
@@ -532,12 +538,12 @@ nav ul li a.nav-link {
     justify-content: space-between;
     min-height: 125px;
     transition: all 0.25s ease-in-out;
-    box-shadow: 0 1px 3px rgba(19, 78, 74, 0.02);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
 }
 
     .category-card-item:hover {
         border-color: var(--primary-orange);
-        box-shadow: 0 8px 20px rgba(19, 78, 74, 0.1);
+        box-shadow: 0 8px 20px rgba(247, 144, 30, 0.14);
         transform: translateY(-2px);
     }
 
@@ -571,7 +577,7 @@ nav ul li a.nav-link {
     .btn-view-jobs-cat:hover {
         background-color: var(--accent-lime-hover);
         color: var(--accent-lime-text) !important;
-        box-shadow: 0 4px 10px rgba(19, 78, 74, 0.12);
+        box-shadow: 0 4px 10px rgba(247, 144, 30, 0.2);
     }
 
 /* ================= FOOTER ================= */
@@ -588,7 +594,7 @@ footer {
         padding-bottom: 8px;
     }
 
-        /* Gạch chân nhỏ màu vàng chanh dưới tiêu đề cột Footer */
+        /* Gạch chân nhỏ màu cam dưới tiêu đề cột Footer */
         footer h6::after {
             content: "";
             position: absolute;
