@@ -13,9 +13,17 @@
         myAppCount = db.APPLICATIONS.Count(a => a.UserId == uid);
     }
 
-    string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
-    string currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
-    int? selectedCat = Request.QueryString["categoryId"] != null ? int.Parse(Request.QueryString["categoryId"]) : (int?)null;
+    string currentController = ViewContext.RouteData.Values["controller"] != null ? ViewContext.RouteData.Values["controller"].ToString() : "";
+    string currentAction = ViewContext.RouteData.Values["action"] != null ? ViewContext.RouteData.Values["action"].ToString() : "";
+
+    // XỬ LÝ AN TOÀN KHI LẤY CATEGORY ID TỪ URL (TRÁNH LỖI FORMAT EXCEPTION KHI TÌM KIẾM)
+    int? selectedCat = null;
+    int parsedCat;
+    if (!string.IsNullOrEmpty(Request.QueryString["categoryId"]) && int.TryParse(Request.QueryString["categoryId"], out parsedCat))
+    {
+        selectedCat = parsedCat;
+    }
+
     string selectedLoc = Request.QueryString["location"];
 }
 <!DOCTYPE html>
@@ -28,19 +36,22 @@
     <!-- 1. BOOTSTRAP 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- 2. NHÚNG ĐÚNG ĐƯỜNG DẪN TỚI THƯ MỤC CONTENT -->
-    <link href="@Url.Content("~/Content/StyleLayoutRecruitment.css?v=5")" rel="stylesheet" />
+    <!-- BOOTSTRAP ICONS CHO FOOTER VÀ GIAO DIỆN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- 2. FILE CSS CHÍNH (ĐÃ ĐỔI ?v=100 ĐỂ ÉP TRÌNH DUYỆT XÓA CACHE) -->
+    <link href="@Url.Content("~/Content/StyleLayoutRecruitment.css?v=100")" rel="stylesheet" />
 </head>
 <body>
 
     <!-- HEADER -->
-    <header class="py-2 border-bottom bg-white sticky-top">
+    <header class="py-2 sticky-top">
         <div class="container d-flex align-items-center justify-content-between">
 
             <!-- LOGO D-JOBS -->
             <div class="logo">
                 <a href="@Url.Action("Index", "Jobs")">
-                    <img src="@Url.Content("~/Content/Images/Logo.png")" alt="D-Jobs Recruitment Agency" />
+                    <img src="@Url.Content("~/Content/Images/logo.png")" alt="D-Jobs Recruitment Agency" />
                 </a>
             </div>
 
@@ -84,13 +95,13 @@
                     @if (Session["Role"] != null && Session["Role"].ToString() == "Recruiter")
                     {
                         <li class="nav-item">
-                            <a class="nav-link fw-bold" style="color: #f7931e !important;" href="@Url.Action("MyJobs", "Jobs")">Quản lý tin đăng</a>
+                            <a class="nav-link fw-bold" style="color: var(--accent-lime) !important;" href="@Url.Action("MyJobs", "Jobs")">Quản lý tin đăng</a>
                         </li>
                     }
                     else if (Session["Role"] != null && Session["Role"].ToString() == "Admin")
                     {
                         <li class="nav-item">
-                            <a class="nav-link fw-bold text-danger" href="@Url.Action("Index", "Admin")">Quản trị Admin</a>
+                            <a class="nav-link fw-bold text-warning" href="@Url.Action("Index", "Admin")">Quản trị Admin</a>
                         </li>
                     }
                 </ul>
@@ -100,15 +111,15 @@
             <div class="auth-buttons d-flex align-items-center gap-3">
                 @if (Session["UserId"] != null)
                 {
-                    <span class="text-dark small fw-semibold">
+                    <span class="text-white small fw-semibold">
                         Xin chào, <strong>@Session["FullName"]</strong> (@Session["Role"])
                     </span>
-                    <a class="btn btn-warning text-white fw-semibold px-3 py-2" style="background-color: #f7931e; border: none;" href="@Url.Action("Logout", "Account")">Đăng xuất</a>
+                    <a class="btn btn-primary-custom px-3 py-2" href="@Url.Action("Logout", "Account")">Đăng xuất</a>
                 }
                 else
                 {
                     <a class="btn-login-soft" href="@Url.Action("Login", "Account")">Đăng nhập</a>
-                    <a class="btn btn-warning text-white fw-semibold px-3 py-2" style="background-color: #f7931e; border: none;" href="@Url.Action("Register", "Account")">Đăng ký</a>
+                    <a class="btn btn-primary-custom px-3 py-2" href="@Url.Action("Register", "Account")">Đăng ký</a>
                 }
             </div>
 
@@ -120,7 +131,7 @@
 
         <!-- BANNER NẰM TRÊN HẲN (VẮT NGANG TOÀN BỘ TRANG) -->
         <div class="banner-container mb-4">
-            <img src="@Url.Content("~/Content/Images/banner.jpg")" alt="Banner Tuyển Dụng" class="banner-img" />
+            <img src="@Url.Content("~/Content/Images/banner.png")" alt="Banner Tuyển Dụng" class="banner-img" />
         </div>
 
         <div class="job-content">
@@ -161,7 +172,6 @@
 
                 <div class="filter-group">
                     <h4>LỐI TẮT</h4>
-                    <!-- XỬ LÝ CHUYỂN HƯỚNG BÊN CỘT LỐI TẮT (CÓ RETURN URL) -->
                     @if (Session["UserId"] == null)
                     {
                         <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Profile", "Account") })" class="aside-item">
@@ -192,19 +202,118 @@
         </div>
     </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-white border-top py-4 mt-auto">
-        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-            <div class="footer-logo">
-                <h2 class="h5 fw-bold text-warning mb-0" style="color: #f7931e !important;">D-JOBS Recruitment Agency</h2>
+    <!-- FOOTER 4 CỘT -->
+    <footer class="border-top pt-5 pb-4 mt-auto">
+        <div class="container">
+            <div class="row gy-4">
+
+                <!-- CỘT 1: THÔNG TIN THƯƠNG HIỆU -->
+                <div class="col-lg-4 col-md-6 pe-lg-4">
+                    <h5 class="fw-bold mb-3 text-orange">D-JOBS Recruitment Agency</h5>
+                    <p class="small mb-3" style="line-height: 1.6;">
+                        Nền tảng kết nối nhân tài với hàng ngàn cơ hội nghề nghiệp hấp dẫn từ các doanh nghiệp hàng đầu. Đồng hành cùng sự nghiệp của bạn.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;" title="Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;" title="LinkedIn">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                        <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;" title="YouTube">
+                            <i class="bi bi-youtube"></i>
+                        </a>
+                        <a href="mailto:support@d-jobs.vn" class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;" title="Email">
+                            <i class="bi bi-envelope-fill"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- CỘT 2: DÀNH CHO ỨNG VIÊN -->
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6 class="text-uppercase small">Dành cho ứng viên</h6>
+                    <ul class="list-unstyled small d-flex flex-column gap-2 mb-0">
+                        <li><a href="@Url.Action("Index", "Jobs")" class="footer-link">Tìm việc làm</a></li>
+                        <li><a href="@Url.Action("Index", "COMPANies")" class="footer-link">Danh sách công ty</a></li>
+                        <li>
+                            @if (Session["UserId"] == null)
+                            {
+                                <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Profile", "Account") })" class="footer-link">Hồ sơ cá nhân</a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("Profile", "Account")" class="footer-link">Hồ sơ cá nhân</a>
+                            }
+                        </li>
+                        <li>
+                            @if (Session["UserId"] == null)
+                            {
+                                <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("MyApplications", "Applications") })" class="footer-link">Việc đã ứng tuyển</a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("MyApplications", "Applications")" class="footer-link">Việc đã ứng tuyển</a>
+                            }
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- CỘT 3: KHÁM PHÁ VIỆC LÀM -->
+                <div class="col-lg-3 col-md-6 col-6">
+                    <h6 class="text-uppercase small">Khám phá việc làm</h6>
+                    <ul class="list-unstyled small d-flex flex-column gap-2 mb-0">
+                        <li><a href="@Url.Action("Index", "CATEGORies")" class="footer-link">Tất cả ngành nghề</a></li>
+                        <li>
+                            <a href="@Url.Action("Index", "Jobs", new { location = "Hà Nội" })" class="footer-link d-flex justify-content-between align-items-center">
+                                <span>Việc làm Hà Nội</span>
+                                <span class="badge bg-light text-secondary border">@countHN</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("Index", "Jobs", new { location = "Hồ Chí Minh" })" class="footer-link d-flex justify-content-between align-items-center">
+                                <span>Việc làm TP.HCM</span>
+                                <span class="badge bg-light text-secondary border">@countHCM</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- CỘT 4: LIÊN HỆ -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-uppercase small">Liên hệ</h6>
+                    <ul class="list-unstyled small d-flex flex-column gap-2 mb-0 text-secondary">
+                        <li class="d-flex align-items-start gap-2">
+                            <i class="bi bi-geo-alt-fill mt-1" style="color: var(--primary-orange);"></i>
+                            <span>Quận 1, Thành phố Hồ Chí Minh</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-2">
+                            <i class="bi bi-telephone-fill" style="color: var(--primary-orange);"></i>
+                            <span>(028) 3888 9999</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-2">
+                            <i class="bi bi-envelope-fill" style="color: var(--primary-orange);"></i>
+                            <span>support@d-jobs.vn</span>
+                        </li>
+                    </ul>
+                </div>
+
             </div>
-            <div class="footer-info text-center text-md-end text-muted small">
-                <p class="mb-1">Website tuyển dụng D-JOBS Recruitment Agency - Kết nối nhân tài với cơ hội nghề nghiệp.</p>
-                <p class="mb-0">© 2026 D-JOBS Recruitment Agency. All rights reserved.</p>
+
+            <hr class="my-4 border-secondary-subtle" />
+
+            <!-- BẢN QUYỀN DƯỚI CÙNG -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-muted gap-2">
+                <p class="mb-0">© @DateTime.Now.Year <strong>D-JOBS Recruitment Agency</strong>. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-muted text-decoration-none footer-link">Điều khoản dịch vụ</a>
+                    <span>•</span>
+                    <a href="#" class="text-muted text-decoration-none footer-link">Chính sách bảo mật</a>
+                </div>
             </div>
         </div>
     </footer>
 
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/Scripts/recruitment.js"></script>
     @RenderSection("scripts", required: false)

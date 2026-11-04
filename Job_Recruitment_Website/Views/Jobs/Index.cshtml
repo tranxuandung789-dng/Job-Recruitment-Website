@@ -3,24 +3,60 @@
 
 @{
     ViewBag.Title = "Tin tuyển dụng";
-    // Đã chuyển Banner lên Layout nên ở đây dùng chung layout chuẩn
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
 
     var db = new RecruitmentDBEntities();
     var categories = db.CATEGORIES.ToList();
-    int? selectedCat = Request.QueryString["categoryId"] != null ? int.Parse(Request.QueryString["categoryId"]) : (int?)null;
+
+    // SỬA LỖI FORMAT EXCEPTION: Kiểm tra chuỗi không rỗng và dùng TryParse an toàn
+    int? selectedCat = null;
+    int parsedCat;
+    if (!string.IsNullOrEmpty(Request.QueryString["categoryId"]) && int.TryParse(Request.QueryString["categoryId"], out parsedCat))
+    {
+        selectedCat = parsedCat;
+    }
+
     string searchKeyword = Request.QueryString["search"];
+    string selectedLoc = Request.QueryString["location"];
+}
+
+<!-- THÔNG BÁO TRẠNG THÁI -->
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger rounded-3 py-2 small fw-semibold mb-3">
+         @TempData["Error"]
+    </div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success rounded-3 py-2 small fw-semibold mb-3">
+         @TempData["Success"]
+    </div>
 }
 
 <!-- TIÊU ĐỀ TRANG -->
-<div class="job-section-header">
-    <h2>Tin tuyển dụng</h2>
+<div class="job-section-header mb-3">
+    <h2 class="fw-bold text-dark">Tin tuyển dụng</h2>
 </div>
 
 <!-- THANH TÌM KIẾM VÀ DROPDOWN NGÀNH NGHỀ -->
-<form method="get" action="@Url.Action("Index", "Jobs")" class="filter-bar-top">
-    <input type="text" name="search" value="@searchKeyword" placeholder="Tìm theo vị trí, công ty, địa điểm..." />
-    <select name="categoryId" onchange="this.form.submit()">
+<form method="get" action="@Url.Action("Index", "Jobs")" class="d-flex gap-2 mb-4 align-items-center">
+    @if (!string.IsNullOrEmpty(selectedLoc))
+    {
+        <input type="hidden" name="location" value="@selectedLoc" />
+    }
+
+    <input type="text"
+           name="search"
+           value="@searchKeyword"
+           placeholder="Tìm theo công việc, công ty, địa điểm..."
+           class="form-control rounded-3"
+           style="height: 44px; color: #1e293b; font-weight: 500; border: 1px solid #ced4da;" />
+
+    <select name="categoryId"
+            onchange="this.form.submit()"
+            class="form-select rounded-3"
+            style="height: 44px; width: 230px; flex-shrink: 0; color: #334155; border: 1px solid #ced4da;">
         <option value="">Tất cả ngành nghề</option>
         @foreach (var cat in categories)
         {
@@ -29,6 +65,13 @@
             </option>
         }
     </select>
+
+    <!-- Nút Tìm kiếm nền xanh rêu đậm đồng bộ Header, chữ trắng sắc nét -->
+    <button type="submit"
+            class="btn text-white fw-bold px-4 rounded-3 shadow-sm d-flex align-items-center justify-content-center"
+            style="height: 44px; background-color: #1b4332; border: none; white-space: nowrap; font-size: 15px; letter-spacing: 0.3px;">
+        Tìm kiếm
+    </button>
 </form>
 
 <!-- LƯỚI CARD VIỆC LÀM 2 CỘT -->
@@ -52,9 +95,13 @@
                         <span class="badge-open">@item.Status</span>
                     </div>
 
-                    <div class="company">
+                    <div class="company d-flex align-items-center gap-2 mb-2">
+                        @if (item.COMPANy != null && !string.IsNullOrEmpty(item.COMPANy.Logo_Url))
+                        {
+                            <img src="@item.COMPANy.Logo_Url" alt="@item.COMPANy.CompanyName" style="width: 24px; height: 24px; object-fit: contain; border-radius: 4px;" />
+                        }
                         <strong>@(item.COMPANy != null ? item.COMPANy.CompanyName : "Đang cập nhật")</strong>
-                        <span>@item.Location</span>
+                        <span>• @item.Location</span>
                     </div>
 
                     <div class="salary">
@@ -70,13 +117,23 @@
                             @(item.CATEGORy != null ? item.CATEGORy.CategoryName : "Chưa phân loại")
                         </span>
                         <span class="deadline">
-                            Hạn nộp: @item.Deadline.ToString("dd/MM/yyyy")
+                            Hạn nộp: @string.Format("{0:dd/MM/yyyy}", item.Deadline)
                         </span>
                     </div>
 
-                    <a href="@Url.Action("Apply", "Applications", new { jobId = item.JobId })" class="btn-apply">
-                        Ứng tuyển
-                    </a>
+                    <!-- Nút Ứng tuyển: Tự động chuyển qua Login kèm returnUrl nếu chưa đăng nhập -->
+                    @if (Session["UserId"] == null)
+                    {
+                        <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Apply", "Applications", new { jobId = item.JobId }) })" class="btn-apply">
+                            Ứng tuyển
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Apply", "Applications", new { jobId = item.JobId })" class="btn-apply">
+                            Ứng tuyển
+                        </a>
+                    }
                 </div>
             </div>
         }

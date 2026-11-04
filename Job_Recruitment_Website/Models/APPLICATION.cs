@@ -21,7 +21,6 @@ namespace Job_Recruitment_Website.Models
         public System.DateTime AppliedDate { get; set; }
         public string Status { get; set; }
         public int UserId { get; set; }
-        public string CV_Url { get; set; } // <-- Add this property
     
         public virtual CANDIDATEPROFILE CANDIDATEPROFILE { get; set; }
         public virtual JOB JOB { get; set; }

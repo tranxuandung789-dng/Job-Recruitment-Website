@@ -1,12 +1,37 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|d:\\duanlaptrinhwebn05\\job-recruitment-website\\job_recruitment_website\\views\\jobs\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C76063AD-B5EF-45F8-ADAF-FB55CBFF4F07}|Job_Recruitment_Website.csproj|solutionrelative:views\\jobs\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Jobs\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Jobs\\Index.cshtml",
+              "ToolTip": "D:\\DuAnLapTrinhWebN05\\Job-Recruitment-Website\\Job_Recruitment_Website\\Views\\Jobs\\Index.cshtml",
+              "RelativeToolTip": "Views\\Jobs\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGYAAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-11-04T09:01:03.644Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }

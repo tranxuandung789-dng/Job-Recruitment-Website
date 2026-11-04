@@ -1,12 +1,15 @@
 ﻿/* ================= VARIABLES & RESET ================= */
 :root {
-    --primary-orange: #f7931e; /* Màu cam chủ đạo D-JOBS */
-    --primary-dark: #e07d0c; /* Cam đậm khi di chuột */
-    --primary-light: #fff3e0; /* Nền cam nhạt cho mục đang chọn */
-    --text-color: #1b2533; /* Chữ chính */
-    --text-muted: #64748b; /* Chữ phụ */
-    --bg-light: #f8fafc; /* Nền trang */
-    --border-color: #e2e8f0; /* Đường viền */
+    --primary-orange: #134e4a; /* Màu Teal đậm chủ đạo (giữ tên biến để tương thích HTML/CSS cũ) */
+    --primary-dark: #0f3f3c; /* Teal đậm hơn khi di chuột */
+    --primary-light: #e6f4f1; /* Nền xanh bạc hà nhạt cho mục đang chọn */
+    --accent-lime: #d9f99d; /* Màu vàng chanh cho các nút nhấn (Nộp, Tìm) */
+    --accent-lime-hover: #bef264; /* Vàng chanh đậm hơn khi hover */
+    --accent-lime-text: #1a2e05; /* Chữ xanh đen đậm trên nền vàng chanh */
+    --text-color: #134e4a; /* Chữ chính màu Teal đậm */
+    --text-muted: #5f7a76; /* Chữ phụ xám xanh */
+    --bg-light: #f2fbf9; /* Nền trang xanh mint cực nhạt */
+    --border-color: #d5e8e4; /* Đường viền xanh nhạt hài hòa */
     --white: #ffffff;
 }
 
@@ -37,14 +40,15 @@ ul {
     padding-left: 0;
 }
 
-/* ================= HEADER ================= */
+/* ================= HEADER (NỀN TEAL ĐẬM) ================= */
 header {
-    background-color: var(--white);
-    border-bottom: 1px solid var(--border-color);
+    background-color: var(--primary-orange);
+    border-bottom: 1px solid var(--primary-dark);
     position: sticky;
     top: 0;
     z-index: 1000;
     height: 95px !important;
+    box-shadow: 0 2px 10px rgba(19, 78, 74, 0.12);
 }
 
     header .container {
@@ -55,39 +59,16 @@ header {
     }
 
 .logo img {
-    height: 150px !important;
+    height: 70px !important;
     width: auto !important;
     display: block;
     object-fit: contain;
 }
 
-/* ================= BANNER PHÍA TRÊN CÙNG ================= */
-.banner-container {
-    width: 100%;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-    background-color: var(--white);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-}
-
-.banner-img {
-    width: 100%;
-    height: 190px;
-    object-fit: cover;
-    display: block;
-}
-
-@media (max-width: 768px) {
-    .banner-img {
-        height: 120px;
-    }
-}
-
 nav ul li a.nav-link {
     font-weight: 600;
     font-size: 15px;
-    color: var(--text-color) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
     padding: 8px 4px !important;
     position: relative;
     transition: color 0.2s ease;
@@ -95,10 +76,10 @@ nav ul li a.nav-link {
 
     nav ul li a.nav-link:hover,
     nav ul li a.nav-link.active-menu {
-        color: var(--primary-orange) !important;
+        color: var(--accent-lime) !important;
     }
 
-        /* Gạch chân cam dưới menu đang chọn */
+        /* Gạch chân vàng chanh dưới menu đang chọn trên nền Header Teal */
         nav ul li a.nav-link.active-menu::after {
             content: "";
             position: absolute;
@@ -106,13 +87,13 @@ nav ul li a.nav-link {
             left: 0;
             right: 0;
             height: 3px;
-            background-color: var(--primary-orange);
+            background-color: var(--accent-lime);
             border-radius: 2px;
         }
 
 .btn-login-soft {
-    background-color: var(--primary-light);
-    color: var(--primary-orange) !important;
+    background-color: var(--accent-lime);
+    color: var(--accent-lime-text) !important;
     font-weight: 600;
     font-size: 14px;
     padding: 8px 18px;
@@ -121,9 +102,26 @@ nav ul li a.nav-link {
 }
 
     .btn-login-soft:hover {
-        background-color: #ffe0b2;
-        color: var(--primary-dark) !important;
+        background-color: var(--accent-lime-hover);
+        color: var(--accent-lime-text) !important;
     }
+
+/* ================= BANNER PHÍA TRÊN CÙNG ================= */
+.banner-container {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    background-color: var(--white);
+    box-shadow: 0 2px 6px rgba(19, 78, 74, 0.04);
+}
+
+.banner-img {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    display: block;
+}
 
 /* ================= BỐ CỤC 2 CỘT (ASIDE TRÁI + NỘI DUNG PHẢI) ================= */
 .job-content {
@@ -141,13 +139,15 @@ nav ul li a.nav-link {
     padding: 18px 14px;
     border-radius: 14px;
     border: 1px solid var(--border-color);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 3px rgba(19, 78, 74, 0.03);
+    position: sticky;
+    top: 115px; /* Giữ thanh lọc trượt theo khi cuộn trang */
 }
 
 .filter-group {
     margin-bottom: 20px;
     padding-bottom: 16px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--primary-light);
 }
 
     .filter-group:last-child {
@@ -160,7 +160,7 @@ nav ul li a.nav-link {
         font-size: 12px;
         font-weight: 800;
         text-transform: uppercase;
-        color: #475569;
+        color: var(--text-muted);
         margin-bottom: 10px;
         padding: 0 10px;
         letter-spacing: 0.5px;
@@ -180,7 +180,7 @@ nav ul li a.nav-link {
 }
 
     .aside-item:hover {
-        background-color: #f8fafc;
+        background-color: var(--bg-light);
         color: var(--primary-orange) !important;
     }
 
@@ -191,13 +191,17 @@ nav ul li a.nav-link {
     }
 
 .aside-count {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-muted);
+    background-color: var(--bg-light);
+    padding: 2px 8px;
+    border-radius: 999px;
 }
 
 .aside-item.active .aside-count {
-    color: var(--primary-orange);
+    background-color: var(--primary-orange);
+    color: var(--white);
 }
 
 /* CỘT CHÍNH BÊN PHẢI */
@@ -238,6 +242,8 @@ nav ul li a.nav-link {
         outline: none;
         font-size: 14px;
         background-color: var(--white);
+        color: var(--text-color);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .filter-bar-top select {
@@ -248,12 +254,15 @@ nav ul li a.nav-link {
         outline: none;
         font-size: 14px;
         background-color: var(--white);
+        color: var(--text-color);
         cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
         .filter-bar-top input[type="text"]:focus,
         .filter-bar-top select:focus {
             border-color: var(--primary-orange);
+            box-shadow: 0 0 0 3px rgba(19, 78, 74, 0.1);
         }
 
 /* LƯỚI CARD VIỆC LÀM 2 CỘT */
@@ -272,12 +281,13 @@ nav ul li a.nav-link {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
     .job-card:hover {
         border-color: var(--primary-orange);
-        box-shadow: 0 6px 16px rgba(247, 147, 30, 0.12);
+        box-shadow: 0 6px 16px rgba(19, 78, 74, 0.08);
+        transform: translateY(-2px);
     }
 
 .job-card-top {
@@ -300,12 +310,12 @@ nav ul li a.nav-link {
     }
 
         .job-card .title a:hover {
-            color: var(--primary-orange) !important;
+            color: var(--primary-dark) !important;
         }
 
 .badge-open {
-    background-color: #dcfce7;
-    color: #15803d;
+    background-color: var(--accent-lime);
+    color: var(--accent-lime-text);
     font-size: 12px;
     font-weight: 700;
     padding: 3px 10px;
@@ -325,7 +335,7 @@ nav ul li a.nav-link {
     }
 
 .job-card .salary {
-    color: #059669;
+    color: var(--primary-orange);
     font-weight: 800;
     font-size: 16px;
     margin-bottom: 10px;
@@ -333,7 +343,7 @@ nav ul li a.nav-link {
 
 .job-card .desc {
     font-size: 13.5px;
-    color: #475569;
+    color: var(--text-muted);
     margin-bottom: 14px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -365,50 +375,39 @@ nav ul li a.nav-link {
 
 .job-card .btn-apply {
     display: inline-block;
-    background-color: var(--primary-orange);
-    color: var(--white) !important;
+    background-color: var(--accent-lime);
+    color: var(--accent-lime-text) !important;
     padding: 8px 18px;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 13.5px;
+    text-align: center;
     transition: background-color 0.2s ease;
 }
 
     .job-card .btn-apply:hover {
-        background-color: var(--primary-dark);
+        background-color: var(--accent-lime-hover);
     }
 
-/* RESPONSIVE */
-@media (max-width: 992px) {
-    .job-content {
-        flex-direction: column;
-    }
-
-    .job-filter {
-        width: 100%;
-    }
-
-    #job-list-results {
-        grid-template-columns: 1fr;
-    }
-}
 /* ================= CSS TRANG ĐĂNG NHẬP & ĐĂNG KÝ ================= */
 .card {
     border: 1px solid var(--border-color) !important;
+    border-radius: 14px !important;
 }
 
-/* Nút bấm màu cam chủ đạo D-JOBS */
 .btn-primary-custom {
-    background-color: var(--primary-orange) !important;
+    background-color: var(--accent-lime) !important;
+    color: var(--accent-lime-text) !important;
+    font-weight: 700 !important;
     border: none !important;
+    border-radius: 8px;
     transition: background-color 0.2s ease;
 }
 
     .btn-primary-custom:hover {
-        background-color: var(--primary-dark) !important;
+        background-color: var(--accent-lime-hover) !important;
     }
 
-/* Link màu cam */
 .text-orange {
     color: var(--primary-orange) !important;
 }
@@ -418,15 +417,15 @@ nav ul li a.nav-link {
         text-decoration: underline !important;
     }
 
-/* Viền input khi focus đổi sang màu cam */
 .form-control:focus {
     border-color: var(--primary-orange) !important;
-    box-shadow: 0 0 0 0.25rem rgba(247, 147, 30, 0.15) !important;
+    box-shadow: 0 0 0 0.25rem rgba(19, 78, 74, 0.15) !important;
 }
+
 /* ================= CSS CHO TRANG DANH SÁCH CÔNG TY ================= */
 .company-grid-results {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Hiển thị dạng lưới 2 cột cân đối bên cạnh aside */
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     margin-bottom: 30px;
 }
@@ -440,14 +439,14 @@ nav ul li a.nav-link {
     flex-direction: column;
     justify-content: space-between;
     transition: all 0.25s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 3px rgba(19, 78, 74, 0.02);
 }
 
-.company-card:hover {
-    border-color: var(--primary-orange);
-    box-shadow: 0 8px 20px rgba(247, 147, 30, 0.1);
-    transform: translateY(-2px);
-}
+    .company-card:hover {
+        border-color: var(--primary-orange);
+        box-shadow: 0 8px 20px rgba(19, 78, 74, 0.1);
+        transform: translateY(-2px);
+    }
 
 .company-logo-box {
     width: 100%;
@@ -458,12 +457,12 @@ nav ul li a.nav-link {
     margin-bottom: 14px;
 }
 
-.company-logo-box img {
-    max-height: 70px;
-    max-width: 140px;
-    object-fit: contain;
-    display: block;
-}
+    .company-logo-box img {
+        max-height: 70px;
+        max-width: 140px;
+        object-fit: contain;
+        display: block;
+    }
 
 .company-title {
     font-size: 18px;
@@ -471,14 +470,14 @@ nav ul li a.nav-link {
     margin-bottom: 6px;
 }
 
-.company-title a {
-    color: var(--text-color) !important;
-    transition: color 0.2s ease;
-}
+    .company-title a {
+        color: var(--text-color) !important;
+        transition: color 0.2s ease;
+    }
 
-.company-title a:hover {
-    color: var(--primary-orange) !important;
-}
+        .company-title a:hover {
+            color: var(--primary-dark) !important;
+        }
 
 .company-address {
     font-size: 13px;
@@ -488,9 +487,9 @@ nav ul li a.nav-link {
 
 .company-desc {
     font-size: 13.5px;
-    color: #475569;
+    color: var(--text-muted);
     line-height: 1.4;
-    margin-bottom: 0;
+    margin-bottom: 14px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -501,20 +500,21 @@ nav ul li a.nav-link {
     display: inline-block;
     width: 100%;
     text-align: center;
-    background-color: var(--primary-light);
-    color: var(--primary-orange) !important;
+    background-color: var(--accent-lime);
+    color: var(--accent-lime-text) !important;
     padding: 8px 16px;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 13.5px;
     transition: all 0.2s ease;
 }
 
-.btn-view-company:hover {
-    background-color: var(--primary-orange);
-    color: var(--white) !important;
-}
-/* ================= GIAO DIỆN LƯỚI CARD NGÀNH NGHỀ (CHUẨN D-JOBS) ================= */
+    .btn-view-company:hover {
+        background-color: var(--accent-lime-hover);
+        color: var(--accent-lime-text) !important;
+    }
+
+/* ================= GIAO DIỆN LƯỚI CARD NGÀNH NGHỀ ================= */
 .category-grid-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -523,7 +523,7 @@ nav ul li a.nav-link {
 }
 
 .category-card-item {
-    background: #ffffff;
+    background: var(--white);
     border: 1px solid var(--border-color);
     border-radius: 14px;
     padding: 22px;
@@ -532,19 +532,19 @@ nav ul li a.nav-link {
     justify-content: space-between;
     min-height: 125px;
     transition: all 0.25s ease-in-out;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 3px rgba(19, 78, 74, 0.02);
 }
 
     .category-card-item:hover {
         border-color: var(--primary-orange);
-        box-shadow: 0 8px 20px rgba(247, 147, 30, 0.12);
+        box-shadow: 0 8px 20px rgba(19, 78, 74, 0.1);
         transform: translateY(-2px);
     }
 
 .category-card-name {
     font-size: 16px;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--text-color);
     margin-bottom: 6px;
     line-height: 1.35;
 }
@@ -556,12 +556,11 @@ nav ul li a.nav-link {
     display: inline-block;
 }
 
-/* Nút Xem việc làm theo tone màu cam thương hiệu D-JOBS */
 .btn-view-jobs-cat {
     display: inline-block;
-    background-color: var(--primary-light); /* Màu nền cam nhạt #fff3e0 */
-    color: var(--primary-orange) !important; /* Chữ màu cam #f7931e */
-    font-weight: 600;
+    background-color: var(--accent-lime);
+    color: var(--accent-lime-text) !important;
+    font-weight: 700;
     font-size: 13px;
     padding: 7px 16px;
     border-radius: 8px;
@@ -570,12 +569,104 @@ nav ul li a.nav-link {
 }
 
     .btn-view-jobs-cat:hover {
-        background-color: var(--primary-orange);
-        color: #ffffff !important;
-        box-shadow: 0 4px 10px rgba(247, 147, 30, 0.25);
+        background-color: var(--accent-lime-hover);
+        color: var(--accent-lime-text) !important;
+        box-shadow: 0 4px 10px rgba(19, 78, 74, 0.12);
     }
 
+/* ================= FOOTER ================= */
+footer {
+    background-color: var(--white) !important;
+    border-top: 2px solid var(--border-color) !important;
+    color: var(--text-muted);
+}
+
+    footer h6 {
+        color: var(--text-color) !important;
+        font-weight: 800;
+        position: relative;
+        padding-bottom: 8px;
+    }
+
+        /* Gạch chân nhỏ màu vàng chanh dưới tiêu đề cột Footer */
+        footer h6::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 32px;
+            height: 3px;
+            background-color: var(--accent-lime);
+            border-radius: 2px;
+        }
+
+.footer-link {
+    color: var(--text-muted) !important;
+    display: inline-block;
+    transition: all 0.2s ease-in-out;
+}
+
+    .footer-link:hover {
+        color: var(--primary-orange) !important;
+        font-weight: 600;
+        transform: translateX(4px);
+    }
+
+/* Nút mạng xã hội ở Footer */
+footer .btn-outline-secondary {
+    border-color: var(--border-color) !important;
+    color: var(--primary-orange) !important;
+    background-color: var(--bg-light);
+    transition: all 0.2s ease;
+}
+
+    footer .btn-outline-secondary:hover {
+        background-color: var(--accent-lime) !important;
+        border-color: var(--accent-lime-hover) !important;
+        color: var(--accent-lime-text) !important;
+        transform: translateY(-2px);
+    }
+
+/* ================= RESPONSIVE TOÀN TRANG ================= */
+@media (max-width: 992px) {
+    header {
+        height: auto !important;
+        padding: 12px 0;
+    }
+
+        header .container {
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+    nav ul li a.nav-link.active-menu::after {
+        bottom: -4px;
+    }
+
+    .job-content {
+        flex-direction: column;
+    }
+
+    .job-filter {
+        width: 100%;
+        position: static;
+    }
+
+    #job-list-results,
+    .company-grid-results {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 768px) {
+    .banner-img {
+        height: 120px;
+    }
+
+    .filter-bar-top {
+        flex-direction: column;
+    }
+
     .category-grid-container {
         grid-template-columns: 1fr;
     }
