@@ -12,6 +12,10 @@
     {
         <div class="alert alert-success">@TempData["Success"]</div>
     }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle">
@@ -36,24 +40,46 @@
                     foreach (var item in Model)
                     {
                         <tr>
-                            <td><strong>@item.JOB.Title</strong></td>
-                            <td>@item.JOB.COMPANy.CompanyName</td>
-                            <td>@item.AppliedDate.ToString("dd/MM/yyyy HH:mm")</td>
                             <td>
-                                <a href="@Url.Content(item.CV_Url)" target="_blank" class="btn btn-sm btn-outline-info">Xem CV</a>
+                                <a href="@Url.Action("Details", "Jobs", new { id = item.JobId })" class="text-decoration-none text-dark">
+                                    <strong>@item.JOB.Title</strong>
+                                </a>
+                            </td>
+                            <td>@(item.JOB.COMPANy != null ? item.JOB.COMPANy.CompanyName : "Đang cập nhật")</td>
+                            <td>@item.AppliedDate.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (item.CANDIDATEPROFILE != null && !string.IsNullOrEmpty(item.CANDIDATEPROFILE.CV_Url))
+                                {
+                                    <a href="@Url.Content(item.CANDIDATEPROFILE.CV_Url)" target="_blank" class="btn btn-sm btn-outline-info">Xem CV</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Chưa có CV</span>
+                                }
                             </td>
                             <td>
-                                @if (item.Status == "Submitted")
+                                @switch (item.Status)
                                 {
-                                    <span class="badge bg-secondary">Đã nộp</span>
-                                }
-                                else if (item.Status == "Approved")
-                                {
-                                    <span class="badge bg-success">Đã được duyệt</span>
-                                }
-                                else if (item.Status == "Rejected")
-                                {
-                                    <span class="badge bg-danger">Bị từ chối</span>
+                                    case "Pending":
+                                    case "Submitted":
+                                        <span class="badge bg-secondary">Đã nộp</span>
+                                        break;
+                                    case "Reviewed":
+                                        <span class="badge bg-info text-dark">Đã được xem xét</span>
+                                        break;
+                                    case "Interview":
+                                        <span class="badge bg-primary">Mời phỏng vấn</span>
+                                        break;
+                                    case "Accepted":
+                                    case "Approved":
+                                        <span class="badge bg-success">Đã được duyệt</span>
+                                        break;
+                                    case "Rejected":
+                                        <span class="badge bg-danger">Bị từ chối</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-light text-dark">@item.Status</span>
+                                        break;
                                 }
                             </td>
                         </tr>
