@@ -11,27 +11,29 @@ namespace Job_Recruitment_Website.Models
 {
     using System;
     using System.Collections.Generic;
-    
-    public partial class job
+
+    public partial class JOB
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public job()
+        public JOB()
         {
-            this.applications = new HashSet<application>();
+            this.APPLICATIONS = new HashSet<APPLICATION>();
         }
-    
-        public int id { get; set; }
-        public int posted_by_user_id { get; set; }
-        public string title { get; set; }
-        public string description { get; set; }
-        public string location { get; set; }
-        public string salary_range { get; set; }
-        public string job_type { get; set; }
-        public string status { get; set; }
-        public Nullable<System.DateTime> created_at { get; set; }
-    
+
+        public int JobId { get; set; }
+        public int CompanyId { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string SalaryRange { get; set; }
+        public string Location { get; set; }
+        public System.DateTime Deadline { get; set; }
+        public string Status { get; set; }
+        public System.DateTime PostedDate { get; set; }
+        public int CategoryId { get; set; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<application> applications { get; set; }
-        public virtual user user { get; set; }
+        public virtual ICollection<APPLICATION> APPLICATIONS { get; set; }
+        public virtual CATEGORy CATEGORy { get; set; }
+        public virtual COMPANy COMPANy { get; set; }
     }
 }
