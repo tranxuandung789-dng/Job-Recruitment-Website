@@ -12,18 +12,16 @@ namespace Job_Recruitment_Website.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class APPLICATION
+    public partial class application
     {
-        public int ApplicationId { get; set; }
-        public int JobId { get; set; }
-        public int CandidateId { get; set; }
-        public string CoverLetter { get; set; }
-        public System.DateTime AppliedDate { get; set; }
-        public string Status { get; set; }
-        public int UserId { get; set; }
+        public int id { get; set; }
+        public int job_id { get; set; }
+        public int cv_id { get; set; }
+        public Nullable<System.DateTime> applied_at { get; set; }
+        public string status { get; set; }
+        public string cover_letter { get; set; }
     
-        public virtual CANDIDATEPROFILE CANDIDATEPROFILE { get; set; }
-        public virtual JOB JOB { get; set; }
-        public virtual USER USER { get; set; }
+        public virtual cv_profiles cv_profiles { get; set; }
+        public virtual job job { get; set; }
     }
 }

@@ -12,33 +12,27 @@ namespace Job_Recruitment_Website.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class USER
+    public partial class user
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public USER()
+        public user()
         {
-            this.APPLICATIONS = new HashSet<APPLICATION>();
-            this.CANDIDATEPROFILES = new HashSet<CANDIDATEPROFILE>();
-            this.COMPANIES = new HashSet<COMPANy>();
+            this.cv_profiles = new HashSet<cv_profiles>();
+            this.jobs = new HashSet<job>();
         }
     
-        public int UserId { get; set; }
-        public string Email { get; set; }
-        public string PasswordHash { get; set; }
-        public string FullName { get; set; }
-        public string Phone { get; set; }
-        public int RoleId { get; set; }
-        public bool IsActive { get; set; }
-        public System.DateTime CreatedAt { get; set; }
-        public Nullable<int> CompanyId { get; set; }
+        public int id { get; set; }
+        public string username { get; set; }
+        public string email { get; set; }
+        public string password_hash { get; set; }
+        public string full_name { get; set; }
+        public string role { get; set; }
+        public string phone { get; set; }
+        public Nullable<System.DateTime> created_at { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<APPLICATION> APPLICATIONS { get; set; }
+        public virtual ICollection<cv_profiles> cv_profiles { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CANDIDATEPROFILE> CANDIDATEPROFILES { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<COMPANy> COMPANIES { get; set; }
-        public virtual COMPANy COMPANy { get; set; }
-        public virtual ROLE ROLE { get; set; }
+        public virtual ICollection<job> jobs { get; set; }
     }
 }
