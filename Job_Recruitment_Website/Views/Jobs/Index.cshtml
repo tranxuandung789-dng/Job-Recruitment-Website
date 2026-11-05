@@ -1,0 +1,142 @@
+﻿@model IEnumerable<Job_Recruitment_Website.Models.JOB>
+@using Job_Recruitment_Website.Models
+
+@{
+    ViewBag.Title = "Tin tuyển dụng";
+    Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+
+    var db = new RecruitmentDBEntities();
+    var categories = db.CATEGORIES.ToList();
+
+    // SỬA LỖI FORMAT EXCEPTION: Kiểm tra chuỗi không rỗng và dùng TryParse an toàn
+    int? selectedCat = null;
+    int parsedCat;
+    if (!string.IsNullOrEmpty(Request.QueryString["categoryId"]) && int.TryParse(Request.QueryString["categoryId"], out parsedCat))
+    {
+        selectedCat = parsedCat;
+    }
+
+    string searchKeyword = Request.QueryString["search"];
+    string selectedLoc = Request.QueryString["location"];
+}
+
+<!-- THÔNG BÁO TRẠNG THÁI -->
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger rounded-3 py-2 small fw-semibold mb-3">
+        ⚠ @TempData["Error"]
+    </div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success rounded-3 py-2 small fw-semibold mb-3">
+        ✔ @TempData["Success"]
+    </div>
+}
+
+<!-- TIÊU ĐỀ TRANG -->
+<div class="job-section-header mb-3">
+    <h2 class="fw-bold text-dark">Tin tuyển dụng</h2>
+</div>
+
+<!-- THANH TÌM KIẾM VÀ DROPDOWN NGÀNH NGHỀ -->
+<form method="get" action="@Url.Action("Index", "Jobs")" class="d-flex gap-2 mb-4 align-items-center">
+    @if (!string.IsNullOrEmpty(selectedLoc))
+    {
+        <input type="hidden" name="location" value="@selectedLoc" />
+    }
+
+    <input type="text"
+           name="search"
+           value="@searchKeyword"
+           placeholder="Tìm theo công việc, công ty, địa điểm..."
+           class="form-control rounded-3"
+           style="height: 44px; color: #1e293b; font-weight: 500; border: 1px solid #ced4da; font-size: 14.5px;" />
+
+    <select name="categoryId"
+            onchange="this.form.submit()"
+            class="form-select rounded-3"
+            style="height: 44px; width: 230px; flex-shrink: 0; color: #334155; border: 1px solid #ced4da; font-size: 14.5px;">
+        <option value="">Tất cả ngành nghề</option>
+        @foreach (var cat in categories)
+        {
+            <option value="@cat.CategoryId" @(selectedCat == cat.CategoryId ? "selected" : "")>
+                @cat.CategoryName
+            </option>
+        }
+    </select>
+
+    <!-- Nút Tìm kiếm nền cam chữ trắng thương hiệu D-Jobs -->
+    <button type="submit"
+            class="btn text-white px-4 rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2"
+            style="height: 44px; background-color: #f7931e; border: none; white-space: nowrap; font-size: 14.5px; font-weight: 600; letter-spacing: 0.3px;">
+        <i class="bi bi-search text-white"></i>
+        <span>Tìm kiếm</span>
+    </button>
+</form>
+
+<!-- LƯỚI CARD VIỆC LÀM 2 CỘT -->
+<div id="job-list-results">
+    @if (Model == null || !Model.Any())
+    {
+        <div class="p-4 bg-white border rounded-3 text-muted col-12">
+            Không tìm thấy tin tuyển dụng nào phù hợp.
+        </div>
+    }
+    else
+    {
+        foreach (var item in Model)
+        {
+            <div class="job-card">
+                <div>
+                    <div class="job-card-top">
+                        <h3 class="title">
+                            <a href="@Url.Action("Details", "Jobs", new { id = item.JobId })">@item.Title</a>
+                        </h3>
+                        <span class="badge-open">@item.Status</span>
+                    </div>
+
+                    <div class="company d-flex align-items-center gap-2 mb-2">
+                        @if (item.COMPANy != null && !string.IsNullOrEmpty(item.COMPANy.Logo_Url))
+                        {
+                            <img src="@item.COMPANy.Logo_Url" alt="@item.COMPANy.CompanyName" style="width: 24px; height: 24px; object-fit: contain; border-radius: 4px;" />
+                        }
+                        <strong>@(item.COMPANy != null ? item.COMPANy.CompanyName : "Đang cập nhật")</strong>
+                        <span>• @item.Location</span>
+                    </div>
+
+                    <div class="salary">
+                        @(string.IsNullOrEmpty(item.SalaryRange) ? "Thỏa thuận" : item.SalaryRange)
+                    </div>
+
+                    <p class="desc">@item.Description</p>
+                </div>
+
+                <div>
+                    <div class="job-card-meta">
+                        <span class="badge-category">
+                            @(item.CATEGORy != null ? item.CATEGORy.CategoryName : "Chưa phân loại")
+                        </span>
+                        <span class="deadline">
+                            Hạn nộp: @string.Format("{0:dd/MM/yyyy}", item.Deadline)
+                        </span>
+                    </div>
+
+                    <!-- Nút Ứng tuyển: Tự động chuyển qua Login kèm returnUrl nếu chưa đăng nhập -->
+                    @if (Session["UserId"] == null)
+                    {
+                        <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Apply", "Applications", new { jobId = item.JobId }) })" class="btn-apply">
+                            Ứng tuyển
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Apply", "Applications", new { jobId = item.JobId })" class="btn-apply">
+                            Ứng tuyển
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
