@@ -11,7 +11,7 @@ namespace Job_Recruitment_Website.Models
 {
     using System;
     using System.Collections.Generic;
-    
+
     public partial class JOB
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
@@ -19,7 +19,7 @@ namespace Job_Recruitment_Website.Models
         {
             this.APPLICATIONS = new HashSet<APPLICATION>();
         }
-    
+
         public int JobId { get; set; }
         public int CompanyId { get; set; }
         public string Title { get; set; }
@@ -30,7 +30,7 @@ namespace Job_Recruitment_Website.Models
         public string Status { get; set; }
         public System.DateTime PostedDate { get; set; }
         public int CategoryId { get; set; }
-    
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<APPLICATION> APPLICATIONS { get; set; }
         public virtual CATEGORy CATEGORy { get; set; }

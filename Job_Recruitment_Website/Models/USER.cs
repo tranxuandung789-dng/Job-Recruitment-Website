@@ -11,7 +11,7 @@ namespace Job_Recruitment_Website.Models
 {
     using System;
     using System.Collections.Generic;
-    
+
     public partial class USER
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
@@ -21,7 +21,7 @@ namespace Job_Recruitment_Website.Models
             this.CANDIDATEPROFILES = new HashSet<CANDIDATEPROFILE>();
             this.COMPANIES = new HashSet<COMPANy>();
         }
-    
+
         public int UserId { get; set; }
         public string Email { get; set; }
         public string PasswordHash { get; set; }
@@ -31,7 +31,7 @@ namespace Job_Recruitment_Website.Models
         public bool IsActive { get; set; }
         public System.DateTime CreatedAt { get; set; }
         public Nullable<int> CompanyId { get; set; }
-    
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<APPLICATION> APPLICATIONS { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

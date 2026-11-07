@@ -4,14 +4,14 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="227a534682034aeaa8f384c5de0a5b62" Name="Diagram1" ZoomLevel="108">
-        <EntityTypeShape EntityType="RecruitmentDBModel.APPLICATION" Width="1.5" PointX="7.5" PointY="5.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="RecruitmentDBModel.CANDIDATEPROFILE" Width="1.5" PointX="5.25" PointY="7.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="RecruitmentDBModel.CATEGORy" Width="1.5" PointX="5.25" PointY="15.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="RecruitmentDBModel.COMPANy" Width="1.5" PointX="5.25" PointY="10.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="RecruitmentDBModel.JOB" Width="1.5" PointX="7.5" PointY="10.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="RecruitmentDBModel.ROLE" Width="1.5" PointX="0.75" PointY="5.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="RecruitmentDBModel.USER" Width="1.5" PointX="3" PointY="4.875" IsExpanded="true" />
+      <Diagram DiagramId="227a534682034aeaa8f384c5de0a5b62" Name="Diagram1" ZoomLevel="49">
+        <EntityTypeShape EntityType="RecruitmentDBModel.APPLICATION" Width="1.5" PointX="38.375" PointY="3.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="RecruitmentDBModel.CANDIDATEPROFILE" Width="1.5" PointX="36.125" PointY="5.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="RecruitmentDBModel.CATEGORy" Width="1.5" PointX="41.25" PointY="7.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="RecruitmentDBModel.COMPANy" Width="1.5" PointX="36.125" PointY="8.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="RecruitmentDBModel.JOB" Width="1.5" PointX="38.5" PointY="7.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="RecruitmentDBModel.ROLE" Width="1.5" PointX="31.625" PointY="3.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="RecruitmentDBModel.USER" Width="1.5" PointX="33.875" PointY="2.875" IsExpanded="true" />
         <AssociationConnector Association="RecruitmentDBModel.FK_APPLICATIONS_CANDIDATEPROFILES" ManuallyRouted="false" />
         <AssociationConnector Association="RecruitmentDBModel.FK_APPLICATIONS_JOBS" ManuallyRouted="false" />
         <AssociationConnector Association="RecruitmentDBModel.FK_APPLICATIONS_USERS" ManuallyRouted="false" />

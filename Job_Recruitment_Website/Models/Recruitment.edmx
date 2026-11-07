@@ -1,0 +1,350 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="RecruitmentDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="applications">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="job_id" Type="int" Nullable="false" />
+          <Property Name="cv_id" Type="int" Nullable="false" />
+          <Property Name="applied_at" Type="datetime" />
+          <Property Name="status" Type="nvarchar" MaxLength="50" />
+          <Property Name="cover_letter" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="cv_profiles">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="user_id" Type="int" Nullable="false" />
+          <Property Name="title" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="summary" Type="nvarchar(max)" />
+          <Property Name="skills" Type="nvarchar(max)" />
+          <Property Name="experience" Type="nvarchar(max)" />
+          <Property Name="education" Type="nvarchar(max)" />
+          <Property Name="resume_url" Type="varchar" MaxLength="255" />
+          <Property Name="updated_at" Type="datetime" />
+        </EntityType>
+        <EntityType Name="jobs">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="posted_by_user_id" Type="int" Nullable="false" />
+          <Property Name="title" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="description" Type="nvarchar(max)" />
+          <Property Name="location" Type="nvarchar" MaxLength="150" />
+          <Property Name="salary_range" Type="nvarchar" MaxLength="100" />
+          <Property Name="job_type" Type="nvarchar" MaxLength="50" />
+          <Property Name="status" Type="nvarchar" MaxLength="50" />
+          <Property Name="created_at" Type="datetime" />
+        </EntityType>
+        <EntityType Name="users">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="username" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="email" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="password_hash" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="full_name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="role" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="phone" Type="varchar" MaxLength="20" />
+          <Property Name="created_at" Type="datetime" />
+        </EntityType>
+        <Association Name="FK_applications_cv_profiles">
+          <End Role="cv_profiles" Type="Self.cv_profiles" Multiplicity="1" />
+          <End Role="applications" Type="Self.applications" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="cv_profiles">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="applications">
+              <PropertyRef Name="cv_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_applications_jobs">
+          <End Role="jobs" Type="Self.jobs" Multiplicity="1" />
+          <End Role="applications" Type="Self.applications" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="jobs">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="applications">
+              <PropertyRef Name="job_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_cv_profiles_users">
+          <End Role="users" Type="Self.users" Multiplicity="1" />
+          <End Role="cv_profiles" Type="Self.cv_profiles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="cv_profiles">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_jobs_users">
+          <End Role="users" Type="Self.users" Multiplicity="1" />
+          <End Role="jobs" Type="Self.jobs" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="jobs">
+              <PropertyRef Name="posted_by_user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="RecruitmentDBModelStoreContainer">
+          <EntitySet Name="applications" EntityType="Self.applications" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="cv_profiles" EntityType="Self.cv_profiles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="jobs" EntityType="Self.jobs" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="users" EntityType="Self.users" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_applications_cv_profiles" Association="Self.FK_applications_cv_profiles">
+            <End Role="cv_profiles" EntitySet="cv_profiles" />
+            <End Role="applications" EntitySet="applications" />
+          </AssociationSet>
+          <AssociationSet Name="FK_applications_jobs" Association="Self.FK_applications_jobs">
+            <End Role="jobs" EntitySet="jobs" />
+            <End Role="applications" EntitySet="applications" />
+          </AssociationSet>
+          <AssociationSet Name="FK_cv_profiles_users" Association="Self.FK_cv_profiles_users">
+            <End Role="users" EntitySet="users" />
+            <End Role="cv_profiles" EntitySet="cv_profiles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_jobs_users" Association="Self.FK_jobs_users">
+            <End Role="users" EntitySet="users" />
+            <End Role="jobs" EntitySet="jobs" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="RecruitmentDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="application">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="job_id" Type="Int32" Nullable="false" />
+          <Property Name="cv_id" Type="Int32" Nullable="false" />
+          <Property Name="applied_at" Type="DateTime" Precision="3" />
+          <Property Name="status" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="cover_letter" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="cv_profiles" Relationship="Self.FK_applications_cv_profiles" FromRole="applications" ToRole="cv_profiles" />
+          <NavigationProperty Name="job" Relationship="Self.FK_applications_jobs" FromRole="applications" ToRole="jobs" />
+        </EntityType>
+        <EntityType Name="cv_profiles">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="user_id" Type="Int32" Nullable="false" />
+          <Property Name="title" Type="String" MaxLength="150" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="summary" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="skills" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="experience" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="education" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="resume_url" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="updated_at" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="applications" Relationship="Self.FK_applications_cv_profiles" FromRole="cv_profiles" ToRole="applications" />
+          <NavigationProperty Name="user" Relationship="Self.FK_cv_profiles_users" FromRole="cv_profiles" ToRole="users" />
+        </EntityType>
+        <EntityType Name="job">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="posted_by_user_id" Type="Int32" Nullable="false" />
+          <Property Name="title" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="location" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="salary_range" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="job_type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="status" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="created_at" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="applications" Relationship="Self.FK_applications_jobs" FromRole="jobs" ToRole="applications" />
+          <NavigationProperty Name="user" Relationship="Self.FK_jobs_users" FromRole="jobs" ToRole="users" />
+        </EntityType>
+        <EntityType Name="user">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="username" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="password_hash" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="full_name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="role" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="phone" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="created_at" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="cv_profiles" Relationship="Self.FK_cv_profiles_users" FromRole="users" ToRole="cv_profiles" />
+          <NavigationProperty Name="jobs" Relationship="Self.FK_jobs_users" FromRole="users" ToRole="jobs" />
+        </EntityType>
+        <Association Name="FK_applications_cv_profiles">
+          <End Role="cv_profiles" Type="Self.cv_profiles" Multiplicity="1" />
+          <End Role="applications" Type="Self.application" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="cv_profiles">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="applications">
+              <PropertyRef Name="cv_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_applications_jobs">
+          <End Role="jobs" Type="Self.job" Multiplicity="1" />
+          <End Role="applications" Type="Self.application" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="jobs">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="applications">
+              <PropertyRef Name="job_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_cv_profiles_users">
+          <End Role="users" Type="Self.user" Multiplicity="1" />
+          <End Role="cv_profiles" Type="Self.cv_profiles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="cv_profiles">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_jobs_users">
+          <End Role="users" Type="Self.user" Multiplicity="1" />
+          <End Role="jobs" Type="Self.job" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="jobs">
+              <PropertyRef Name="posted_by_user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="RecruitmentDBEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="applications" EntityType="Self.application" />
+          <EntitySet Name="cv_profiles" EntityType="Self.cv_profiles" />
+          <EntitySet Name="jobs" EntityType="Self.job" />
+          <EntitySet Name="users" EntityType="Self.user" />
+          <AssociationSet Name="FK_applications_cv_profiles" Association="Self.FK_applications_cv_profiles">
+            <End Role="cv_profiles" EntitySet="cv_profiles" />
+            <End Role="applications" EntitySet="applications" />
+          </AssociationSet>
+          <AssociationSet Name="FK_applications_jobs" Association="Self.FK_applications_jobs">
+            <End Role="jobs" EntitySet="jobs" />
+            <End Role="applications" EntitySet="applications" />
+          </AssociationSet>
+          <AssociationSet Name="FK_cv_profiles_users" Association="Self.FK_cv_profiles_users">
+            <End Role="users" EntitySet="users" />
+            <End Role="cv_profiles" EntitySet="cv_profiles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_jobs_users" Association="Self.FK_jobs_users">
+            <End Role="users" EntitySet="users" />
+            <End Role="jobs" EntitySet="jobs" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="RecruitmentDBModelStoreContainer" CdmEntityContainer="RecruitmentDBEntities">
+          <EntitySetMapping Name="applications">
+            <EntityTypeMapping TypeName="RecruitmentDBModel.application">
+              <MappingFragment StoreEntitySet="applications">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="job_id" ColumnName="job_id" />
+                <ScalarProperty Name="cv_id" ColumnName="cv_id" />
+                <ScalarProperty Name="applied_at" ColumnName="applied_at" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="cover_letter" ColumnName="cover_letter" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="cv_profiles">
+            <EntityTypeMapping TypeName="RecruitmentDBModel.cv_profiles">
+              <MappingFragment StoreEntitySet="cv_profiles">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="title" ColumnName="title" />
+                <ScalarProperty Name="summary" ColumnName="summary" />
+                <ScalarProperty Name="skills" ColumnName="skills" />
+                <ScalarProperty Name="experience" ColumnName="experience" />
+                <ScalarProperty Name="education" ColumnName="education" />
+                <ScalarProperty Name="resume_url" ColumnName="resume_url" />
+                <ScalarProperty Name="updated_at" ColumnName="updated_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="jobs">
+            <EntityTypeMapping TypeName="RecruitmentDBModel.job">
+              <MappingFragment StoreEntitySet="jobs">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="posted_by_user_id" ColumnName="posted_by_user_id" />
+                <ScalarProperty Name="title" ColumnName="title" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="location" ColumnName="location" />
+                <ScalarProperty Name="salary_range" ColumnName="salary_range" />
+                <ScalarProperty Name="job_type" ColumnName="job_type" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="created_at" ColumnName="created_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="users">
+            <EntityTypeMapping TypeName="RecruitmentDBModel.user">
+              <MappingFragment StoreEntitySet="users">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="username" ColumnName="username" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="password_hash" ColumnName="password_hash" />
+                <ScalarProperty Name="full_name" ColumnName="full_name" />
+                <ScalarProperty Name="role" ColumnName="role" />
+                <ScalarProperty Name="phone" ColumnName="phone" />
+                <ScalarProperty Name="created_at" ColumnName="created_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
