@@ -1,41 +1,28 @@
 ﻿@model Job_Recruitment_Website.Models.CATEGORy
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Thêm ngành nghề mới";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
 }
 
-<h2>Create</h2>
+<div class="card shadow-sm border-0 rounded-4 p-4 bg-white my-3" style="max-width: 600px;">
+    <h3 class="fw-bold text-dark mb-1">Thêm ngành nghề mới</h3>
+    <p class="text-muted small mb-4">Tạo danh mục ngành nghề tuyển dụng mới trên hệ thống D-JOBS.</p>
 
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-danger small mb-3" })
 
-@using (Html.BeginForm()) 
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>CATEGORy</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            @Html.LabelFor(model => model.CategoryName, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.CategoryName, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.CategoryName, "", new { @class = "text-danger" })
-            </div>
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Tên ngành nghề <span class="text-danger">*</span></label>
+            @Html.TextBoxFor(model => model.CategoryName, new { @class = "form-control rounded-3 py-2", placeholder = "VD: Tài chính - Ngân hàng...", required = "required" })
+            @Html.ValidationMessageFor(model => model.CategoryName, "", new { @class = "text-danger small" })
         </div>
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
-            </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary-custom px-4 py-2">Thêm mới</button>
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4 py-2 rounded-3">Quay lại</a>
         </div>
-    </div>
-}
-
-<div>
-    @Html.ActionLink("Back to List", "Index")
+    }
 </div>
-
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-}

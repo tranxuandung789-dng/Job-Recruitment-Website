@@ -56,6 +56,21 @@ namespace Job_Recruitment_Website.Controllers
             }
         }
 
+        // Kiểm tra luồng chuyển trạng thái hợp lệ: Applied (Pending/Submitted) -> Reviewed -> Interview -> Accepted / Rejected
+        private static bool IsValidTransition(string currentStatus, string nextStatus)
+        {
+            if (currentStatus == "Pending" || currentStatus == "Submitted")
+                return nextStatus == "Reviewed" || nextStatus == "Rejected";
+
+            if (currentStatus == "Reviewed")
+                return nextStatus == "Interview" || nextStatus == "Rejected";
+
+            if (currentStatus == "Interview")
+                return nextStatus == "Accepted" || nextStatus == "Approved" || nextStatus == "Rejected";
+
+            return false; // Đã Accepted / Approved / Rejected thì không chuyển tiếp nữa
+        }
+
         // ========================================================
         // 1. DÀNH CHO ỨNG VIÊN (CANDIDATE)
         // ========================================================
@@ -262,7 +277,7 @@ namespace Job_Recruitment_Website.Controllers
             return View(applicants);
         }
 
-        // POST: Cập nhật trạng thái duyệt/từ chối hồ sơ
+        // POST: Cập nhật trạng thái duyệt/từ chối hồ sơ theo đúng luồng chuẩn
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("Recruiter")]
@@ -276,11 +291,16 @@ namespace Job_Recruitment_Website.Controllers
                                                        && a.JOB.CompanyId == company.CompanyId);
             if (app == null) return RedirectToAction("MyJobs", "Jobs");
 
-            // Kiểm tra trạng thái hợp lệ theo đúng CHECK Constraint CK_APPLICATIONS_Status trong SQL
-            if (ValidStatuses.Contains(newStatus))
+            // Kiểm tra trạng thái hợp lệ và đúng quy trình: Applied -> Review -> Interview -> Accepted / Rejected
+            if (ValidStatuses.Contains(newStatus) && IsValidTransition(app.Status, newStatus))
             {
                 app.Status = newStatus;
                 db.SaveChanges();
+                TempData["Success"] = "Đã cập nhật trạng thái hồ sơ sang: " + newStatus;
+            }
+            else
+            {
+                TempData["Error"] = "Không thể chuyển trạng thái từ " + app.Status + " sang " + newStatus + " (sai quy trình)!";
             }
 
             return RedirectToAction("Candidates", new { jobId = app.JobId });

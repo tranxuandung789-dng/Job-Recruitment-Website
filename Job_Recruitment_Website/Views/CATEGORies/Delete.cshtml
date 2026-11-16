@@ -1,33 +1,37 @@
 ﻿@model Job_Recruitment_Website.Models.CATEGORy
 
 @{
-    ViewBag.Title = "Delete";
+    ViewBag.Title = "Xóa ngành nghề";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+    int jobCount = Model.JOBS != null ? Model.JOBS.Count : 0;
 }
 
-<h2>Delete</h2>
+<div class="card shadow-sm border-0 rounded-4 p-4 bg-white my-3" style="max-width: 600px;">
+    <h3 class="fw-bold text-danger mb-2">Xác nhận xóa ngành nghề</h3>
+    <p class="text-muted mb-3">Bạn có chắc chắn muốn xóa ngành nghề dưới đây khỏi hệ thống?</p>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>CATEGORy</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.CategoryName)
-        </dt>
+    <div class="p-3 bg-light rounded-3 border mb-4">
+        <div class="mb-1"><strong>Mã ngành:</strong> #@Model.CategoryId</div>
+        <div class="mb-1"><strong>Tên ngành nghề:</strong> @Model.CategoryName</div>
+        <div><strong>Số tin tuyển dụng thuộc ngành này:</strong> @jobCount tin</div>
+    </div>
 
-        <dd>
-            @Html.DisplayFor(model => model.CategoryName)
-        </dd>
-
-    </dl>
-
-    @using (Html.BeginForm()) {
-        @Html.AntiForgeryToken()
-
-        <div class="form-actions no-color">
-            <input type="submit" value="Delete" class="btn btn-default" /> |
-            @Html.ActionLink("Back to List", "Index")
+    @if (jobCount > 0)
+    {
+        <div class="alert alert-warning rounded-3 small fw-semibold mb-3">
+             Ngành nghề này đang có <strong>@jobCount</strong> tin tuyển dụng nên không thể xóa. Vui lòng chuyển hoặc xóa các tin tuyển dụng trước!
         </div>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4 py-2 rounded-3">Quay lại danh sách</a>
+    }
+    else
+    {
+        using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger fw-bold px-4 py-2 rounded-3">Xác nhận xóa</button>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4 py-2 rounded-3">Hủy bỏ</a>
+            </div>
+        }
     }
 </div>

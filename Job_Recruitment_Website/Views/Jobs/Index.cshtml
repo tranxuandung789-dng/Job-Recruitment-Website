@@ -5,10 +5,12 @@
     ViewBag.Title = "Tin tuyển dụng";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
 
-    var db = new RecruitmentDBEntities();
-    var categories = db.CATEGORIES.ToList();
+    List<CATEGORy> categories;
+    using (var db = new RecruitmentDBEntities())
+    {
+        categories = db.CATEGORIES.ToList();
+    }
 
-    // SỬA LỖI FORMAT EXCEPTION: Kiểm tra chuỗi không rỗng và dùng TryParse an toàn
     int? selectedCat = null;
     int parsedCat;
     if (!string.IsNullOrEmpty(Request.QueryString["categoryId"]) && int.TryParse(Request.QueryString["categoryId"], out parsedCat))
@@ -18,6 +20,10 @@
 
     string searchKeyword = Request.QueryString["search"];
     string selectedLoc = Request.QueryString["location"];
+
+    int currentPage = ViewBag.CurrentPage != null ? (int)ViewBag.CurrentPage : 1;
+    int totalPages = ViewBag.TotalPages != null ? (int)ViewBag.TotalPages : 1;
+    int totalItems = ViewBag.TotalItems != null ? (int)ViewBag.TotalItems : (Model != null ? Model.Count() : 0);
 }
 
 <!-- THÔNG BÁO TRẠNG THÁI -->
@@ -35,8 +41,13 @@
 }
 
 <!-- TIÊU ĐỀ TRANG -->
-<div class="job-section-header mb-3">
-    <h2 class="fw-bold text-dark">Tin tuyển dụng</h2>
+<div class="job-section-header mb-3 d-flex justify-content-between align-items-end flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold text-dark mb-0">Tin tuyển dụng</h2>
+    </div>
+    <span class="text-muted small fw-semibold">
+        Hiển thị <strong>@(Model != null ? Model.Count() : 0)</strong> / <strong>@totalItems</strong> việc làm
+    </span>
 </div>
 
 <!-- THANH TÌM KIẾM VÀ DROPDOWN NGÀNH NGHỀ -->
@@ -140,3 +151,42 @@
         }
     }
 </div>
+
+<!-- THANH PHÂN TRANG (PAGINATION) MÀU CAM D-JOBS -->
+@if (totalPages > 1)
+{
+    <nav aria-label="Phân trang tin tuyển dụng" class="mt-2 mb-4">
+        <ul class="pagination justify-content-center gap-2 mb-0">
+            <!-- Nút Trang trước -->
+            <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                <a class="page-link rounded-3 fw-semibold px-3 py-2 border"
+                   style="color: @(currentPage <= 1 ? "#94a3b8" : "#1e293b");"
+                   href="@Url.Action("Index", "Jobs", new { search = searchKeyword, categoryId = selectedCat, location = selectedLoc, page = currentPage - 1 })">
+                    « Trước
+                </a>
+            </li>
+
+            <!-- Danh sách số trang -->
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                bool isActive = (i == currentPage);
+                <li class="page-item @(isActive ? "active" : "")">
+                    <a class="page-link rounded-3 fw-bold px-3 py-2 border"
+                       style="@(isActive ? "background-color: #f7931e; border-color: #f7931e; color: #ffffff;" : "background-color: #ffffff; color: #1e293b;")"
+                       href="@Url.Action("Index", "Jobs", new { search = searchKeyword, categoryId = selectedCat, location = selectedLoc, page = i })">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <!-- Nút Trang sau -->
+            <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                <a class="page-link rounded-3 fw-semibold px-3 py-2 border"
+                   style="color: @(currentPage >= totalPages ? "#94a3b8" : "#1e293b");"
+                   href="@Url.Action("Index", "Jobs", new { search = searchKeyword, categoryId = selectedCat, location = selectedLoc, page = currentPage + 1 })">
+                    Sau »
+                </a>
+            </li>
+        </ul>
+    </nav>
+}
