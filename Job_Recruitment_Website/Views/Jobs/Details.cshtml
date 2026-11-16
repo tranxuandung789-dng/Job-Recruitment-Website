@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = "Chi tiết công việc";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+    bool isExpired = Model.Deadline < DateTime.Today;
 }
 
 <div class="container my-4" style="max-width: 900px;">
@@ -30,9 +31,13 @@
                     </h5>
                 </div>
                 <div>
-                    @if (Model.Status == "Open")
+                    @if (Model.Status == "Open" && !isExpired)
                     {
                         <span class="badge bg-success fs-6 px-3 py-2">Đang mở ứng tuyển</span>
+                    }
+                    else if (isExpired)
+                    {
+                        <span class="badge bg-danger fs-6 px-3 py-2">Đã hết hạn nộp</span>
                     }
                     else
                     {
@@ -52,7 +57,12 @@
                 </div>
                 <div class="col-md-6">
                     <p class="mb-2"><strong>Ngày đăng tin:</strong> @Model.PostedDate.ToString("dd/MM/yyyy")</p>
-                    <p class="mb-2"><strong>Hạn chót nộp hồ sơ:</strong> <span class="text-primary fw-bold">@Model.Deadline.ToString("dd/MM/yyyy")</span></p>
+                    <p class="mb-2">
+                        <strong>Hạn chót nộp hồ sơ:</strong>
+                        <span class="@(isExpired ? "text-danger" : "text-primary") fw-bold">
+                            @Model.Deadline.ToString("dd/MM/yyyy")
+                        </span>
+                    </p>
                 </div>
             </div>
 
@@ -67,17 +77,21 @@
             <!-- Khu vực thao tác nút Ứng tuyển & Quay lại -->
             <div class="pt-3 border-top d-flex align-items-center justify-content-between">
                 <div>
-                    @Html.ActionLink("← Quay lại danh sách việc làm", "Index", "Jobs", null, new { @class = "btn btn-outline-secondary" })
+                    @Html.ActionLink("Quay lại danh sách việc làm", "Index", "Jobs", null, new { @class = "btn btn-outline-secondary" })
                 </div>
 
                 <div>
                     @if (Session["Role"] != null && Session["Role"].ToString() == "Candidate")
                     {
-                        if (Model.Status == "Open")
+                        if (Model.Status == "Open" && !isExpired)
                         {
                             <a href="@Url.Action("Apply", "Applications", new { jobId = Model.JobId })" class="btn btn-primary btn-lg px-4 shadow-sm">
                                 Ứng tuyển ngay
                             </a>
+                        }
+                        else if (isExpired)
+                        {
+                            <button class="btn btn-danger btn-lg" disabled>Đã quá hạn ứng tuyển</button>
                         }
                         else
                         {
@@ -86,8 +100,17 @@
                     }
                     else if (Session["Role"] == null)
                     {
-                        <span class="text-muted me-2 small">Đăng nhập tài khoản Ứng viên để nộp hồ sơ:</span>
-                        @Html.ActionLink("Đăng nhập để ứng tuyển", "Login", "Account", null, new { @class = "btn btn-primary" })
+                        if (Model.Status == "Open" && !isExpired)
+                        {
+                            <span class="text-muted me-2 small">Đăng nhập tài khoản ứng viên để nộp hồ sơ:</span>
+                            <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Apply", "Applications", new { jobId = Model.JobId }) })" class="btn btn-primary">
+                                Đăng nhập để ứng tuyển
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary" disabled>Không còn nhận hồ sơ</button>
+                        }
                     }
                 </div>
             </div>

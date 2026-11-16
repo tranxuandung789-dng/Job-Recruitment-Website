@@ -17,21 +17,36 @@ namespace Job_Recruitment_Website.Controllers
             get { return Session["UserId"] != null ? (int)Session["UserId"] : 0; }
         }
 
+        // Hàm hỗ trợ tìm Công ty của Nhà tuyển dụng hiện tại (đồng bộ với JobsController)
+        private COMPANy GetRecruiterCompany()
+        {
+            int uid = CurrentUserId;
+            if (uid == 0) return null;
+
+            var user = db.USERS.Find(uid);
+            if (user != null && user.CompanyId.HasValue)
+            {
+                var compByUser = db.COMPANIES.Find(user.CompanyId.Value);
+                if (compByUser != null) return compByUser;
+            }
+
+            return db.COMPANIES.FirstOrDefault(c => c.UserId == uid);
+        }
+
         // ========================================================
         // 1. DÀNH CHO TẤT CẢ MỌI NGƯỜI (XEM DANH SÁCH & CHI TIẾT CÔNG TY)
         // ========================================================
 
-        // Trang danh sách công ty (Ai cũng xem được, không cần bắt buộc đăng nhập Recruiter)
         public ActionResult Index()
         {
             var list = db.COMPANIES.OrderByDescending(c => c.CompanyId).ToList();
             return View(list);
         }
 
-        // Xem chi tiết một công ty và các việc làm đang tuyển của công ty đó
-        public ActionResult Details(int id)
+        public ActionResult Details(int? id)
         {
-            var company = db.COMPANIES.FirstOrDefault(c => c.CompanyId == id);
+            if (id == null) return RedirectToAction("Index");
+            var company = db.COMPANIES.FirstOrDefault(c => c.CompanyId == id.Value);
             if (company == null) return HttpNotFound();
             return View(company);
         }
@@ -43,8 +58,7 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Recruiter")]
         public ActionResult MyCompany()
         {
-            int userId = CurrentUserId;
-            var company = db.COMPANIES.FirstOrDefault(c => c.UserId == userId);
+            var company = GetRecruiterCompany();
             if (company == null) return RedirectToAction("Create");
             return View(company);
         }
@@ -52,8 +66,7 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Recruiter")]
         public ActionResult Create()
         {
-            int userId = CurrentUserId;
-            if (db.COMPANIES.Any(c => c.UserId == userId))
+            if (GetRecruiterCompany() != null)
                 return RedirectToAction("MyCompany");
             return View();
         }
@@ -63,21 +76,19 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Recruiter")]
         public ActionResult Create(COMPANy company, HttpPostedFileBase logoFile)
         {
-            // Xử lý upload file logo
             if (logoFile != null && logoFile.ContentLength > 0)
             {
                 string ext = Path.GetExtension(logoFile.FileName).ToLower();
                 if (ext == ".jpg" || ext == ".png" || ext == ".jpeg")
                 {
-                    string name = Guid.NewGuid() + ext;
-                    string path = Server.MapPath("~/Content/Logos/" + name);
-
-                    // Kiểm tra và tạo thư mục nếu chưa có
-                    if (!Directory.Exists(Server.MapPath("~/Content/Logos/")))
+                    string folderPath = Server.MapPath("~/Content/Logos/");
+                    if (!Directory.Exists(folderPath))
                     {
-                        Directory.CreateDirectory(Server.MapPath("~/Content/Logos/"));
+                        Directory.CreateDirectory(folderPath);
                     }
 
+                    string name = Guid.NewGuid() + ext;
+                    string path = Path.Combine(folderPath, name);
                     logoFile.SaveAs(path);
                     company.Logo_Url = "/Content/Logos/" + name;
                 }
@@ -103,9 +114,8 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Recruiter")]
         public ActionResult Edit()
         {
-            int userId = CurrentUserId;
-            var company = db.COMPANIES.FirstOrDefault(c => c.UserId == userId);
-            if (company == null) return HttpNotFound();
+            var company = GetRecruiterCompany();
+            if (company == null) return RedirectToAction("Create");
             return View(company);
         }
 
@@ -114,18 +124,22 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Recruiter")]
         public ActionResult Edit(COMPANy model, HttpPostedFileBase logoFile)
         {
-            int userId = CurrentUserId;
-            var company = db.COMPANIES.FirstOrDefault(c => c.UserId == userId && c.CompanyId == model.CompanyId);
+            var company = GetRecruiterCompany();
             if (company == null) return HttpNotFound();
 
-            // Xử lý cập nhật logo mới nếu có
             if (logoFile != null && logoFile.ContentLength > 0)
             {
                 string ext = Path.GetExtension(logoFile.FileName).ToLower();
                 if (ext == ".jpg" || ext == ".png" || ext == ".jpeg")
                 {
+                    string folderPath = Server.MapPath("~/Content/Logos/");
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
                     string name = Guid.NewGuid() + ext;
-                    string path = Server.MapPath("~/Content/Logos/" + name);
+                    string path = Path.Combine(folderPath, name);
                     logoFile.SaveAs(path);
                     company.Logo_Url = "/Content/Logos/" + name;
                 }

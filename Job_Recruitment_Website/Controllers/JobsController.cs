@@ -11,6 +11,8 @@ namespace Job_Recruitment_Website.Controllers
     {
         private RecruitmentDBEntities db = new RecruitmentDBEntities();
 
+        private const int PageSize = 6; // Chuẩn 6 việc làm / 1 trang (3 hàng x 2 cột)
+
         // Lấy UserId an toàn từ Session
         private int CurrentUserId
         {
@@ -37,7 +39,7 @@ namespace Job_Recruitment_Website.Controllers
         // 1. DÀNH CHO TẤT CẢ MỌI NGƯỜI (ỨNG VIÊN & KHÁCH)
         // ==========================================
 
-        public ActionResult Index(string search, int? categoryId, string location)
+        public ActionResult Index(string search, int? categoryId, string location, int page = 1)
         {
             var jobs = db.JOBS.Include(j => j.COMPANy)
                               .Include(j => j.CATEGORy)
@@ -67,7 +69,26 @@ namespace Job_Recruitment_Website.Controllers
                 jobs = jobs.Where(j => j.Location.Contains(loc));
             }
 
-            return View(jobs.OrderByDescending(j => j.PostedDate).ToList());
+            // Sắp xếp tin mới nhất lên đầu
+            var orderedJobs = jobs.OrderByDescending(j => j.PostedDate)
+                                  .ThenByDescending(j => j.JobId);
+
+            // Tính toán phân trang (6 việc / trang)
+            int totalItems = orderedJobs.Count();
+            int totalPages = (int)Math.Ceiling((double)totalItems / PageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            var pagedJobs = orderedJobs.Skip((page - 1) * PageSize)
+                                       .Take(PageSize)
+                                       .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = totalItems;
+
+            return View(pagedJobs);
         }
 
         public ActionResult Details(int? id)
@@ -201,6 +222,29 @@ namespace Job_Recruitment_Website.Controllers
                 }
             }
             return RedirectToAction("MyJobs");
+        }
+
+        [HttpPost]
+        [RoleAuthorize("Recruiter")]
+        public ActionResult Reopen(int id)
+        {
+            var company = GetRecruiterCompany();
+            if (company != null)
+            {
+                var job = db.JOBS.FirstOrDefault(j => j.JobId == id && j.CompanyId == company.CompanyId);
+                if (job != null)
+                {
+                    job.Status = "Open";
+                    db.SaveChanges();
+                }
+            }
+            return RedirectToAction("MyJobs");
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) db.Dispose();
+            base.Dispose(disposing);
         }
     }
 }
