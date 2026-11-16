@@ -62,11 +62,25 @@ namespace Job_Recruitment_Website.Controllers
                 jobs = jobs.Where(j => j.CategoryId == categoryId.Value);
             }
 
-            // Lọc theo Địa điểm (Cột Aside bên trái)
+            // Lọc theo Địa điểm (Cột Aside bên trái: TP.HCM, Hà Nội, Đà Nẵng, hoặc Khu vực khác)
             if (!string.IsNullOrWhiteSpace(location))
             {
                 string loc = location.Trim();
-                jobs = jobs.Where(j => j.Location.Contains(loc));
+                if (loc == "Khác")
+                {
+                    jobs = jobs.Where(j => !j.Location.Contains("Hà Nội")
+                                        && !j.Location.Contains("Hồ Chí Minh")
+                                        && !j.Location.Contains("TP.HCM")
+                                        && !j.Location.Contains("Đà Nẵng"));
+                }
+                else if (loc == "Hồ Chí Minh" || loc == "TP.HCM")
+                {
+                    jobs = jobs.Where(j => j.Location.Contains("Hồ Chí Minh") || j.Location.Contains("TP.HCM"));
+                }
+                else
+                {
+                    jobs = jobs.Where(j => j.Location.Contains(loc));
+                }
             }
 
             // Sắp xếp tin mới nhất lên đầu
@@ -152,6 +166,7 @@ namespace Job_Recruitment_Website.Controllers
 
                 db.JOBS.Add(job);
                 db.SaveChanges();
+                TempData["Success"] = "Đăng tin tuyển dụng mới thành công!";
                 return RedirectToAction("MyJobs");
             }
 
@@ -200,6 +215,7 @@ namespace Job_Recruitment_Website.Controllers
                 job.CategoryId = model.CategoryId;
 
                 db.SaveChanges();
+                TempData["Success"] = "Cập nhật tin tuyển dụng thành công!";
                 return RedirectToAction("MyJobs");
             }
 
@@ -219,6 +235,7 @@ namespace Job_Recruitment_Website.Controllers
                 {
                     job.Status = "Closed";
                     db.SaveChanges();
+                    TempData["Success"] = "Đã đóng tin tuyển dụng: " + job.Title;
                 }
             }
             return RedirectToAction("MyJobs");
@@ -235,7 +252,13 @@ namespace Job_Recruitment_Website.Controllers
                 if (job != null)
                 {
                     job.Status = "Open";
+                    // Nếu hạn nộp cũ đã qua thì tự động gia hạn thêm 30 ngày
+                    if (job.Deadline < DateTime.Today)
+                    {
+                        job.Deadline = DateTime.Today.AddDays(30);
+                    }
                     db.SaveChanges();
+                    TempData["Success"] = "Đã mở lại tin tuyển dụng: " + job.Title;
                 }
             }
             return RedirectToAction("MyJobs");

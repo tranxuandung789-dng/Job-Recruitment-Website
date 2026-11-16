@@ -43,7 +43,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const cancelBtn = document.getElementById('djobsModalCancel');
     const confirmBtn = document.getElementById('djobsModalConfirm');
 
-    // Hàm gọi Modal Xác nhận đẹp (Confirm)
     function showConfirmModal(options) {
         if (!bsModal) {
             if (confirm(options.message)) options.onConfirm();
@@ -74,7 +73,6 @@ document.addEventListener("DOMContentLoaded", function () {
         bsModal.show();
     }
 
-    // Hàm gọi Modal Thông báo đẹp (Alert / Xem thư giới thiệu)
     function showInfoModal(title, message, isWarning) {
         if (!bsModal) {
             alert(message);
@@ -106,7 +104,105 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================================
-    // 1. TỰ ĐỘNG ẨN THÔNG BÁO (ALERT) SAU 4 GIÂY
+    // 1. PHÂN TRANG MENU SIDEBAR KIỂU TOPCV (5 MỤC / TRANG + NÚT TRÒN < >)
+    // =========================================================================
+    const pagerGroups = document.querySelectorAll('[data-aside-pager]');
+    pagerGroups.forEach(function (group) {
+        const pageSize = parseInt(group.getAttribute('data-page-size') || '5', 10);
+        const items = Array.from(group.querySelectorAll('.aside-paged-item'));
+        if (items.length <= pageSize) return; // Từ 5 mục trở xuống thì không cần hiện thanh lật trang
+
+        const totalPages = Math.ceil(items.length / pageSize);
+        let currentPage = 1;
+
+        // Nếu đang chọn (active) một mục nằm ở trang 2, tự động mở sẵn trang đó
+        const activeIndex = items.findIndex(function (el) { return el.classList.contains('active'); });
+        if (activeIndex >= 0) {
+            currentPage = Math.floor(activeIndex / pageSize) + 1;
+        }
+
+        // Tạo thanh điều hướng kiểu TopCV: "1/2" bên trái và 2 nút tròn "<" ">" bên phải
+        const navBar = document.createElement('div');
+        navBar.className = 'd-flex align-items-center justify-content-between pt-2 mt-2 border-top px-2';
+        navBar.innerHTML = `
+            <span class="aside-page-indicator text-muted fw-semibold" style="font-size: 13px;">1/${totalPages}</span>
+            <div class="d-flex gap-2">
+                <button type="button" class="aside-prev-btn d-flex align-items-center justify-content-center rounded-circle bg-white"
+                        style="width: 28px; height: 28px; border: 1px solid #f7901e; color: #f7901e; transition: all 0.2s;">
+                    <i class="bi bi-chevron-left" style="font-size: 12px;"></i>
+                </button>
+                <button type="button" class="aside-next-btn d-flex align-items-center justify-content-center rounded-circle bg-white"
+                        style="width: 28px; height: 28px; border: 1px solid #f7901e; color: #f7901e; transition: all 0.2s;">
+                    <i class="bi bi-chevron-right" style="font-size: 12px;"></i>
+                </button>
+            </div>
+        `;
+        group.appendChild(navBar);
+
+        const indicator = navBar.querySelector('.aside-page-indicator');
+        const prevBtn = navBar.querySelector('.aside-prev-btn');
+        const nextBtn = navBar.querySelector('.aside-next-btn');
+
+        function renderPage() {
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+
+            items.forEach(function (item, idx) {
+                if (idx >= start && idx < end) {
+                    item.style.setProperty('display', 'flex', 'important');
+                } else {
+                    item.style.setProperty('display', 'none', 'important');
+                }
+            });
+
+            indicator.innerText = currentPage + '/' + totalPages;
+
+            // Đổi màu nút khi ở đầu/cuối trang giống TopCV
+            if (currentPage <= 1) {
+                prevBtn.disabled = true;
+                prevBtn.style.borderColor = '#e2e8f0';
+                prevBtn.style.color = '#cbd5e1';
+                prevBtn.style.cursor = 'not-allowed';
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.style.borderColor = '#f7901e';
+                prevBtn.style.color = '#f7901e';
+                prevBtn.style.cursor = 'pointer';
+            }
+
+            if (currentPage >= totalPages) {
+                nextBtn.disabled = true;
+                nextBtn.style.borderColor = '#e2e8f0';
+                nextBtn.style.color = '#cbd5e1';
+                nextBtn.style.cursor = 'not-allowed';
+            } else {
+                nextBtn.disabled = false;
+                nextBtn.style.borderColor = '#f7901e';
+                nextBtn.style.color = '#f7901e';
+                nextBtn.style.cursor = 'pointer';
+            }
+        }
+
+        prevBtn.addEventListener('click', function () {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPage();
+            }
+        });
+
+        nextBtn.addEventListener('click', function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderPage();
+            }
+        });
+
+        renderPage();
+    });
+
+
+    // =========================================================================
+    // 2. TỰ ĐỘNG ẨN THÔNG BÁO (ALERT) SAU 4 GIÂY
     // =========================================================================
     const alerts = document.querySelectorAll('.alert-dismissible, .alert-success');
     alerts.forEach(function (alertBox) {
@@ -128,7 +224,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================================
-    // 2. HIỆU ỨNG SMOOTH SCROLL CHO SIDEBAR TRÊN MOBILE
+    // 3. HIỆU ỨNG SMOOTH SCROLL CHO SIDEBAR TRÊN MOBILE
     // =========================================================================
     if (window.innerWidth < 768) {
         const activeFilter = document.querySelector('.job-filter .aside-item.active');
@@ -139,7 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================================
-    // 3. HIỆU ỨNG CHUYỂN TRANG MƯỢT MÀ KHI CLICK BỘ LỌC HOẶC MENU
+    // 4. HIỆU ỨNG CHUYỂN TRANG MƯỢT MÀ KHI CLICK BỘ LỌC HOẶC MENU
     // =========================================================================
     const filterItems = document.querySelectorAll('.job-filter .aside-item, nav .nav-link');
     filterItems.forEach(function (item) {
@@ -158,7 +254,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================================
-    // 4. TẠO NÚT "QUAY LẠI ĐẦU TRANG" (BACK TO TOP) ĐỘNG
+    // 5. TẠO NÚT "QUAY LẠI ĐẦU TRANG" (BACK TO TOP) ĐỘNG
     // =========================================================================
     const backToTopBtn = document.createElement('button');
     backToTopBtn.type = 'button';
@@ -184,9 +280,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================================
-    // 5. HỘP THOẠI MODAL ĐẸP CHO: ĐĂNG XUẤT, ĐÓNG TIN, TỪ CHỐI, KHÓA TK, XEM THƯ
+    // 6. HỘP THOẠI MODAL ĐẸP CHO: ĐĂNG XUẤT, ĐÓNG TIN, TỪ CHỐI, KHÓA TK, XEM THƯ
     // =========================================================================
-    // 5.1 Xác nhận Đăng xuất
     const logoutLinks = document.querySelectorAll('a[href*="Logout"]');
     logoutLinks.forEach(function (link) {
         link.addEventListener('click', function (e) {
@@ -205,7 +300,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // 5.2 Xác nhận Đóng tin tuyển dụng (Jobs/MyJobs)
     const closeJobBtns = document.querySelectorAll('.btn-close-job');
     closeJobBtns.forEach(function (btn) {
         btn.addEventListener('click', function (e) {
@@ -223,7 +317,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // 5.3 Xác nhận Từ chối ứng viên (Applications/Candidates)
     const statusForms = document.querySelectorAll('form[action*="UpdateStatus"]');
     statusForms.forEach(function (form) {
         form.addEventListener('submit', function (e) {
@@ -245,7 +338,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // 5.4 Xác nhận Khóa / Mở khóa tài khoản (Admin/Index)
     const toggleUserForms = document.querySelectorAll('form[action*="ToggleUserStatus"]');
     toggleUserForms.forEach(function (form) {
         form.addEventListener('submit', function (e) {
@@ -268,7 +360,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // 5.5 Nút "Xem thư giới thiệu" (Cover Letter) hiển thị bằng Modal đẹp
     const letterBtns = document.querySelectorAll('button[data-letter]');
     letterBtns.forEach(function (btn) {
         btn.removeAttribute('onclick');
@@ -280,7 +371,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================================
-    // 6. KÍCH HOẠT BOOTSTRAP TOOLTIPS
+    // 7. KÍCH HOẠT BOOTSTRAP TOOLTIPS
     // =========================================================================
     if (typeof bootstrap !== 'undefined') {
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -291,7 +382,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================================
-    // 7. HIỆU ỨNG ĐẾM SỐ LIỆU (COUNTER ANIMATION) CHO CÁC BADGE/COUNT
+    // 8. HIỆU ỨNG ĐẾM SỐ LIỆU (COUNTER ANIMATION) CHO CÁC BADGE/COUNT
     // =========================================================================
     const countElements = document.querySelectorAll('.aside-count');
     countElements.forEach(function (el) {
@@ -313,7 +404,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================================
-    // 8. KIỂM TRA FILE UPLOAD (CV PDF & LOGO CÔNG TY) BẰNG MODAL ĐẸP
+    // 9. KIỂM TRA FILE UPLOAD (CV PDF & LOGO CÔNG TY) BẰNG MODAL ĐẸP
     // =========================================================================
     const cvInput = document.querySelector('input[type="file"][name="cvFile"]');
     if (cvInput) {
@@ -371,7 +462,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================================
-    // 9. TỰ ĐỘNG KIỂM TRA INPUT TRỐNG KHI SUBMIT FORM (CLIENT-SIDE VALIDATION)
+    // 10. TỰ ĐỘNG KIỂM TRA INPUT TRỐNG KHI SUBMIT FORM (CLIENT-SIDE VALIDATION)
     // =========================================================================
     const forms = document.querySelectorAll('form');
     forms.forEach(function (form) {
