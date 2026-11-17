@@ -81,13 +81,13 @@ document.addEventListener("DOMContentLoaded", function () {
         titleEl.innerText = title || "Thông báo";
         msgEl.innerText = message || "";
         cancelBtn.style.display = "none";
-        confirmBtn.innerText = "Đóng";
+        confirmBtn.innerText = "Đã hiểu";
 
         if (isWarning) {
             iconEl.style.backgroundColor = "#fee2e2";
             iconEl.style.color = "#dc2626";
             iconEl.innerHTML = '<i class="bi bi-exclamation-circle-fill"></i>';
-            confirmBtn.style.backgroundColor = "#dc2626";
+            confirmBtn.style.backgroundColor = "#f7901e";
         } else {
             iconEl.style.backgroundColor = "#e0f2fe";
             iconEl.style.color = "#0284c7";
@@ -110,18 +110,16 @@ document.addEventListener("DOMContentLoaded", function () {
     pagerGroups.forEach(function (group) {
         const pageSize = parseInt(group.getAttribute('data-page-size') || '5', 10);
         const items = Array.from(group.querySelectorAll('.aside-paged-item'));
-        if (items.length <= pageSize) return; // Từ 5 mục trở xuống thì không cần hiện thanh lật trang
+        if (items.length <= pageSize) return;
 
         const totalPages = Math.ceil(items.length / pageSize);
         let currentPage = 1;
 
-        // Nếu đang chọn (active) một mục nằm ở trang 2, tự động mở sẵn trang đó
         const activeIndex = items.findIndex(function (el) { return el.classList.contains('active'); });
         if (activeIndex >= 0) {
             currentPage = Math.floor(activeIndex / pageSize) + 1;
         }
 
-        // Tạo thanh điều hướng kiểu TopCV: "1/2" bên trái và 2 nút tròn "<" ">" bên phải
         const navBar = document.createElement('div');
         navBar.className = 'd-flex align-items-center justify-content-between pt-2 mt-2 border-top px-2';
         navBar.innerHTML = `
@@ -157,7 +155,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             indicator.innerText = currentPage + '/' + totalPages;
 
-            // Đổi màu nút khi ở đầu/cuối trang giống TopCV
             if (currentPage <= 1) {
                 prevBtn.disabled = true;
                 prevBtn.style.borderColor = '#e2e8f0';
@@ -280,7 +277,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================================
-    // 6. HỘP THOẠI MODAL ĐẸP CHO: ĐĂNG XUẤT, ĐÓNG TIN, TỪ CHỐI, KHÓA TK, XEM THƯ
+    // 6. HỘP THOẠI MODAL ĐẸP CHO: ĐĂNG XUẤT, ĐÓNG TIN, TỪ CHỐI, KHÓA TK, XEM THƯ, ỨNG TUYỂN
     // =========================================================================
     const logoutLinks = document.querySelectorAll('a[href*="Logout"]');
     logoutLinks.forEach(function (link) {
@@ -368,6 +365,35 @@ document.addEventListener("DOMContentLoaded", function () {
             showInfoModal("Thư giới thiệu ứng viên", letter, false);
         });
     });
+
+    // 6.6 Chặn nút "Ứng tuyển" nếu đang đăng nhập là Nhà tuyển dụng (Employer) hoặc Admin
+    const authSpan = document.querySelector('.auth-buttons span');
+    const authText = authSpan ? authSpan.innerText : '';
+    const isEmployerUser = authText.indexOf('(Employer)') !== -1 || authText.indexOf('(Recruiter)') !== -1;
+    const isAdminUser = authText.indexOf('(Admin)') !== -1;
+
+    if (isEmployerUser || isAdminUser) {
+        const applyBtns = document.querySelectorAll('.btn-apply, a[href*="Applications/Apply"]');
+        applyBtns.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.body.style.opacity = '1';
+                if (isEmployerUser) {
+                    showInfoModal(
+                        "Chức năng dành cho Ứng viên",
+                        "Tài khoản Nhà tuyển dụng (Employer) không thể nộp hồ sơ ứng tuyển.\nVui lòng đăng nhập bằng tài khoản Ứng viên (Candidate) để ứng tuyển công việc này!",
+                        true
+                    );
+                } else {
+                    showInfoModal(
+                        "Chức năng dành cho Ứng viên",
+                        "Tài khoản Quản trị viên (Admin) không thể nộp hồ sơ ứng tuyển.\nVui lòng sử dụng tài khoản Ứng viên (Candidate)!",
+                        true
+                    );
+                }
+            });
+        });
+    }
 
 
     // =========================================================================
