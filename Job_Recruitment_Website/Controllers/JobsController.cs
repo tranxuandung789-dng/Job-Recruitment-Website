@@ -11,6 +11,8 @@ namespace Job_Recruitment_Website.Controllers
     {
         private RecruitmentDBEntities db = new RecruitmentDBEntities();
 
+        private const int PageSize = 6; // Chuẩn 6 việc làm / 1 trang (3 hàng x 2 cột)
+
         // Lấy UserId an toàn từ Session
         private int CurrentUserId
         {
@@ -37,7 +39,7 @@ namespace Job_Recruitment_Website.Controllers
         // 1. DÀNH CHO TẤT CẢ MỌI NGƯỜI (ỨNG VIÊN & KHÁCH)
         // ==========================================
 
-        public ActionResult Index(string search, int? categoryId, string location)
+        public ActionResult Index(string search, int? categoryId, string location, int page = 1)
         {
             var jobs = db.JOBS.Include(j => j.COMPANy)
                               .Include(j => j.CATEGORy)
@@ -60,14 +62,47 @@ namespace Job_Recruitment_Website.Controllers
                 jobs = jobs.Where(j => j.CategoryId == categoryId.Value);
             }
 
-            // Lọc theo Địa điểm (Cột Aside bên trái)
+            // Lọc theo Địa điểm (Cột Aside bên trái: TP.HCM, Hà Nội, Đà Nẵng, hoặc Khu vực khác)
             if (!string.IsNullOrWhiteSpace(location))
             {
                 string loc = location.Trim();
-                jobs = jobs.Where(j => j.Location.Contains(loc));
+                if (loc == "Khác")
+                {
+                    jobs = jobs.Where(j => !j.Location.Contains("Hà Nội")
+                                        && !j.Location.Contains("Hồ Chí Minh")
+                                        && !j.Location.Contains("TP.HCM")
+                                        && !j.Location.Contains("Đà Nẵng"));
+                }
+                else if (loc == "Hồ Chí Minh" || loc == "TP.HCM")
+                {
+                    jobs = jobs.Where(j => j.Location.Contains("Hồ Chí Minh") || j.Location.Contains("TP.HCM"));
+                }
+                else
+                {
+                    jobs = jobs.Where(j => j.Location.Contains(loc));
+                }
             }
 
-            return View(jobs.OrderByDescending(j => j.PostedDate).ToList());
+            // Sắp xếp tin mới nhất lên đầu
+            var orderedJobs = jobs.OrderByDescending(j => j.PostedDate)
+                                  .ThenByDescending(j => j.JobId);
+
+            // Tính toán phân trang (6 việc / trang)
+            int totalItems = orderedJobs.Count();
+            int totalPages = (int)Math.Ceiling((double)totalItems / PageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            var pagedJobs = orderedJobs.Skip((page - 1) * PageSize)
+                                       .Take(PageSize)
+                                       .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = totalItems;
+
+            return View(pagedJobs);
         }
 
         public ActionResult Details(int? id)
@@ -131,6 +166,7 @@ namespace Job_Recruitment_Website.Controllers
 
                 db.JOBS.Add(job);
                 db.SaveChanges();
+                TempData["Success"] = "Đăng tin tuyển dụng mới thành công!";
                 return RedirectToAction("MyJobs");
             }
 
@@ -179,6 +215,7 @@ namespace Job_Recruitment_Website.Controllers
                 job.CategoryId = model.CategoryId;
 
                 db.SaveChanges();
+                TempData["Success"] = "Cập nhật tin tuyển dụng thành công!";
                 return RedirectToAction("MyJobs");
             }
 
@@ -198,9 +235,39 @@ namespace Job_Recruitment_Website.Controllers
                 {
                     job.Status = "Closed";
                     db.SaveChanges();
+                    TempData["Success"] = "Đã đóng tin tuyển dụng: " + job.Title;
                 }
             }
             return RedirectToAction("MyJobs");
+        }
+
+        [HttpPost]
+        [RoleAuthorize("Recruiter")]
+        public ActionResult Reopen(int id)
+        {
+            var company = GetRecruiterCompany();
+            if (company != null)
+            {
+                var job = db.JOBS.FirstOrDefault(j => j.JobId == id && j.CompanyId == company.CompanyId);
+                if (job != null)
+                {
+                    job.Status = "Open";
+                    // Nếu hạn nộp cũ đã qua thì tự động gia hạn thêm 30 ngày
+                    if (job.Deadline < DateTime.Today)
+                    {
+                        job.Deadline = DateTime.Today.AddDays(30);
+                    }
+                    db.SaveChanges();
+                    TempData["Success"] = "Đã mở lại tin tuyển dụng: " + job.Title;
+                }
+            }
+            return RedirectToAction("MyJobs");
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) db.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

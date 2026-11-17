@@ -8,9 +8,9 @@
     bool isAdmin = Session["RoleId"] != null && (int)Session["RoleId"] == 1;
 }
 
-<div class="mb-4">
+<div class="job-section-header mb-4">
     <div class="d-flex justify-content-between align-items-center mb-1">
-        <h2 class="fw-bold text-dark mb-0">Ngành nghề</h2>
+        <h2 class="fw-bold text-dark mb-0">Danh mục Ngành nghề</h2>
         @if (isAdmin)
         {
             <a href="@Url.Action("Create")" class="btn btn-primary-custom text-white fw-bold px-3 py-2 rounded-3 shadow-sm">
@@ -18,7 +18,7 @@
             </a>
         }
     </div>
-    <p class="text-muted small mb-0">Bảng CATEGORIES, bấm để lọc việc làm.</p>
+    <p class="text-muted small mb-0">Khám phá cơ hội việc làm đa dạng theo từng lĩnh vực chuyên môn tại D-JOBS.</p>
 </div>
 
 @if (!isAdmin)
@@ -40,7 +40,7 @@
 
                 <div class="category-card-item">
                     <h5 class="category-card-name">@item.CategoryName</h5>
-                    <span class="category-job-count">@jobCount việc làm</span>
+                    <span class="category-job-count">@jobCount việc làm đang tuyển</span>
                     <div>
                         <a href="@Url.Action("Index", "Jobs", new { categoryId = item.CategoryId })" class="btn-view-jobs-cat">
                             Xem việc làm
