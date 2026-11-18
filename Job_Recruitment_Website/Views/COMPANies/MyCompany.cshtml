@@ -5,44 +5,52 @@
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
 }
 
-<h2>Thông tin công ty của tôi</h2>
+<div class="job-section-header mb-4">
+    <h2 class="fw-bold text-dark mb-1">Công ty của tôi</h2>
+    <p class="text-muted small mb-0">Thông tin hồ sơ doanh nghiệp đang hiển thị với các ứng viên trên D-JOBS.</p>
+</div>
 
-<div>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>Tên công ty</dt>
-        <dd>
-            @Html.DisplayFor(model => model.CompanyName)
-        </dd>
-
-        <dt>Logo công ty</dt>
-        <dd>
+<div class="card shadow-sm border-0 rounded-4 p-4 p-md-5 bg-white mb-4" style="max-width: 780px;">
+    <div class="d-flex flex-column flex-md-row align-items-md-center gap-4 pb-4 mb-4 border-bottom">
+        <div class="d-flex align-items-center justify-content-center border rounded-3 p-2 bg-light" style="width: 120px; height: 90px; flex-shrink: 0;">
             @if (!string.IsNullOrEmpty(Model.Logo_Url))
             {
-                <img src="@Model.Logo_Url" alt="Logo công ty" style="max-width: 200px; max-height: 150px; object-fit: contain;" />
+                <img src="@Model.Logo_Url" alt="Logo công ty" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
             }
             else
             {
-                <span class="text-muted">Chưa cập nhật logo</span>
+                <span class="text-muted small">Chưa có logo</span>
             }
-        </dd>
+        </div>
+        <div>
+            <h3 class="fw-bold text-dark mb-1">@Model.CompanyName</h3>
+            <p class="text-muted small mb-1">
+                <i class="bi bi-geo-alt-fill text-orange me-1"></i>
+                @(string.IsNullOrEmpty(Model.Address) ? "Đang cập nhật địa chỉ" : Model.Address)
+            </p>
+            @if (!string.IsNullOrEmpty(Model.Website))
+            {
+                <p class="small mb-0">
+                    <i class="bi bi-globe text-orange me-1"></i>
+                    <a href="@Model.Website" target="_blank" class="text-orange fw-semibold">@Model.Website</a>
+                </p>
+            }
+        </div>
+    </div>
 
-        <dt>Địa chỉ</dt>
-        <dd>
-            @Html.DisplayFor(model => model.Address)
-        </dd>
+    <div class="mb-4">
+        <h6 class="fw-bold text-dark mb-2">Giới thiệu doanh nghiệp</h6>
+        <p class="text-secondary mb-0" style="line-height: 1.6; white-space: pre-line;">
+            @(string.IsNullOrEmpty(Model.Description) ? "Chưa có mô tả chi tiết cho công ty này." : Model.Description)
+        </p>
+    </div>
 
-        <dt>Website</dt>
-        <dd>
-            <a href="@Model.Website" target="_blank">@Model.Website</a>
-        </dd>
-
-        <dt>Mô tả</dt>
-        <dd>
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-    </dl>
+    <div class="d-flex gap-2 pt-3 border-top">
+        <a href="@Url.Action("Edit", "Companies")" class="btn btn-primary-custom px-4 py-2">
+            Chỉnh sửa thông tin
+        </a>
+        <a href="@Url.Action("MyJobs", "Jobs")" class="btn btn-outline-secondary px-4 py-2 rounded-3">
+            Quản lý tin đăng
+        </a>
+    </div>
 </div>
-<p style="margin-top: 20px;">
-    @Html.ActionLink("Chỉnh sửa thông tin", "Edit", "Companies", null, new { @class = "btn btn-primary" })
-</p>
