@@ -30,7 +30,7 @@
                     <th>Trạng thái</th>
                     <th>Ngày đăng</th>
                     <th>Ngành nghề</th>
-                    <th style="min-width: 220px;">Thao tác</th>
+                    <th style="min-width: 240px;">Thao tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -76,10 +76,9 @@
                                 @item.PostedDate.ToString("dd/MM/yyyy")
                             </td>
                             <td>
-                                @(item.CATEGORy != null ? item.CATEGORy.CategoryName : "Chưa phân loại")
+                                @(item.CATEGORy != null ? item.CATEGORy.CategoryName : "")
                             </td>
                             <td class="text-center text-nowrap">
-                                <!-- Nút liên kết sang Phần 6: Xem danh sách ứng viên đã nộp đơn -->
                                 <a href="@Url.Action("Candidates", "Applications", new { jobId = item.JobId })" class="btn btn-sm btn-info text-white me-1" title="Xem danh sách ứng viên nộp hồ sơ">
                                     Ứng viên
                                 </a>
@@ -99,7 +98,13 @@
                                 }
                                 else
                                 {
-                                    <span class="text-muted small ps-1">(Đã đóng)</span>
+                                    using (Html.BeginForm("Reopen", "Jobs", FormMethod.Post, new { style = "display:inline;" }))
+                                    {
+                                        <input type="hidden" name="id" value="@item.JobId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            Mở lại
+                                        </button>
+                                    }
                                 }
                             </td>
                         </tr>

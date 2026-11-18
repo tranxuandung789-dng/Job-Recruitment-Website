@@ -54,12 +54,14 @@
         <tbody>
             @foreach (var item in Model)
             {
+                string rName = item.ROLE != null ? item.ROLE.RoleName : "";
+                string displayRole = rName == "Recruiter" ? "Employer" : rName;
                 <tr>
                     <td>@item.UserId</td>
                     <td>@item.FullName</td>
                     <td>@item.Email</td>
                     <td>@item.Phone</td>
-                    <td>@(item.ROLE != null ? item.ROLE.RoleName : "")</td>
+                    <td>@displayRole</td>
                     <td>
                         @if (item.IsActive == true)
                         {

@@ -56,14 +56,43 @@ namespace Job_Recruitment_Website.Controllers
             }
         }
 
+        // Kiểm tra luồng chuyển trạng thái hợp lệ: Applied -> Reviewed -> Interview -> Accepted / Rejected (và cho phép Xem xét lại)
+        private static bool IsValidTransition(string currentStatus, string nextStatus)
+        {
+            if (currentStatus == "Pending" || currentStatus == "Submitted")
+                return nextStatus == "Reviewed" || nextStatus == "Rejected";
+
+            if (currentStatus == "Reviewed")
+                return nextStatus == "Interview" || nextStatus == "Rejected";
+
+            if (currentStatus == "Interview")
+                return nextStatus == "Accepted" || nextStatus == "Approved" || nextStatus == "Rejected";
+
+            if (currentStatus == "Accepted" || currentStatus == "Approved" || currentStatus == "Rejected")
+                return nextStatus == "Reviewed"; // Cho phép bấm "Xem xét lại"
+
+            return false;
+        }
+
         // ========================================================
         // 1. DÀNH CHO ỨNG VIÊN (CANDIDATE)
         // ========================================================
 
         // GET: Hiển thị form nộp đơn ứng tuyển
-        [RoleAuthorize("Candidate")]
         public ActionResult Apply(int? jobId)
         {
+            if (Session["UserId"] == null)
+            {
+                return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("Apply", "Applications", new { jobId = jobId }) });
+            }
+
+            string role = Session["Role"] as string;
+            if (role != "Candidate")
+            {
+                TempData["Error"] = "Tài khoản Nhà tuyển dụng (Employer) hoặc Quản trị viên (Admin) không thể nộp hồ sơ ứng tuyển. Vui lòng sử dụng tài khoản Ứng viên (Candidate)!";
+                return RedirectToAction("Index", "Jobs");
+            }
+
             if (jobId == null) return RedirectToAction("Index", "Jobs");
 
             var job = db.JOBS.Include(j => j.COMPANy)
@@ -262,7 +291,7 @@ namespace Job_Recruitment_Website.Controllers
             return View(applicants);
         }
 
-        // POST: Cập nhật trạng thái duyệt/từ chối hồ sơ
+        // POST: Cập nhật trạng thái duyệt/từ chối hồ sơ theo đúng luồng chuẩn
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("Recruiter")]
@@ -276,11 +305,16 @@ namespace Job_Recruitment_Website.Controllers
                                                        && a.JOB.CompanyId == company.CompanyId);
             if (app == null) return RedirectToAction("MyJobs", "Jobs");
 
-            // Kiểm tra trạng thái hợp lệ theo đúng CHECK Constraint CK_APPLICATIONS_Status trong SQL
-            if (ValidStatuses.Contains(newStatus))
+            // Kiểm tra trạng thái hợp lệ và đúng quy trình: Applied -> Review -> Interview -> Accepted / Rejected (hoặc Xem xét lại)
+            if (ValidStatuses.Contains(newStatus) && IsValidTransition(app.Status, newStatus))
             {
                 app.Status = newStatus;
                 db.SaveChanges();
+                TempData["Success"] = "Đã cập nhật trạng thái hồ sơ thành công!";
+            }
+            else
+            {
+                TempData["Error"] = "Không thể chuyển trạng thái từ " + app.Status + " sang " + newStatus + " (sai quy trình)!";
             }
 
             return RedirectToAction("Candidates", new { jobId = app.JobId });

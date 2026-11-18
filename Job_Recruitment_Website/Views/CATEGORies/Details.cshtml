@@ -1,27 +1,63 @@
 ﻿@model Job_Recruitment_Website.Models.CATEGORy
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = "Chi tiết ngành nghề";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+    int openJobsCount = Model.JOBS != null ? Model.JOBS.Count(j => j.Status == "Open") : 0;
+    int totalJobsCount = Model.JOBS != null ? Model.JOBS.Count : 0;
 }
 
-<h2>Details</h2>
+<div class="card shadow-sm border-0 rounded-4 p-4 p-md-5 bg-white my-3" style="max-width: 720px;">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Chi tiết ngành nghề</h3>
+            <p class="text-muted small mb-0">Thông tin danh mục và danh sách các việc làm thuộc ngành nghề này.</p>
+        </div>
+        <span class="badge rounded-pill px-3 py-2 fw-bold" style="background-color: #fff0dd; color: #f7901e; font-size: 13px;">
+            Mã ngành: #@Model.CategoryId
+        </span>
+    </div>
 
-<div>
-    <h4>CATEGORy</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.CategoryName)
-        </dt>
+    <div class="p-3 bg-light rounded-3 border mb-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <span class="text-muted small d-block">Tên ngành nghề</span>
+                <strong class="fs-5 text-dark">@Model.CategoryName</strong>
+            </div>
+            <div class="col-md-6">
+                <span class="text-muted small d-block">Số lượng tin tuyển dụng</span>
+                <strong class="text-success">@openJobsCount tin đang mở</strong>
+                <span class="text-muted small">(Tổng cộng: @totalJobsCount tin)</span>
+            </div>
+        </div>
+    </div>
 
-        <dd>
-            @Html.DisplayFor(model => model.CategoryName)
-        </dd>
+    @if (Model.JOBS != null && Model.JOBS.Any())
+    {
+        <h6 class="fw-bold text-dark mb-2">Danh sách công việc thuộc ngành @Model.CategoryName:</h6>
+        <div class="list-group mb-4">
+            @foreach (var job in Model.JOBS.OrderByDescending(j => j.PostedDate))
+            {
+                <a href="@Url.Action("Details", "Jobs", new { id = job.JobId })"
+                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2">
+                    <div>
+                        <strong class="text-dark">@job.Title</strong>
+                        <span class="text-muted small ms-2">• @job.Location</span>
+                    </div>
+                    <span class="badge @(job.Status == "Open" ? "bg-success" : "bg-secondary")">
+                        @(job.Status == "Open" ? "Đang mở" : "Đã đóng")
+                    </span>
+                </a>
+            }
+        </div>
+    }
 
-    </dl>
+    <div class="d-flex gap-2 pt-2 border-top">
+        <a href="@Url.Action("Edit", new { id = Model.CategoryId })" class="btn btn-primary-custom px-4 py-2">
+            Chỉnh sửa tên ngành
+        </a>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4 py-2 rounded-3">
+            Quay lại danh sách
+        </a>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.CategoryId }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
