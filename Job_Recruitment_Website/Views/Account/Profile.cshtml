@@ -19,6 +19,9 @@
     string avatarLetter = fullName.Length > 0 ? fullName.Substring(0, 1).ToUpper() : "U";
 
     var candidateProfile = ViewBag.CandidateProfile as CANDIDATEPROFILE;
+
+    string phoneError = ViewBag.PhoneError as string;
+    string phoneValue = (ViewBag.PhoneValue as string) ?? (Model != null ? Model.Phone : "");
 }
 
 <!-- TIÊU ĐỀ TRANG -->
@@ -47,7 +50,10 @@
         </div>
     </div>
 
-    <!-- Thông báo Cập nhật thành công / lỗi -->
+    <!-- Thông báo lỗi từ phía trình duyệt (hiện khi bấm Lưu mà nhập sai) -->
+    <div id="clientAlert" class="alert alert-danger rounded-3 py-2 small fw-semibold d-none" role="alert"></div>
+
+    <!-- Thông báo Cập nhật thành công / lỗi từ server -->
     @if (ViewBag.Success != null)
     {
         <div class="alert alert-success rounded-3 py-2 small fw-semibold">
@@ -60,9 +66,15 @@
             ⚠ @ViewBag.Error
         </div>
     }
+    @if (phoneError != null)
+    {
+        <div class="alert alert-danger rounded-3 py-2 small fw-semibold">
+            ⚠ @phoneError
+        </div>
+    }
 
     <!-- FORM CẬP NHẬT HỒ SƠ -->
-    @using (Html.BeginForm("Profile", "Account", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    @using (Html.BeginForm("Profile", "Account", FormMethod.Post, new { enctype = "multipart/form-data", id = "profileForm", novalidate = "novalidate" }))
     {
         @Html.AntiForgeryToken()
 
@@ -72,16 +84,19 @@
                 <label class="form-label fw-semibold small text-secondary">Họ và tên <span class="text-danger">*</span></label>
                 <input type="text" name="FullName" class="form-control rounded-3 py-2"
                        value="@(Model != null ? Model.FullName : "")"
-                       placeholder="Nhập họ và tên..." maxlength="150" required />
+                       placeholder="Nhập họ và tên..." maxlength="150" />
             </div>
 
             <div class="col-md-6">
                 <label class="form-label fw-semibold small text-secondary">Số điện thoại <span class="text-danger">*</span></label>
-                <input type="tel" name="Phone" class="form-control rounded-3 py-2"
-                       value="@(Model != null ? Model.Phone : "")"
+                <input type="tel" id="Phone" name="Phone"
+                       class="form-control rounded-3 py-2 @(phoneError != null ? "is-invalid" : "")"
+                       value="@phoneValue"
                        placeholder="Nhập 10-11 chữ số..."
-                       pattern="[0-9]{10,11}" maxlength="11"
-                       title="Số điện thoại phải gồm 10 hoặc 11 chữ số" required />
+                       inputmode="numeric" maxlength="11" />
+                <div id="PhoneError" class="invalid-feedback">
+                    @(phoneError ?? "Số điện thoại phải gồm 10 hoặc 11 chữ số.")
+                </div>
             </div>
 
             <div class="col-md-6">
@@ -176,3 +191,61 @@
         </div>
     }
 </div>
+
+@section scripts {
+    <script>
+        (function () {
+            var form = document.getElementById('profileForm');
+            if (!form) return;
+
+            var fullName = form.querySelector('[name="FullName"]');
+            var phone = document.getElementById('Phone');
+            var phoneMsg = document.getElementById('PhoneError');
+            var alertBox = document.getElementById('clientAlert');
+            var re = /^[0-9]{10,11}$/;
+
+            function phoneProblem() {
+                var v = phone.value.trim();
+                if (v.length === 0) return 'Vui lòng nhập số điện thoại!';
+                if (!re.test(v)) return 'Số điện thoại không hợp lệ! Chỉ nhập 10 hoặc 11 chữ số (VD: 0912345678).';
+                return '';
+            }
+
+            function showPhone(msg) {
+                phone.classList.toggle('is-invalid', !!msg);
+                if (msg) phoneMsg.textContent = msg;
+            }
+
+            // Báo lỗi ngay khi đang gõ (chỉ khi đã nhập gì đó)
+            phone.addEventListener('input', function () {
+                showPhone(phone.value.trim().length > 0 ? phoneProblem() : '');
+            });
+
+            // Báo lỗi khi bấm "Lưu thay đổi"
+            form.addEventListener('submit', function (e) {
+                var errors = [];
+
+                if (fullName.value.trim() === '') {
+                    errors.push('Vui lòng nhập họ và tên!');
+                    fullName.classList.add('is-invalid');
+                } else {
+                    fullName.classList.remove('is-invalid');
+                }
+
+                var pm = phoneProblem();
+                showPhone(pm);
+                if (pm) errors.push(pm);
+
+                if (errors.length > 0) {
+                    e.preventDefault();
+                    alertBox.innerHTML = '⚠ ' + errors.join('<br>⚠ ');
+                    alertBox.classList.remove('d-none');
+                    alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    (fullName.classList.contains('is-invalid') ? fullName : phone).focus();
+                } else {
+                    alertBox.classList.add('d-none');
+                }
+            });
+        })();
+    </script>
+}
