@@ -14,7 +14,7 @@
                 <p class="text-muted small">Tạo tài khoản để kết nối cơ hội nghề nghiệp cùng D-JOBS</p>
             </div>
 
-            @using (Html.BeginForm())
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { novalidate = "novalidate", id = "registerForm" }))
             {
                 @Html.AntiForgeryToken()
 
@@ -22,20 +22,26 @@
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold small text-secondary">Họ và tên</label>
-                    @Html.EditorFor(model => model.FullName, new { htmlAttributes = new { @class = "form-control rounded-3 py-2", required = "required", placeholder = "Nguyễn Văn A" } })
+                    @Html.EditorFor(model => model.FullName, new { htmlAttributes = new { @class = "form-control rounded-3 py-2", placeholder = "Nguyễn Văn A" } })
+                    <div class="invalid-feedback" id="err-FullName">
+                        Vui lòng nhập họ và tên.
+                    </div>
                     @Html.ValidationMessageFor(model => model.FullName, "", new { @class = "text-danger small" })
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold small text-secondary">Email</label>
-                    @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control rounded-3 py-2", type = "email", required = "required", placeholder = "name@example.com" } })
+                    @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control rounded-3 py-2", type = "email", placeholder = "name@example.com" } })
+                    <div class="invalid-feedback" id="err-Email">
+                        Vui lòng nhập địa chỉ email hợp lệ.
+                    </div>
                     @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger small" })
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold small text-secondary">Số điện thoại</label>
-                    @Html.EditorFor(model => model.Phone, new { htmlAttributes = new { @class = "form-control rounded-3 py-2", type = "tel", inputmode = "numeric", required = "required", maxlength = "11", placeholder = "Nhập 10-11 số" } })
-                    <div class="invalid-feedback">
+                    @Html.EditorFor(model => model.Phone, new { htmlAttributes = new { @class = "form-control rounded-3 py-2", type = "tel", inputmode = "numeric", maxlength = "11", placeholder = "Nhập 10-11 số" } })
+                    <div class="invalid-feedback" id="err-Phone">
                         Số điện thoại phải gồm 10 hoặc 11 chữ số (không chứa chữ cái hay ký tự đặc biệt).
                     </div>
                     @Html.ValidationMessageFor(model => model.Phone, "", new { @class = "text-danger small" })
@@ -43,12 +49,18 @@
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold small text-secondary">Mật khẩu</label>
-                    <input type="password" name="password" class="form-control rounded-3 py-2" required="required" placeholder="••••••••" />
+                    <input type="password" id="password" name="password" class="form-control rounded-3 py-2" placeholder="••••••••" />
+                    <div class="invalid-feedback" id="err-Password">
+                        Vui lòng nhập mật khẩu.
+                    </div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold small text-secondary">Nhập lại mật khẩu</label>
-                    <input type="password" name="confirmPassword" class="form-control rounded-3 py-2" required="required" placeholder="••••••••" />
+                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control rounded-3 py-2" placeholder="••••••••" />
+                    <div class="invalid-feedback" id="err-ConfirmPassword">
+                        Vui lòng nhập lại mật khẩu.
+                    </div>
                     @Html.ValidationMessage("PasswordError", new { @class = "text-danger small" })
                 </div>
 
@@ -77,27 +89,111 @@
 @section scripts {
     <script>
         (function () {
-            var phone = document.getElementById('Phone');
-            if (!phone) return;
-            var form = phone.form;
-            var re = /^[0-9]{10,11}$/;
+            var form = document.getElementById('registerForm');
+            if (!form) return;
 
-            function check() {
-                var v = phone.value.trim();
-                var ok = re.test(v);
-                // Chỉ báo lỗi khi đã nhập gì đó; ô trống sẽ do "required" xử lý
-                phone.classList.toggle('is-invalid', v.length > 0 && !ok);
+            var fullName = document.getElementById('FullName');
+            var email = document.getElementById('Email');
+            var phone = document.getElementById('Phone');
+            var password = document.getElementById('password');
+            var confirmPassword = document.getElementById('confirmPassword');
+
+            var phoneRe = /^[0-9]{10,11}$/;
+            var emailRe = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+
+            function setInvalid(input, errId, isInvalid, msg) {
+                if (!input) return;
+                var errEl = document.getElementById(errId);
+                if (errEl && msg) {
+                    errEl.textContent = msg;
+                }
+                input.classList.toggle('is-invalid', isInvalid);
+            }
+
+            function checkFullName(forceEmptyCheck) {
+                var v = fullName.value.trim();
+                if (v.length === 0) {
+                    setInvalid(fullName, 'err-FullName', forceEmptyCheck, 'Vui lòng nhập họ và tên.');
+                    return false;
+                }
+                setInvalid(fullName, 'err-FullName', false);
+                return true;
+            }
+
+            function checkEmail(forceEmptyCheck) {
+                var v = email.value.trim();
+                if (v.length === 0) {
+                    setInvalid(email, 'err-Email', forceEmptyCheck, 'Vui lòng nhập địa chỉ email.');
+                    return false;
+                }
+                var ok = emailRe.test(v);
+                setInvalid(email, 'err-Email', !ok, 'Email không đúng định dạng (ví dụ: name@example.com).');
                 return ok;
             }
 
-            phone.addEventListener('input', check);
-            phone.addEventListener('blur', check);
+            function checkPhone(forceEmptyCheck) {
+                var v = phone.value.trim();
+                if (v.length === 0) {
+                    setInvalid(phone, 'err-Phone', forceEmptyCheck, 'Vui lòng nhập số điện thoại.');
+                    return false;
+                }
+                var ok = phoneRe.test(v);
+                setInvalid(phone, 'err-Phone', !ok, 'Số điện thoại phải gồm 10 hoặc 11 chữ số (không chứa chữ cái hay ký tự đặc biệt).');
+                return ok;
+            }
 
+            function checkPassword(forceEmptyCheck) {
+                var v = password.value;
+                if (v.length === 0) {
+                    setInvalid(password, 'err-Password', forceEmptyCheck, 'Vui lòng nhập mật khẩu.');
+                    return false;
+                }
+                setInvalid(password, 'err-Password', false);
+                return true;
+            }
+
+            function checkConfirmPassword(forceEmptyCheck) {
+                var v = confirmPassword.value;
+                if (v.length === 0) {
+                    setInvalid(confirmPassword, 'err-ConfirmPassword', forceEmptyCheck, 'Vui lòng nhập lại mật khẩu.');
+                    return false;
+                }
+                var ok = (v === password.value);
+                setInvalid(confirmPassword, 'err-ConfirmPassword', !ok, 'Mật khẩu nhập lại không khớp.');
+                return ok;
+            }
+
+            // Gắn sự kiện khi gõ và khi rời chuột khỏi ô
+            fullName.addEventListener('input', function () { checkFullName(false); });
+            fullName.addEventListener('blur', function () { checkFullName(true); });
+
+            email.addEventListener('input', function () { checkEmail(false); });
+            email.addEventListener('blur', function () { checkEmail(true); });
+
+            phone.addEventListener('input', function () { checkPhone(false); });
+            phone.addEventListener('blur', function () { checkPhone(true); });
+
+            password.addEventListener('input', function () {
+                checkPassword(false);
+                if (confirmPassword.value.length > 0) checkConfirmPassword(false);
+            });
+            password.addEventListener('blur', function () { checkPassword(true); });
+
+            confirmPassword.addEventListener('input', function () { checkConfirmPassword(false); });
+            confirmPassword.addEventListener('blur', function () { checkConfirmPassword(true); });
+
+            // Kiểm tra tất cả các ô khi bấm nút "Đăng ký ngay"
             form.addEventListener('submit', function (e) {
-                if (!check()) {
+                var validName = checkFullName(true);
+                var validEmail = checkEmail(true);
+                var validPhone = checkPhone(true);
+                var validPass = checkPassword(true);
+                var validConfirm = checkConfirmPassword(true);
+
+                if (!validName || !validEmail || !validPhone || !validPass || !validConfirm) {
                     e.preventDefault();
-                    phone.classList.add('is-invalid');
-                    phone.focus();
+                    var firstInvalid = form.querySelector('.is-invalid');
+                    if (firstInvalid) firstInvalid.focus();
                 }
             });
         })();
