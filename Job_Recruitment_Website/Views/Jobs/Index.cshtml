@@ -133,19 +133,25 @@
                         </span>
                     </div>
 
-                    <!-- Nút Ứng tuyển: Tự động chuyển qua Login kèm returnUrl nếu chưa đăng nhập -->
-                    @if (Session["UserId"] == null)
-                    {
-                        <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Apply", "Applications", new { jobId = item.JobId }) })" class="btn-apply">
-                            Ứng tuyển
+                    <!-- Khu vực nút hành động: Ứng tuyển & Chi tiết việc làm -->
+                    <div class="job-card-actions">
+                        @if (Session["UserId"] == null)
+                        {
+                            <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Apply", "Applications", new { jobId = item.JobId }) })" class="btn-apply">
+                                Ứng tuyển
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Apply", "Applications", new { jobId = item.JobId })" class="btn-apply">
+                                Ứng tuyển
+                            </a>
+                        }
+
+                        <a href="@Url.Action("Details", "Jobs", new { id = item.JobId })" class="btn-job-detail">
+                            <span>Chi tiết việc làm</span>
                         </a>
-                    }
-                    else
-                    {
-                        <a href="@Url.Action("Apply", "Applications", new { jobId = item.JobId })" class="btn-apply">
-                            Ứng tuyển
-                        </a>
-                    }
+                    </div>
                 </div>
             </div>
         }
