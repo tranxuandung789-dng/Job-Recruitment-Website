@@ -1,6 +1,6 @@
 ﻿/**
- * D-JOBS Recruitment Agency - Main Layout & Custom Modal Script
- * File: ~/Scripts/recruitment.js
+- D-JOBS Recruitment Agency - Main Layout & Custom Modal Script
+- File: ~/Scripts/recruitment.js
  */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -277,7 +277,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // =========================================================================
-    // 6. HỘP THOẠI MODAL ĐẸP CHO: ĐĂNG XUẤT, ĐÓNG TIN, TỪ CHỐI, KHÓA TK, XEM THƯ, ỨNG TUYỂN
+    // 6. HỘP THOẠI MODAL ĐẸP CHO: ĐĂNG XUẤT, ĐÓNG TIN, XÓA, TỪ CHỐI, KHÓA TK, XEM THƯ, ỨNG TUYỂN
     // =========================================================================
     const logoutLinks = document.querySelectorAll('a[href*="Logout"]');
     logoutLinks.forEach(function (link) {
@@ -306,6 +306,46 @@ document.addEventListener("DOMContentLoaded", function () {
                 title: "Đóng tin tuyển dụng",
                 message: "Bạn có chắc chắn muốn tạm đóng tin tuyển dụng này không? (Bạn vẫn có thể mở lại bất cứ lúc nào).",
                 confirmText: "Đóng tin",
+                type: "danger",
+                onConfirm: function () {
+                    if (form) form.submit();
+                }
+            });
+        });
+    });
+
+    const deleteJobBtns = document.querySelectorAll('.btn-delete-job');
+    deleteJobBtns.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const form = this.closest('form');
+            const title = this.getAttribute('data-title');
+            showConfirmModal({
+                title: "Xóa tin tuyển dụng",
+                message: title
+                    ? 'Bạn có chắc chắn muốn xóa vĩnh viễn tin "' + title + '" không?\nThao tác này không thể hoàn tác.'
+                    : "Bạn có chắc chắn muốn xóa vĩnh viễn tin tuyển dụng này không?\nThao tác này không thể hoàn tác.",
+                confirmText: "Xóa vĩnh viễn",
+                type: "danger",
+                onConfirm: function () {
+                    if (form) form.submit();
+                }
+            });
+        });
+    });
+
+    const deleteCompanyBtns = document.querySelectorAll('.btn-delete-company');
+    deleteCompanyBtns.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const form = this.closest('form');
+            const name = this.getAttribute('data-name');
+            showConfirmModal({
+                title: "Xóa hồ sơ công ty",
+                message: name
+                    ? 'Bạn có chắc chắn muốn xóa vĩnh viễn công ty "' + name + '" không?\nThao tác này không thể hoàn tác.'
+                    : "Bạn có chắc chắn muốn xóa vĩnh viễn hồ sơ công ty này không?\nThao tác này không thể hoàn tác.",
+                confirmText: "Xóa công ty",
                 type: "danger",
                 onConfirm: function () {
                     if (form) form.submit();
