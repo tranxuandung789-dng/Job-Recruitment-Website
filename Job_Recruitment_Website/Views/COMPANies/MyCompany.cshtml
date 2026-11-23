@@ -10,6 +10,20 @@
     <p class="text-muted small mb-0">Thông tin hồ sơ doanh nghiệp đang hiển thị với các ứng viên trên D-JOBS.</p>
 </div>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert" style="max-width: 780px;">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="max-width: 780px;">
+        @TempData["Error"]
+    </div>
+}
+
 <div class="card shadow-sm border-0 rounded-4 p-4 p-md-5 bg-white mb-4" style="max-width: 780px;">
     <div class="d-flex flex-column flex-md-row align-items-md-center gap-4 pb-4 mb-4 border-bottom">
         <div class="d-flex align-items-center justify-content-center border rounded-3 p-2 bg-light" style="width: 120px; height: 90px; flex-shrink: 0;">
@@ -45,12 +59,20 @@
         </p>
     </div>
 
-    <div class="d-flex gap-2 pt-3 border-top">
+    <div class="d-flex flex-wrap gap-2 pt-3 border-top">
         <a href="@Url.Action("Edit", "Companies")" class="btn btn-primary-custom px-4 py-2">
             Chỉnh sửa thông tin
         </a>
         <a href="@Url.Action("MyJobs", "Jobs")" class="btn btn-outline-secondary px-4 py-2 rounded-3">
             Quản lý tin đăng
         </a>
+
+        @using (Html.BeginForm("Delete", "Companies", FormMethod.Post, new { style = "display:inline;" }))
+        {
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger px-4 py-2 rounded-3 btn-delete-company" data-name="@Model.CompanyName">
+                Xóa công ty
+            </button>
+        }
     </div>
 </div>

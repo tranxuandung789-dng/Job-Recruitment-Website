@@ -264,6 +264,35 @@ namespace Job_Recruitment_Website.Controllers
             return RedirectToAction("MyJobs");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RoleAuthorize("Recruiter")]
+        public ActionResult Delete(int id)
+        {
+            var company = GetRecruiterCompany();
+            if (company == null) return RedirectToAction("Create", "COMPANies");
+
+            var job = db.JOBS.FirstOrDefault(j => j.JobId == id && j.CompanyId == company.CompanyId);
+            if (job == null)
+            {
+                TempData["Error"] = "Không tìm thấy tin tuyển dụng hoặc bạn không có quyền xóa.";
+                return RedirectToAction("MyJobs");
+            }
+
+            if (db.APPLICATIONS.Any(a => a.JobId == id))
+            {
+                TempData["Error"] = "Tin tuyển dụng này đã có ứng viên nộp hồ sơ nên không thể xóa. Vui lòng dùng chức năng Đóng tin!";
+                return RedirectToAction("MyJobs");
+            }
+
+            string title = job.Title;
+            db.JOBS.Remove(job);
+            db.SaveChanges();
+
+            TempData["Success"] = "Đã xóa tin tuyển dụng: " + title;
+            return RedirectToAction("MyJobs");
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing) db.Dispose();
