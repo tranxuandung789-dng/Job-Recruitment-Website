@@ -18,6 +18,13 @@
         </div>
     }
 
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+        </div>
+    }
+
     <div class="table-responsive shadow-sm rounded">
         <table class="table table-bordered table-hover align-middle mb-0 bg-white">
             <thead class="table-light">
@@ -30,7 +37,7 @@
                     <th>Trạng thái</th>
                     <th>Ngày đăng</th>
                     <th>Ngành nghề</th>
-                    <th style="min-width: 240px;">Thao tác</th>
+                    <th style="min-width: 300px;">Thao tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -105,6 +112,15 @@
                                             Mở lại
                                         </button>
                                     }
+                                }
+
+                                @using (Html.BeginForm("Delete", "Jobs", FormMethod.Post, new { style = "display:inline;" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@item.JobId" />
+                                    <button type="submit" class="btn btn-sm btn-danger ms-1 btn-delete-job" data-title="@item.Title">
+                                        Xóa
+                                    </button>
                                 }
                             </td>
                         </tr>

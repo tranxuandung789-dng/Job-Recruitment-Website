@@ -699,3 +699,36 @@ footer .btn-outline-secondary {
         grid-template-columns: 1fr;
     }
 }
+/* Khu vực 2 nút nằm ngang kế bên nhau */
+.job-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+    .job-card-actions .btn-apply,
+    .job-card-actions .btn-job-detail {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.4;
+        text-decoration: none;
+        color: #ffffff;
+        background-color: #f7931e;
+        border: none;
+        margin: 0;
+        transition: background-color 0.2s ease, transform 0.15s ease;
+    }
+
+        .job-card-actions .btn-apply:hover,
+        .job-card-actions .btn-job-detail:hover {
+            background-color: #e07b0b;
+            color: #ffffff;
+            text-decoration: none;
+        }

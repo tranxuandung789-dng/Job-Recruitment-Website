@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 
@@ -33,6 +34,14 @@ namespace Job_Recruitment_Website.Controllers
             if (db.USERS.Any(u => u.Email == user.Email))
             {
                 ModelState.AddModelError("Email", "Email này đã được sử dụng!");
+                return View(user);
+            }
+
+            // Kiểm tra định dạng số điện thoại: chỉ gồm 10-11 chữ số
+            user.Phone = (user.Phone ?? "").Trim();
+            if (!Regex.IsMatch(user.Phone, @"^[0-9]{10,11}$"))
+            {
+                ModelState.AddModelError("Phone", "Số điện thoại không hợp lệ! Chỉ nhập 10 hoặc 11 chữ số (VD: 0912345678).");
                 return View(user);
             }
 
@@ -136,6 +145,26 @@ namespace Job_Recruitment_Website.Controllers
             var user = db.USERS.Find(uid);
             if (user != null)
             {
+                FullName = (FullName ?? "").Trim();
+                Phone = (Phone ?? "").Trim();
+
+                // Kiểm tra họ tên
+                if (FullName.Length == 0)
+                {
+                    ViewBag.Error = "Vui lòng nhập họ và tên!";
+                    ViewBag.CandidateProfile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == uid);
+                    return View(user);
+                }
+
+                // Kiểm tra định dạng số điện thoại: chỉ gồm 10-11 chữ số
+                if (!Regex.IsMatch(Phone, @"^[0-9]{10,11}$"))
+                {
+                    ViewBag.PhoneError = "Số điện thoại không hợp lệ! Chỉ nhập 10 hoặc 11 chữ số (VD: 0912345678).";
+                    ViewBag.PhoneValue = Phone; // giữ lại giá trị vừa nhập để người dùng sửa
+                    ViewBag.CandidateProfile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == uid);
+                    return View(user);
+                }
+
                 if (db.USERS.Any(u => u.Phone == Phone && u.UserId != uid))
                 {
                     ViewBag.Error = "Số điện thoại này đã được tài khoản khác sử dụng!";
