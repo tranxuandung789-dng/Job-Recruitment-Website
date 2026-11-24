@@ -66,11 +66,8 @@
         <div class="form-group" style="margin-top: 15px;">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Đăng tin" class="btn btn-primary" />
+                @Html.ActionLink("Quay lại danh sách", "MyJobs", null, new { @class = "btn btn-outline-secondary ms-2" })
             </div>
         </div>
     </div>
 }
-
-<div style="margin-top: 15px;">
-    @Html.ActionLink("Quay lại danh sách", "MyJobs")
-</div>
