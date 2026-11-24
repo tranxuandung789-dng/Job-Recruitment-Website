@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.Mvc;
 using Job_Recruitment_Website.Models;
 using Job_Recruitment_Website.Helpers;
+using System.Text.RegularExpressions;
 
 namespace Job_Recruitment_Website.Controllers
 {
@@ -158,6 +159,26 @@ namespace Job_Recruitment_Website.Controllers
                 ModelState.AddModelError("Deadline", "Hạn nộp hồ sơ không được nhỏ hơn ngày hiện tại!");
             }
 
+            // Kiểm tra định dạng Mức lương (chặn số âm, ký tự lạ, chuỗi chỉ toàn khoảng trắng)
+            if (!string.IsNullOrWhiteSpace(job.SalaryRange))
+            {
+                string salary = job.SalaryRange.Trim();
+
+                // 1. Chặn số âm (chỉ bắt dấu trừ đứng đầu hoặc không có số phía trước, không bắt nhầm 15 - 20)
+                bool hasNegativeNumber = Regex.IsMatch(salary, @"(^|[^\d\s])\s*-\s*\d");
+
+                // 2. Chỉ cho phép chữ cái (có dấu tiếng Việt), số, khoảng trắng và các ký tự hợp lệ (- / . , + $)
+                bool hasInvalidChars = !Regex.IsMatch(salary, @"^[\p{L}\d\s\-\/\.,\+\$]+$");
+
+                // 3. Bắt buộc phải có ít nhất 1 chữ cái hoặc chữ số (chặn nhập toàn dấu --- hoặc ...)
+                bool hasLetterOrDigit = Regex.IsMatch(salary, @"[\p{L}\d]");
+
+                if (hasNegativeNumber || hasInvalidChars || !hasLetterOrDigit)
+                {
+                    ModelState.AddModelError("SalaryRange", "Mức lương không hợp lệ (không được nhập số âm hoặc ký tự đặc biệt như @, #, %...).");
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 job.CompanyId = company.CompanyId;
@@ -261,6 +282,35 @@ namespace Job_Recruitment_Website.Controllers
                     TempData["Success"] = "Đã mở lại tin tuyển dụng: " + job.Title;
                 }
             }
+            return RedirectToAction("MyJobs");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RoleAuthorize("Recruiter")]
+        public ActionResult Delete(int id)
+        {
+            var company = GetRecruiterCompany();
+            if (company == null) return RedirectToAction("Create", "COMPANies");
+
+            var job = db.JOBS.FirstOrDefault(j => j.JobId == id && j.CompanyId == company.CompanyId);
+            if (job == null)
+            {
+                TempData["Error"] = "Không tìm thấy tin tuyển dụng hoặc bạn không có quyền xóa.";
+                return RedirectToAction("MyJobs");
+            }
+
+            if (db.APPLICATIONS.Any(a => a.JobId == id))
+            {
+                TempData["Error"] = "Tin tuyển dụng này đã có ứng viên nộp hồ sơ nên không thể xóa. Vui lòng dùng chức năng Đóng tin!";
+                return RedirectToAction("MyJobs");
+            }
+
+            string title = job.Title;
+            db.JOBS.Remove(job);
+            db.SaveChanges();
+
+            TempData["Success"] = "Đã xóa tin tuyển dụng: " + title;
             return RedirectToAction("MyJobs");
         }
 
