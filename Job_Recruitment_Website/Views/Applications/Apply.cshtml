@@ -1,34 +1,212 @@
 ﻿@{
     ViewBag.Title = "Nộp hồ sơ ứng tuyển";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+
     var job = ViewBag.Job as Job_Recruitment_Website.Models.JOB;
+    string compName = (job != null && job.COMPANy != null) ? job.COMPANy.CompanyName : "Đang cập nhật";
+    string compLogo = (job != null && job.COMPANy != null) ? job.COMPANy.Logo_Url : null;
+    bool hasCvError = ViewData.ModelState["cvFile"] != null && ViewData.ModelState["cvFile"].Errors.Count > 0;
+    string savedCoverLetter = Request.Form["coverLetter"] ?? "";
 }
 
-<div class="container my-4" style="max-width: 650px;">
-    <div class="card shadow-sm p-4">
-        <h3 class="text-primary mb-3">Ứng tuyển vị trí: @job.Title</h3>
-        <p class="text-muted"><strong>Công ty:</strong> @job.COMPANy.CompanyName</p>
-        <hr />
+<div class="apply-card mb-4">
+    <!-- HEADER TÓM TẮT VỊ TRÍ ỨNG TUYỂN -->
+    <div class="apply-job-header">
+        @if (!string.IsNullOrEmpty(compLogo))
+        {
+            <img src="@compLogo" alt="@compName" class="apply-company-logo" />
+        }
+        else
+        {
+            <div class="apply-company-fallback">
+                <i class="bi bi-building"></i>
+            </div>
+        }
 
-        @using (Html.BeginForm("Apply", "Applications", new { jobId = job.JobId }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+        <div class="flex-grow-1">
+            <span class="apply-badge-top">
+                <i class="bi bi-send-check-fill"></i> Nộp hồ sơ ứng tuyển
+            </span>
+            <h2 class="apply-job-title">@job.Title</h2>
+            <div class="apply-company-name">
+                <i class="bi bi-building-check text-orange me-1"></i>@compName
+            </div>
+
+            <div class="apply-meta-pills">
+                <span class="apply-meta-pill pill-salary">
+                    <i class="bi bi-cash-stack"></i>
+                    @(string.IsNullOrEmpty(job.SalaryRange) ? "Thỏa thuận" : job.SalaryRange)
+                </span>
+                @if (!string.IsNullOrEmpty(job.Location))
+                {
+                    <span class="apply-meta-pill">
+                        <i class="bi bi-geo-alt-fill text-orange"></i> @job.Location
+                    </span>
+                }
+                <span class="apply-meta-pill">
+                    <i class="bi bi-calendar-event text-orange"></i> Hạn nộp: @job.Deadline.ToString("dd/MM/yyyy")
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORM ĐÍNH KÈM CV & COVER LETTER -->
+    <div class="apply-body">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger rounded-3 py-2 small fw-semibold mb-4">
+                ⚠ @Html.ValidationMessage("cvFile")
+                @Html.ValidationSummary(true)
+            </div>
+        }
+
+        @using (Html.BeginForm("Apply", "Applications", new { jobId = job.JobId }, FormMethod.Post, new { enctype = "multipart/form-data", id = "applyJobForm", novalidate = "novalidate" }))
         {
             @Html.AntiForgeryToken()
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">File CV đính kèm (Chỉ chấp nhận file PDF, tối đa 5MB) *</label>
-                <input type="file" name="cvFile" class="form-control" accept=".pdf" required />
-                @Html.ValidationMessage("cvFile", "", new { @class = "text-danger" })
+            <!-- 1. UPLOAD FILE CV PDF -->
+            <div class="mb-4">
+                <label class="job-label" for="cvFile">
+                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                    <span>Hồ sơ CV đính kèm <span class="text-danger">*</span></span>
+                </label>
+
+                <input type="file" id="cvFile" name="cvFile" class="d-none" accept=".pdf" />
+
+                <label for="cvFile" id="cvDropZone" class="apply-upload-zone @(hasCvError ? "is-invalid" : "")">
+                    <div class="apply-upload-icon" id="cvUploadIcon">
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                    </div>
+                    <div class="fw-bold text-dark" id="cvFileName" style="font-size: 15px;">
+                        Nhấn vào đây hoặc kéo thả file CV để tải lên
+                    </div>
+                    <div class="text-muted small mt-1" id="cvFileSub">
+                        Chỉ chấp nhận định dạng <strong>.PDF</strong> chuẩn, dung lượng tối đa <strong>5MB</strong>
+                    </div>
+                    <span class="apply-upload-btn-fake" id="cvChooseBtnText">
+                        <i class="bi bi-folder2-open"></i> Chọn tệp từ máy tính
+                    </span>
+                </label>
+
+                <div id="cvClientError" class="text-danger small fw-semibold mt-2 @(hasCvError ? "" : "d-none")">
+                    @if (hasCvError)
+                    {
+                        @Html.ValidationMessage("cvFile")
+                    }
+                    else
+                    {
+                        @:Vui lòng đính kèm file CV định dạng PDF của bạn.
+                    }
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Thư giới thiệu ngắn (Cover Letter):</label>
-                <textarea name="coverLetter" class="form-control" rows="4" placeholder="Giới thiệu bản thân và lý do bạn phù hợp với công việc này..."></textarea>
+            <!-- 2. THƯ GIỚI THIỆU -->
+            <div class="mb-2">
+                <label class="job-label" for="coverLetter">
+                    <i class="bi bi-chat-square-quote-fill"></i>
+                    <span>Thư giới thiệu ngắn (Cover Letter) <span class="text-muted fw-normal small">(Không bắt buộc)</span></span>
+                </label>
+                <textarea id="coverLetter" name="coverLetter" class="form-control job-input" rows="5"
+                          placeholder="Giới thiệu ngắn gọn về kinh nghiệm, thế mạnh của bản thân và lý do bạn phù hợp với vị trí này...">@savedCoverLetter</textarea>
             </div>
 
-            <div class="d-flex justify-content-between">
-                <a href="@Url.Action("Details", "Jobs", new { id = job.JobId })" class="btn btn-outline-secondary">Quay lại</a>
-                <button type="submit" class="btn btn-primary px-4">Gửi hồ sơ</button>
+            <!-- THANH NÚT BẤM -->
+            <div class="apply-footer">
+                <a href="@Url.Action("Details", "Jobs", new { id = job.JobId })" class="btn btn-outline-secondary btn-back-job d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Quay lại việc làm</span>
+                </a>
+
+                <button type="submit" class="btn-apply-detail">
+                    <i class="bi bi-send-fill"></i>
+                    <span>Gửi hồ sơ ứng tuyển</span>
+                </button>
             </div>
         }
     </div>
 </div>
+
+@section scripts {
+    <script>
+        (function () {
+            var form = document.getElementById('applyJobForm');
+            var cvInput = document.getElementById('cvFile');
+            var dropZone = document.getElementById('cvDropZone');
+            var iconBox = document.getElementById('cvUploadIcon');
+            var nameText = document.getElementById('cvFileName');
+            var subText = document.getElementById('cvFileSub');
+            var btnText = document.getElementById('cvChooseBtnText');
+            var errBox = document.getElementById('cvClientError');
+
+            if (!form || !cvInput || !dropZone) return;
+
+            function formatSize(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+                return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            }
+
+            function resetZoneDisplay() {
+                dropZone.classList.remove('has-file');
+                iconBox.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i>';
+                nameText.textContent = 'Nhấn vào đây hoặc kéo thả file CV để tải lên';
+                subText.innerHTML = 'Chỉ chấp nhận định dạng <strong>.PDF</strong> chuẩn, dung lượng tối đa <strong>5MB</strong>';
+                btnText.innerHTML = '<i class="bi bi-folder2-open"></i> Chọn tệp từ máy tính';
+            }
+
+            function updateSelectedFile() {
+                // Đợi sự kiện kiểm tra đuôi file trong recruitment.js chạy xong trước
+                setTimeout(function () {
+                    var file = cvInput.files && cvInput.files[0];
+                    if (file) {
+                        dropZone.classList.remove('is-invalid');
+                        dropZone.classList.add('has-file');
+                        errBox.classList.add('d-none');
+                        iconBox.innerHTML = '<i class="bi bi-file-earmark-check-fill"></i>';
+                        nameText.textContent = file.name;
+                        subText.textContent = 'Dung lượng: ' + formatSize(file.size) + ' • Đã sẵn sàng gửi hồ sơ';
+                        btnText.innerHTML = '<i class="bi bi-arrow-repeat"></i> Đổi tệp PDF khác';
+                    } else {
+                        resetZoneDisplay();
+                    }
+                }, 20);
+            }
+
+            cvInput.addEventListener('change', updateSelectedFile);
+
+            // Hỗ trợ kéo thả file trực tiếp vào khung
+            ['dragenter', 'dragover'].forEach(function (ev) {
+                dropZone.addEventListener(ev, function (e) {
+                    e.preventDefault();
+                    dropZone.classList.add('drag-over');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(function (ev) {
+                dropZone.addEventListener(ev, function (e) {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+                });
+            });
+
+            dropZone.addEventListener('drop', function (e) {
+                if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    cvInput.files = e.dataTransfer.files;
+                    var event = new Event('change', { bubbles: true });
+                    cvInput.dispatchEvent(event);
+                }
+            });
+
+            form.addEventListener('submit', function (e) {
+                if (!cvInput.files || cvInput.files.length === 0) {
+                    e.preventDefault();
+                    dropZone.classList.remove('has-file');
+                    dropZone.classList.add('is-invalid');
+                    errBox.textContent = 'Vui lòng đính kèm file CV định dạng PDF trước khi gửi hồ sơ.';
+                    errBox.classList.remove('d-none');
+                    dropZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        })();
+    </script>
+}

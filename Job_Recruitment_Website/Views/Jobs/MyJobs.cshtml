@@ -1,132 +1,244 @@
 ﻿@model IEnumerable<Job_Recruitment_Website.Models.JOB>
+@using Job_Recruitment_Website.Models
 
 @{
     ViewBag.Title = "Quản lý tin tuyển dụng";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+
+    var jobsList = Model != null ? Model.ToList() : new List<JOB>();
+    int totalJobs = jobsList.Count;
+    int openJobs = jobsList.Count(j => j.Status == "Open" && j.Deadline >= DateTime.Today);
+    int closedJobs = totalJobs - openJobs;
+
+    var jobIds = jobsList.Select(j => j.JobId).ToList();
+    var appCounts = new Dictionary<int, int>();
+    if (jobIds.Any())
+    {
+        using (var db = new RecruitmentDBEntities())
+        {
+            appCounts = db.APPLICATIONS
+                          .Where(a => jobIds.Contains(a.JobId))
+                          .GroupBy(a => a.JobId)
+                          .ToDictionary(g => g.Key, g => g.Count());
+        }
+    }
+    int totalApplicants = appCounts.Values.Sum();
 }
 
-<div class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="fw-bold">Danh sách tin tuyển dụng của công ty</h2>
-        @Html.ActionLink("Đăng tin mới", "Create", null, new { @class = "btn btn-primary shadow-sm" })
+<!-- TIÊU ĐỀ TRANG & NÚT ĐĂNG TIN MỚI -->
+<div class="job-section-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Danh sách tin tuyển dụng của công ty</h2>
+        <p class="text-muted small mb-0">Quản lý trạng thái bài đăng và duyệt hồ sơ ứng viên ứng tuyển</p>
+    </div>
+    <a href="@Url.Action("Create", "Jobs")" class="btn btn-primary-custom px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
+        <i class="bi bi-plus-circle-fill"></i>
+        <span>Đăng tin mới</span>
+    </a>
+</div>
+
+<!-- THÔNG BÁO -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 py-2 small fw-semibold mb-3" role="alert">
+        ✔ @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 py-2 small fw-semibold mb-3" role="alert">
+        ⚠ @TempData["Error"]
+    </div>
+}
+
+<!-- 4 THẺ THỐNG KÊ NHANH CHO NHÀ TUYỂN DỤNG -->
+<div class="myjobs-stats-grid">
+    <div class="myjobs-stat-card">
+        <div class="myjobs-stat-icon icon-total">
+            <i class="bi bi-briefcase-fill"></i>
+        </div>
+        <div>
+            <div class="myjobs-stat-num">@totalJobs</div>
+            <div class="myjobs-stat-label">Tổng tin đã đăng</div>
+        </div>
     </div>
 
-    @if (TempData["Success"] != null)
+    <div class="myjobs-stat-card">
+        <div class="myjobs-stat-icon icon-open">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div>
+            <div class="myjobs-stat-num">@openJobs</div>
+            <div class="myjobs-stat-label">Đang mở tuyển</div>
+        </div>
+    </div>
+
+    <div class="myjobs-stat-card">
+        <div class="myjobs-stat-icon icon-closed">
+            <i class="bi bi-archive-fill"></i>
+        </div>
+        <div>
+            <div class="myjobs-stat-num">@closedJobs</div>
+            <div class="myjobs-stat-label">Đã đóng / Hết hạn</div>
+        </div>
+    </div>
+
+    <div class="myjobs-stat-card">
+        <div class="myjobs-stat-icon icon-candidates">
+            <i class="bi bi-people-fill"></i>
+        </div>
+        <div>
+            <div class="myjobs-stat-num">@totalApplicants</div>
+            <div class="myjobs-stat-label">Tổng đơn ứng tuyển</div>
+        </div>
+    </div>
+</div>
+
+<!-- BẢNG QUẢN LÝ TIN TUYỂN DỤNG -->
+<div class="myjobs-card mb-4">
+    @if (!jobsList.Any())
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Success"]
+        <div class="p-5 text-center">
+            <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle"
+                 style="width: 64px; height: 64px; background-color: #fff0dd; color: #f7901e; font-size: 28px;">
+                <i class="bi bi-megaphone-fill"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-1">Chưa có tin tuyển dụng nào được đăng</h5>
+            <p class="text-muted small mb-3">Hãy bấm nút <strong>"Đăng tin mới"</strong> để tạo bài đăng đầu tiên cho công ty của bạn!</p>
+            <a href="@Url.Action("Create", "Jobs")" class="btn btn-primary-custom px-4 py-2">
+                <i class="bi bi-plus-lg me-1"></i> Đăng tin ngay
+            </a>
         </div>
     }
-
-    @if (TempData["Error"] != null)
+    else
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["Error"]
-        </div>
-    }
-
-    <div class="table-responsive shadow-sm rounded">
-        <table class="table table-bordered table-hover align-middle mb-0 bg-white">
-            <thead class="table-light">
-                <tr class="text-nowrap text-center">
-                    <th>Tiêu đề công việc</th>
-                    <th style="max-width: 250px;">Mô tả</th>
-                    <th>Mức lương</th>
-                    <th>Địa điểm</th>
-                    <th>Hạn nộp</th>
-                    <th>Trạng thái</th>
-                    <th>Ngày đăng</th>
-                    <th>Ngành nghề</th>
-                    <th style="min-width: 300px;">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model == null || !Model.Any())
-                {
+        <div class="table-responsive">
+            <table class="myjobs-table">
+                <thead>
                     <tr>
-                        <td colspan="9" class="text-center py-4 text-muted">
-                            Chưa có tin tuyển dụng nào được đăng. Hãy bấm nút <strong>"Đăng tin mới"</strong> để tạo bài đăng đầu tiên!
-                        </td>
+                        <th>Thông tin công việc</th>
+                        <th>Thời hạn</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center">Hồ sơ nộp</th>
+                        <th class="text-center">Thao tác</th>
                     </tr>
-                }
-                else
-                {
-                    foreach (var item in Model)
+                </thead>
+                <tbody>
+                    @foreach (var item in jobsList)
                     {
+                        bool isExpired = item.Deadline < DateTime.Today;
+                        int cnt = appCounts.ContainsKey(item.JobId) ? appCounts[item.JobId] : 0;
+
                         <tr>
+                            <!-- Cột 1: Tiêu đề + Ngành nghề + Lương + Địa điểm + Mô tả rút gọn -->
                             <td>
-                                <strong>@item.Title</strong>
-                            </td>
-                            <td class="text-truncate" style="max-width: 250px;" title="@item.Description">
-                                @item.Description
-                            </td>
-                            <td class="text-center text-nowrap">
-                                @(string.IsNullOrEmpty(item.SalaryRange) ? "Thỏa thuận" : item.SalaryRange)
-                            </td>
-                            <td>
-                                @item.Location
-                            </td>
-                            <td class="text-center text-nowrap">
-                                @item.Deadline.ToString("dd/MM/yyyy")
-                            </td>
-                            <td class="text-center">
-                                @if (item.Status == "Open")
-                                {
-                                    <span class="badge bg-success">Đang mở</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">Đã đóng</span>
-                                }
-                            </td>
-                            <td class="text-center text-nowrap">
-                                @item.PostedDate.ToString("dd/MM/yyyy")
-                            </td>
-                            <td>
-                                @(item.CATEGORy != null ? item.CATEGORy.CategoryName : "")
-                            </td>
-                            <td class="text-center text-nowrap">
-                                <a href="@Url.Action("Candidates", "Applications", new { jobId = item.JobId })" class="btn btn-sm btn-info text-white me-1" title="Xem danh sách ứng viên nộp hồ sơ">
-                                    Ứng viên
+                                <a href="@Url.Action("Details", "Jobs", new { id = item.JobId })" class="myjobs-job-title">
+                                    @item.Title
                                 </a>
-
-                                @Html.ActionLink("Sửa", "Edit", new { id = item.JobId }, new { @class = "btn btn-sm btn-outline-secondary me-1" })
-                                @Html.ActionLink("Chi tiết", "Details", new { id = item.JobId }, new { @class = "btn btn-sm btn-outline-primary me-1" })
-
-                                @if (item.Status == "Open")
-                                {
-                                    using (Html.BeginForm("Close", "Jobs", FormMethod.Post, new { style = "display:inline;" }))
+                                <div class="myjobs-meta-row">
+                                    @if (item.CATEGORy != null)
                                     {
-                                        <input type="hidden" name="id" value="@item.JobId" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger btn-close-job">
-                                            Đóng tin
-                                        </button>
+                                        <span class="myjobs-cat-tag">@item.CATEGORy.CategoryName</span>
                                     }
+                                    <span><i class="bi bi-geo-alt text-orange"></i> @item.Location</span>
+                                    <span class="fw-bold" style="color: #059669;">
+                                        • @(string.IsNullOrEmpty(item.SalaryRange) ? "Thỏa thuận" : item.SalaryRange)
+                                    </span>
+                                </div>
+                                <div class="myjobs-desc-preview" title="@item.Description">
+                                    @item.Description
+                                </div>
+                            </td>
+
+                            <!-- Cột 2: Hạn nộp & Ngày đăng -->
+                            <td class="text-nowrap">
+                                <div class="fw-bold @(isExpired ? "text-danger" : "text-dark")">
+                                    <i class="bi bi-hourglass-split text-orange me-1"></i>@item.Deadline.ToString("dd/MM/yyyy")
+                                </div>
+                                <div class="text-muted" style="font-size: 12px; margin-top: 3px;">
+                                    Đăng: @item.PostedDate.ToString("dd/MM/yyyy")
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Trạng thái -->
+                            <td class="text-center">
+                                @if (item.Status == "Open" && !isExpired)
+                                {
+                                    <span class="myjobs-status-badge st-open">
+                                        <i class="bi bi-check-circle-fill"></i> Đang mở
+                                    </span>
+                                }
+                                else if (item.Status == "Open" && isExpired)
+                                {
+                                    <span class="myjobs-status-badge st-expired">
+                                        <i class="bi bi-exclamation-circle-fill"></i> Quá hạn
+                                    </span>
                                 }
                                 else
                                 {
-                                    using (Html.BeginForm("Reopen", "Jobs", FormMethod.Post, new { style = "display:inline;" }))
+                                    <span class="myjobs-status-badge st-closed">
+                                        <i class="bi bi-lock-fill"></i> Đã đóng
+                                    </span>
+                                }
+                            </td>
+
+                            <!-- Cột 4: Nút xem danh sách Ứng viên kèm số lượng -->
+                            <td class="text-center">
+                                <a href="@Url.Action("Candidates", "Applications", new { jobId = item.JobId })"
+                                   class="btn-candidates-pill"
+                                   title="Xem danh sách ứng viên nộp hồ sơ">
+                                    <i class="bi bi-people-fill"></i>
+                                    <span>Ứng viên</span>
+                                    <span class="candidates-count-badge">@cnt</span>
+                                </a>
+                            </td>
+
+                            <!-- Cột 5: Các nút thao tác -->
+                            <td class="text-center">
+                                <div class="myjobs-actions">
+                                    <a href="@Url.Action("Edit", "Jobs", new { id = item.JobId })" class="myjobs-btn btn-act-edit" title="Chỉnh sửa tin">
+                                        <i class="bi bi-pencil-square"></i> Sửa
+                                    </a>
+
+                                    <a href="@Url.Action("Details", "Jobs", new { id = item.JobId })" class="myjobs-btn btn-act-view" title="Xem chi tiết">
+                                        <i class="bi bi-eye"></i> Chi tiết
+                                    </a>
+
+                                    @if (item.Status == "Open")
                                     {
+                                        using (Html.BeginForm("Close", "Jobs", FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            <input type="hidden" name="id" value="@item.JobId" />
+                                            <button type="submit" class="myjobs-btn btn-act-close btn-close-job" title="Tạm đóng tin tuyển dụng">
+                                                <i class="bi bi-pause-circle"></i> Đóng
+                                            </button>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        using (Html.BeginForm("Reopen", "Jobs", FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            <input type="hidden" name="id" value="@item.JobId" />
+                                            <button type="submit" class="myjobs-btn btn-act-reopen" title="Mở lại tin tuyển dụng">
+                                                <i class="bi bi-arrow-clockwise"></i> Mở lại
+                                            </button>
+                                        }
+                                    }
+
+                                    @using (Html.BeginForm("Delete", "Jobs", FormMethod.Post, new { style = "display:inline;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@item.JobId" />
-                                        <button type="submit" class="btn btn-sm btn-outline-success">
-                                            Mở lại
+                                        <button type="submit" class="myjobs-btn btn-act-delete btn-delete-job" data-title="@item.Title" title="Xóa tin tuyển dụng">
+                                            <i class="bi bi-trash3"></i> Xóa
                                         </button>
                                     }
-                                }
-
-                                @using (Html.BeginForm("Delete", "Jobs", FormMethod.Post, new { style = "display:inline;" }))
-                                {
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@item.JobId" />
-                                    <button type="submit" class="btn btn-sm btn-danger ms-1 btn-delete-job" data-title="@item.Title">
-                                        Xóa
-                                    </button>
-                                }
+                                </div>
                             </td>
                         </tr>
                     }
-                }
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
+    }
 </div>

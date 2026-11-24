@@ -3,166 +3,295 @@
 @{
     ViewBag.Title = "Danh sách ứng viên";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+
+    var list = Model != null ? Model.ToList() : new List<Job_Recruitment_Website.Models.APPLICATION>();
+    int totalCount = list.Count;
+    int reviewingCount = list.Count(a => a.Status == "Pending" || a.Status == "Submitted" || a.Status == "Reviewed");
+    int interviewCount = list.Count(a => a.Status == "Interview");
+    int acceptedCount = list.Count(a => a.Status == "Accepted" || a.Status == "Approved");
 }
 
-<div class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="mb-0">Hồ sơ ứng viên: <span class="text-primary">@ViewBag.JobTitle</span></h3>
-        <a href="@Url.Action("MyJobs", "Jobs")" class="btn btn-outline-secondary">Quay lại danh sách tin</a>
+<!-- TIÊU ĐỀ TRANG -->
+<div class="job-section-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <div class="small fw-bold text-orange text-uppercase mb-1" style="letter-spacing: 0.4px;">
+            <i class="bi bi-people-fill me-1"></i>Quản lý hồ sơ ứng tuyển (Applied → Review → Interview → Accepted / Rejected)
+        </div>
+        <h2 class="fw-bold text-dark mb-0" style="font-size: 22px;">
+            Vị trí:
+            <a href="@Url.Action("Details", "Jobs", new { id = ViewBag.JobId })" class="text-orange">
+                @ViewBag.JobTitle
+            </a>
+        </h2>
     </div>
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success rounded-3 py-2 small fw-semibold mb-3">✔ @TempData["Success"]</div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger rounded-3 py-2 small fw-semibold mb-3">⚠ @TempData["Error"]</div>
-    }
+    <a href="@Url.Action("MyJobs", "Jobs")" class="btn-profile-nav">
+        <i class="bi bi-arrow-left"></i>
+        <span>Quay lại danh sách tin</span>
+    </a>
+</div>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle bg-white">
-            <thead class="table-light">
-                <tr>
-                    <th>Họ và tên</th>
-                    <th>Email / SĐT</th>
-                    <th>Ngày nộp</th>
-                    <th>Hồ sơ / Thư giới thiệu</th>
-                    <th class="text-center">Trạng thái hiện tại</th>
-                    <th class="text-center" style="min-width: 230px;">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (!Model.Any())
-                {
+<!-- THÔNG BÁO -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success rounded-3 py-2 small fw-semibold mb-3">✔ @TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger rounded-3 py-2 small fw-semibold mb-3">⚠ @TempData["Error"]</div>
+}
+
+<!-- 4 THẺ THỐNG KÊ PHỄU TUYỂN DỤNG -->
+<div class="cand-stats-grid">
+    <div class="cand-stat-card">
+        <div class="cand-stat-icon st-all">
+            <i class="bi bi-people-fill"></i>
+        </div>
+        <div>
+            <div class="fw-bold text-dark fs-5" style="line-height: 1.1;">@totalCount</div>
+            <div class="text-muted small fw-semibold">Tổng hồ sơ nộp</div>
+        </div>
+    </div>
+
+    <div class="cand-stat-card">
+        <div class="cand-stat-icon st-wait">
+            <i class="bi bi-hourglass-split"></i>
+        </div>
+        <div>
+            <div class="fw-bold text-dark fs-5" style="line-height: 1.1;">@reviewingCount</div>
+            <div class="text-muted small fw-semibold">Applied / Review</div>
+        </div>
+    </div>
+
+    <div class="cand-stat-card">
+        <div class="cand-stat-icon st-itv">
+            <i class="bi bi-calendar2-check-fill"></i>
+        </div>
+        <div>
+            <div class="fw-bold text-dark fs-5" style="line-height: 1.1;">@interviewCount</div>
+            <div class="text-muted small fw-semibold">Interview (Phỏng vấn)</div>
+        </div>
+    </div>
+
+    <div class="cand-stat-card">
+        <div class="cand-stat-icon st-ok">
+            <i class="bi bi-patch-check-fill"></i>
+        </div>
+        <div>
+            <div class="fw-bold text-dark fs-5" style="line-height: 1.1;">@acceptedCount</div>
+            <div class="text-muted small fw-semibold">Accepted (Đã nhận)</div>
+        </div>
+    </div>
+</div>
+
+<!-- BẢNG DANH SÁCH ỨNG VIÊN -->
+<div class="cand-card mb-4">
+    @if (!list.Any())
+    {
+        <div class="p-5 text-center">
+            <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle"
+                 style="width: 64px; height: 64px; background-color: #fff0dd; color: #f7901e; font-size: 28px;">
+                <i class="bi bi-inbox-fill"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-1">Chưa có ứng viên nào nộp hồ sơ</h5>
+            <p class="text-muted small mb-0">Khi có ứng viên ứng tuyển vào vị trí này, hồ sơ và CV sẽ hiển thị tại đây.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="cand-table">
+                <thead>
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-4">Chưa có ứng viên nào nộp hồ sơ vào vị trí này.</td>
+                        <th>Ứng viên</th>
+                        <th>Liên hệ & Ngày nộp</th>
+                        <th class="text-center">Hồ sơ / Thư</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center">Duyệt hồ sơ</th>
                     </tr>
-                }
-                else
-                {
-                    foreach (var item in Model)
+                </thead>
+                <tbody>
+                    @foreach (var item in list)
                     {
-                        <tr>
-                            <td><strong>@item.USER.FullName</strong></td>
-                            <td>
-                                <div>@item.USER.Email</div>
-                                <div class="text-muted small">@item.USER.Phone</div>
-                            </td>
-                            <td>@item.AppliedDate.ToString("dd/MM/yyyy")</td>
-                            <td>
-                                @if (item.CANDIDATEPROFILE != null && !string.IsNullOrEmpty(item.CANDIDATEPROFILE.CV_Url))
-                                {
-                                    <a href="@Url.Content(item.CANDIDATEPROFILE.CV_Url)" target="_blank" class="btn btn-sm btn-info text-white me-1">Xem CV (PDF)</a>
-                                }
-                                else
-                                {
-                                    <span class="text-muted small me-1">Chưa có CV</span>
-                                }
+                        string cName = (item.USER != null && !string.IsNullOrWhiteSpace(item.USER.FullName)) ? item.USER.FullName.Trim() : "Ứng viên";
+                        string initial = cName.Substring(0, 1).ToUpper();
+                        string skills = (item.CANDIDATEPROFILE != null && !string.IsNullOrWhiteSpace(item.CANDIDATEPROFILE.Skills) && item.CANDIDATEPROFILE.Skills != "Đang cập nhật")
+                            ? item.CANDIDATEPROFILE.Skills
+                            : null;
 
-                                @if (!string.IsNullOrEmpty(item.CoverLetter))
-                                {
-                                    <button type="button" class="btn btn-sm btn-outline-secondary"
-                                            data-letter="@item.CoverLetter"
-                                            onclick="alert(this.getAttribute('data-letter'))">
-                                        Xem thư
-                                    </button>
-                                }
+                        <tr>
+                            <td>
+                                <div class="cand-person">
+                                    <div class="cand-avatar">@initial</div>
+                                    <div>
+                                        <div class="fw-bold text-dark">@cName</div>
+                                        @if (skills != null)
+                                        {
+                                            <div class="cand-skill-sub" title="@skills">
+                                                <i class="bi bi-stars text-orange me-1"></i>@skills
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
                             </td>
+
+                            <td>
+                                <div class="fw-medium text-dark">@(item.USER != null ? item.USER.Email : "")</div>
+                                <div class="text-muted" style="font-size: 12.5px;">
+                                    <i class="bi bi-telephone text-orange me-1"></i>@(item.USER != null ? item.USER.Phone : "")
+                                    <span class="mx-1">•</span>
+                                    <i class="bi bi-calendar3 me-1"></i>@item.AppliedDate.ToString("dd/MM/yyyy")
+                                </div>
+                            </td>
+
+                            <td class="text-center">
+                                <div class="d-inline-flex align-items-center gap-1 flex-nowrap">
+                                    @if (item.CANDIDATEPROFILE != null && !string.IsNullOrEmpty(item.CANDIDATEPROFILE.CV_Url) && item.CANDIDATEPROFILE.CV_Url != "Đang cập nhật")
+                                    {
+                                        <a href="@Url.Action("ViewCv", "Applications", new { id = item.ApplicationId })"
+                                           target="_blank"
+                                           class="btn-view-cv-soft">
+                                            <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            <span>Xem CV</span>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small me-1">Chưa có CV</span>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(item.CoverLetter))
+                                    {
+                                        <button type="button"
+                                                class="btn-cover-letter"
+                                                data-letter="@item.CoverLetter"
+                                                onclick="alert(this.getAttribute('data-letter'))">
+                                            <i class="bi bi-envelope-open"></i>
+                                            <span>Xem thư</span>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+
                             <td class="text-center">
                                 @switch (item.Status)
                                 {
                                     case "Pending":
                                     case "Submitted":
-                                        <span class="badge bg-secondary">Chờ duyệt</span>
+                                        <span class="myapp-badge badge-status-pending">
+                                            <i class="bi bi-clock"></i> Applied • Chờ duyệt
+                                        </span>
                                         break;
                                     case "Reviewed":
-                                        <span class="badge bg-info text-dark">Đang xem xét</span>
+                                        <span class="myapp-badge badge-status-reviewed">
+                                            <i class="bi bi-eye-fill"></i> Review • Đang xét
+                                        </span>
                                         break;
                                     case "Interview":
-                                        <span class="badge bg-primary">Phỏng vấn</span>
+                                        <span class="myapp-badge badge-status-interview">
+                                            <i class="bi bi-calendar-event-fill"></i> Interview • Phỏng vấn
+                                        </span>
                                         break;
                                     case "Accepted":
                                     case "Approved":
-                                        <span class="badge bg-success">Đã nhận</span>
+                                        <span class="myapp-badge badge-status-accepted">
+                                            <i class="bi bi-check-circle-fill"></i> Accepted • Đã nhận
+                                        </span>
                                         break;
                                     case "Rejected":
-                                        <span class="badge bg-danger">Đã từ chối</span>
+                                        <span class="myapp-badge badge-status-rejected">
+                                            <i class="bi bi-x-circle-fill"></i> Rejected • Từ chối
+                                        </span>
                                         break;
                                     default:
-                                        <span class="badge bg-light text-dark">@item.Status</span>
+                                        <span class="myapp-badge badge-status-pending">@item.Status</span>
                                         break;
                                 }
                             </td>
+
                             <td class="text-center">
-                                @if (item.Status == "Pending" || item.Status == "Submitted")
-                                {
-                                    using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline-block;" }))
+                                <div class="cand-workflow-btns">
+                                    @if (item.Status == "Pending" || item.Status == "Submitted")
                                     {
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="applicationId" value="@item.ApplicationId" />
-                                        <input type="hidden" name="newStatus" value="Reviewed" />
-                                        <button type="submit" class="btn btn-sm btn-info text-white me-1">Xem xét</button>
+                                        using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="applicationId" value="@item.ApplicationId" />
+                                            <input type="hidden" name="newStatus" value="Reviewed" />
+                                            <button type="submit" class="btn-wf wf-review">
+                                                <i class="bi bi-eye"></i> Review
+                                            </button>
+                                        }
+                                        using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="applicationId" value="@item.ApplicationId" />
+                                            <input type="hidden" name="newStatus" value="Rejected" />
+                                            <button type="submit" class="btn-wf wf-reject">
+                                                <i class="bi bi-x-lg"></i> Reject
+                                            </button>
+                                        }
                                     }
-                                    using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline-block;" }))
+                                    else if (item.Status == "Reviewed")
                                     {
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="applicationId" value="@item.ApplicationId" />
-                                        <input type="hidden" name="newStatus" value="Rejected" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Từ chối</button>
+                                        using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="applicationId" value="@item.ApplicationId" />
+                                            <input type="hidden" name="newStatus" value="Interview" />
+                                            <button type="submit" class="btn-wf wf-interview">
+                                                <i class="bi bi-calendar-plus"></i> Interview
+                                            </button>
+                                        }
+                                        using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="applicationId" value="@item.ApplicationId" />
+                                            <input type="hidden" name="newStatus" value="Rejected" />
+                                            <button type="submit" class="btn-wf wf-reject">
+                                                <i class="bi bi-x-lg"></i> Reject
+                                            </button>
+                                        }
                                     }
-                                }
-                                else if (item.Status == "Reviewed")
-                                {
-                                    using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline-block;" }))
+                                    else if (item.Status == "Interview")
                                     {
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="applicationId" value="@item.ApplicationId" />
-                                        <input type="hidden" name="newStatus" value="Interview" />
-                                        <button type="submit" class="btn btn-sm btn-primary me-1">Mời phỏng vấn</button>
+                                        using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="applicationId" value="@item.ApplicationId" />
+                                            <input type="hidden" name="newStatus" value="Accepted" />
+                                            <button type="submit" class="btn-wf wf-accept">
+                                                <i class="bi bi-check2-circle"></i> Accept
+                                            </button>
+                                        }
+                                        using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="applicationId" value="@item.ApplicationId" />
+                                            <input type="hidden" name="newStatus" value="Rejected" />
+                                            <button type="submit" class="btn-wf wf-reject">
+                                                <i class="bi bi-x-lg"></i> Reject
+                                            </button>
+                                        }
                                     }
-                                    using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline-block;" }))
+                                    else
                                     {
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="applicationId" value="@item.ApplicationId" />
-                                        <input type="hidden" name="newStatus" value="Rejected" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Từ chối</button>
+                                        using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="applicationId" value="@item.ApplicationId" />
+                                            <input type="hidden" name="newStatus" value="Reviewed" />
+                                            <button type="submit" class="btn-wf wf-reopen" title="Đưa hồ sơ quay lại bước Review">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Xem xét lại
+                                            </button>
+                                        }
                                     }
-                                }
-                                else if (item.Status == "Interview")
-                                {
-                                    using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline-block;" }))
-                                    {
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="applicationId" value="@item.ApplicationId" />
-                                        <input type="hidden" name="newStatus" value="Accepted" />
-                                        <button type="submit" class="btn btn-sm btn-success me-1">Nhận việc</button>
-                                    }
-                                    using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline-block;" }))
-                                    {
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="applicationId" value="@item.ApplicationId" />
-                                        <input type="hidden" name="newStatus" value="Rejected" />
-                                        <button type="submit" class="btn btn-sm btn-danger">Từ chối</button>
-                                    }
-                                }
-                                else
-                                {
-                                    using (Html.BeginForm("UpdateStatus", "Applications", FormMethod.Post, new { style = "display:inline-block;" }))
-                                    {
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="applicationId" value="@item.ApplicationId" />
-                                        <input type="hidden" name="newStatus" value="Reviewed" />
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary" title="Đưa hồ sơ quay lại bước Đang xem xét">
-                                            <i class="bi bi-arrow-counterclockwise"></i> Xem xét lại
-                                        </button>
-                                    }
-                                }
+                                </div>
                             </td>
                         </tr>
                     }
-                }
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
+    }
 </div>

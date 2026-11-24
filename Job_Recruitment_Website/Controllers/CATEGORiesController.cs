@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Data.Entity;
 using System.Linq;
-using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using Job_Recruitment_Website.Helpers;
 using Job_Recruitment_Website.Models;
@@ -15,7 +11,7 @@ namespace Job_Recruitment_Website.Controllers
     {
         private RecruitmentDBEntities db = new RecruitmentDBEntities();
 
-        // GET: CATEGORies (Ai cũng xem được danh sách ngành nghề)
+        // GET: CATEGORies
         public ActionResult Index()
         {
             return View(db.CATEGORIES.ToList());
@@ -44,6 +40,17 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Admin")]
         public ActionResult Create([Bind(Include = "CategoryId,CategoryName")] CATEGORy cATEGORy)
         {
+            cATEGORy.CategoryName = (cATEGORy.CategoryName ?? "").Trim();
+
+            if (cATEGORy.CategoryName.Length < 2)
+            {
+                ModelState.AddModelError("CategoryName", "Tên ngành nghề phải có ít nhất 2 ký tự!");
+            }
+            else if (db.CATEGORIES.Any(c => c.CategoryName.ToLower() == cATEGORy.CategoryName.ToLower()))
+            {
+                ModelState.AddModelError("CategoryName", "Ngành nghề này đã tồn tại trên hệ thống!");
+            }
+
             if (ModelState.IsValid)
             {
                 db.CATEGORIES.Add(cATEGORy);
@@ -70,12 +77,24 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Admin")]
         public ActionResult Edit([Bind(Include = "CategoryId,CategoryName")] CATEGORy cATEGORy)
         {
+            cATEGORy.CategoryName = (cATEGORy.CategoryName ?? "").Trim();
+
+            if (cATEGORy.CategoryName.Length < 2)
+            {
+                ModelState.AddModelError("CategoryName", "Tên ngành nghề phải có ít nhất 2 ký tự!");
+            }
+            else if (db.CATEGORIES.Any(c => c.CategoryId != cATEGORy.CategoryId && c.CategoryName.ToLower() == cATEGORy.CategoryName.ToLower()))
+            {
+                ModelState.AddModelError("CategoryName", "Tên ngành nghề này đã trùng với một ngành khác!");
+            }
+
             if (ModelState.IsValid)
             {
                 db.Entry(cATEGORy).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+
             return View(cATEGORy);
         }
 
@@ -89,27 +108,28 @@ namespace Job_Recruitment_Website.Controllers
             return View(cATEGORy);
         }
 
-        // POST: CATEGORies/Delete/5
+        // POST: CATEGORies/Delete/5 (Bảo toàn khóa ngoại FK cho TC27)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("Admin")]
         public ActionResult DeleteConfirmed(int id)
         {
             CATEGORy cATEGORy = db.CATEGORIES.Find(id);
-            if (cATEGORy != null && !db.JOBS.Any(j => j.CategoryId == id))
+            if (cATEGORy == null) return RedirectToAction("Index");
+
+            if (db.JOBS.Any(j => j.CategoryId == id))
             {
-                db.CATEGORIES.Remove(cATEGORy);
-                db.SaveChanges();
+                return View("Delete", cATEGORy);
             }
+
+            db.CATEGORIES.Remove(cATEGORy);
+            db.SaveChanges();
             return RedirectToAction("Index");
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                db.Dispose();
-            }
+            if (disposing) db.Dispose();
             base.Dispose(disposing);
         }
     }

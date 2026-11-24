@@ -1,49 +1,115 @@
 ﻿@model IEnumerable<Job_Recruitment_Website.Models.CATEGORy>
+@using Job_Recruitment_Website.Models
 
 @{
     ViewBag.Title = "Ngành nghề";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
 
-    // Kiểm tra trạng thái và quyền: Chỉ hiển thị bảng quản trị nếu là Admin (RoleId == 1)
     bool isAdmin = Session["RoleId"] != null && (int)Session["RoleId"] == 1;
+    var catList = Model != null ? Model.ToList() : new List<CATEGORy>();
+
+    var openJobCounts = new Dictionary<int, int>();
+    var totalJobCounts = new Dictionary<int, int>();
+
+    using (var db = new RecruitmentDBEntities())
+    {
+        var stats = db.JOBS
+                      .GroupBy(j => j.CategoryId)
+                      .Select(g => new
+                      {
+                          CatId = g.Key,
+                          Total = g.Count(),
+                          Open = g.Count(j => j.Status == "Open")
+                      })
+                      .ToList();
+
+        foreach (var s in stats)
+        {
+            totalJobCounts[s.CatId] = s.Total;
+            openJobCounts[s.CatId] = s.Open;
+        }
+    }
+
+    int totalCats = catList.Count;
+    int activeCats = catList.Count(c => openJobCounts.ContainsKey(c.CategoryId) && openJobCounts[c.CategoryId] > 0);
+    int totalOpenJobs = openJobCounts.Values.Sum();
 }
 
-<div class="job-section-header mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-1">
-        <h2 class="fw-bold text-dark mb-0">Danh mục Ngành nghề</h2>
-        @if (isAdmin)
-        {
-            <a href="@Url.Action("Create")" class="btn btn-primary-custom text-white fw-bold px-3 py-2 rounded-3 shadow-sm">
-                + Thêm ngành nghề mới
-            </a>
-        }
+@functions {
+    public string GetCategoryIcon(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "bi-layers-fill";
+        string lower = name.ToLower();
+        if (lower.Contains("công nghệ") || lower.Contains("cntt") || lower.Contains("phần mềm") || lower.Contains("it"))
+            return "bi-laptop";
+        if (lower.Contains("marketing") || lower.Contains("truyền thông"))
+            return "bi-megaphone-fill";
+        if (lower.Contains("kinh doanh") || lower.Contains("bán hàng") || lower.Contains("thương mại"))
+            return "bi-graph-up-arrow";
+        if (lower.Contains("cơ khí") || lower.Contains("kỹ thuật") || lower.Contains("điện"))
+            return "bi-gear-wide-connected";
+        if (lower.Contains("tài chính") || lower.Contains("ngân hàng") || lower.Contains("kế toán"))
+            return "bi-cash-coin";
+        if (lower.Contains("thiết kế") || lower.Contains("đồ họa"))
+            return "bi-palette-fill";
+        if (lower.Contains("nhân sự") || lower.Contains("hành chính"))
+            return "bi-people-fill";
+        return "bi-layers-fill";
+    }
+}
+
+<!-- TIÊU ĐỀ TRANG -->
+<div class="job-section-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Danh mục Ngành nghề</h2>
+        <p class="text-muted small mb-0">Khám phá cơ hội việc làm đa dạng theo từng lĩnh vực chuyên môn tại D-JOBS</p>
     </div>
-    <p class="text-muted small mb-0">Khám phá cơ hội việc làm đa dạng theo từng lĩnh vực chuyên môn tại D-JOBS.</p>
+    @if (isAdmin)
+    {
+        <a href="@Url.Action("Create")" class="btn btn-primary-custom px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
+            <i class="bi bi-plus-circle-fill"></i>
+            <span>Thêm ngành nghề mới</span>
+        </a>
+    }
 </div>
 
 @if (!isAdmin)
 {
-    <!-- GIAO DIỆN KHI CHƯA ĐĂNG NHẬP / DÀNH CHO ỨNG VIÊN (LƯỚI CARD 2 CỘT) -->
+    <!-- GIAO DIỆN DÀNH CHO ỨNG VIÊN / KHÁCH (LƯỚI CARD 2 CỘT) -->
     <div class="category-grid-container">
-        @if (Model == null || !Model.Any())
+        @if (!catList.Any())
         {
-            <div class="p-4 bg-white border rounded-3 text-muted w-100">
+            <div class="p-4 bg-white border rounded-4 text-muted text-center" style="grid-column: span 2;">
                 Chưa có ngành nghề nào được tạo.
             </div>
         }
         else
         {
-            foreach (var item in Model)
+            foreach (var item in catList)
             {
-                // Đếm số lượng việc làm đang mở thuộc ngành nghề này
-                int jobCount = item.JOBS != null ? item.JOBS.Count(j => j.Status == "Open") : 0;
+                int jobCount = openJobCounts.ContainsKey(item.CategoryId) ? openJobCounts[item.CategoryId] : 0;
+                string iconClass = GetCategoryIcon(item.CategoryName);
 
                 <div class="category-card-item">
-                    <h5 class="category-card-name">@item.CategoryName</h5>
-                    <span class="category-job-count">@jobCount việc làm đang tuyển</span>
+                    <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="cat-icon-box" style="width: 46px; height: 46px; font-size: 20px;">
+                                <i class="bi @iconClass"></i>
+                            </div>
+                            <div>
+                                <h5 class="category-card-name mb-1">@item.CategoryName</h5>
+                                <span class="category-job-count mb-0">
+                                    <strong class="text-orange">@jobCount</strong> việc làm đang tuyển
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div>
-                        <a href="@Url.Action("Index", "Jobs", new { categoryId = item.CategoryId })" class="btn-view-jobs-cat">
-                            Xem việc làm
+                        <a href="@Url.Action("Index", "Jobs", new { categoryId = item.CategoryId })"
+                           class="btn-view-jobs-cat d-inline-flex align-items-center gap-2">
+                            <span>Xem việc làm</span>
+                            <i class="bi bi-arrow-right"></i>
                         </a>
                     </div>
                 </div>
@@ -53,28 +119,101 @@
 }
 else
 {
-    <!-- GIAO DIỆN DÀNH CHO ADMIN (BẢNG QUẢN TRỊ ĐỂ SỬA / XÓA) -->
-    <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white mb-4">
+    <!-- 3 THẺ THỐNG KÊ NHANH CHO ADMIN -->
+    <div class="cat-stats-grid">
+        <div class="cat-stat-card">
+            <div class="cat-stat-icon st-total">
+                <i class="bi bi-grid-1x2-fill"></i>
+            </div>
+            <div>
+                <div class="cat-stat-num">@totalCats</div>
+                <div class="cat-stat-label">Tổng ngành nghề</div>
+            </div>
+        </div>
+
+        <div class="cat-stat-card">
+            <div class="cat-stat-icon st-active">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div>
+                <div class="cat-stat-num">@activeCats</div>
+                <div class="cat-stat-label">Ngành đang có tin mở</div>
+            </div>
+        </div>
+
+        <div class="cat-stat-card">
+            <div class="cat-stat-icon st-jobs">
+                <i class="bi bi-briefcase-fill"></i>
+            </div>
+            <div>
+                <div class="cat-stat-num">@totalOpenJobs</div>
+                <div class="cat-stat-label">Tin tuyển dụng đang mở</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BẢNG QUẢN TRỊ NGÀNH NGHỀ CHO ADMIN -->
+    <div class="cat-admin-card mb-4">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 custom-category-table">
+            <table class="cat-admin-table">
                 <thead>
                     <tr>
-                        <th class="ps-4" style="width: 15%;">Mã ngành</th>
-                        <th style="width: 55%;">Tên ngành nghề</th>
-                        <th class="text-end pe-4" style="width: 30%;">Thao tác</th>
+                        <th style="width: 13%;">Mã ngành</th>
+                        <th style="width: 42%;">Tên ngành nghề</th>
+                        <th class="text-center" style="width: 20%;">Số tin tuyển dụng</th>
+                        <th class="text-end" style="width: 25%;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model)
+                    @foreach (var item in catList)
                     {
+                        int openCnt = openJobCounts.ContainsKey(item.CategoryId) ? openJobCounts[item.CategoryId] : 0;
+                        string iconClass = GetCategoryIcon(item.CategoryName);
+
                         <tr>
-                            <td class="ps-4 text-muted fw-bold">#@item.CategoryId</td>
-                            <td><span class="fw-bold text-dark fs-6">@item.CategoryName</span></td>
-                            <td class="text-end pe-4">
-                                <div class="btn-group gap-1">
-                                    <a href="@Url.Action("Edit", new { id = item.CategoryId })" class="btn btn-sm btn-outline-warning rounded-2 px-2 py-1 fw-semibold">Sửa</a>
-                                    <a href="@Url.Action("Details", new { id = item.CategoryId })" class="btn btn-sm btn-outline-info rounded-2 px-2 py-1 fw-semibold text-info">Chi tiết</a>
-                                    <a href="@Url.Action("Delete", new { id = item.CategoryId })" class="btn btn-sm btn-outline-danger rounded-2 px-2 py-1 fw-semibold">Xóa</a>
+                            <td>
+                                <span class="cat-id-badge">#@item.CategoryId</span>
+                            </td>
+
+                            <td>
+                                <div class="cat-name-cell">
+                                    <div class="cat-icon-box">
+                                        <i class="bi @iconClass"></i>
+                                    </div>
+                                    <a href="@Url.Action("Index", "Jobs", new { categoryId = item.CategoryId })"
+                                       class="cat-title-link"
+                                       title="Xem các tin tuyển dụng thuộc ngành này">
+                                        @item.CategoryName
+                                    </a>
+                                </div>
+                            </td>
+
+                            <td class="text-center">
+                                @if (openCnt > 0)
+                                {
+                                    <span class="cat-job-pill has-jobs">
+                                        <i class="bi bi-briefcase-fill"></i> @openCnt tin đang mở
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="cat-job-pill no-jobs">
+                                        Chưa có tin mở
+                                    </span>
+                                }
+                            </td>
+
+                            <td class="text-end">
+                                <div class="cat-action-group">
+                                    <a href="@Url.Action("Edit", new { id = item.CategoryId })" class="cat-btn btn-cat-edit">
+                                        <i class="bi bi-pencil-square"></i> Sửa
+                                    </a>
+                                    <a href="@Url.Action("Details", new { id = item.CategoryId })" class="cat-btn btn-cat-detail">
+                                        <i class="bi bi-eye"></i> Chi tiết
+                                    </a>
+                                    <a href="@Url.Action("Delete", new { id = item.CategoryId })" class="cat-btn btn-cat-delete">
+                                        <i class="bi bi-trash3"></i> Xóa
+                                    </a>
                                 </div>
                             </td>
                         </tr>

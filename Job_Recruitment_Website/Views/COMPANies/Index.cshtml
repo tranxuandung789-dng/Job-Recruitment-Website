@@ -1,74 +1,160 @@
 ﻿@model IEnumerable<Job_Recruitment_Website.Models.COMPANy>
+@using Job_Recruitment_Website.Models
 
 @{
     ViewBag.Title = "Danh sách công ty";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+
+    var compList = Model != null ? Model.ToList() : new List<COMPANy>();
+    var openJobCounts = new Dictionary<int, int>();
+
+    using (var db = new RecruitmentDBEntities())
+    {
+        openJobCounts = db.JOBS
+                          .Where(j => j.Status == "Open")
+                          .GroupBy(j => j.CompanyId)
+                          .ToDictionary(g => g.Key, g => g.Count());
+    }
 }
 
-<!-- TIÊU ĐỀ TRANG -->
-<div class="job-section-header mb-4">
-    <h2>Danh sách Công ty đối tác</h2>
-    <p class="text-muted">Khám phá các doanh nghiệp hàng đầu đang tuyển dụng nhân tài tại D-JOBS.</p>
+@functions {
+    public string GetCompanyInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "DJ";
+        string cleaned = name.Trim();
+        string[] prefixes = { "công ty tnhh", "công ty cổ phần", "công ty cp", "tổng công ty", "tập đoàn", "công ty" };
+        foreach (var p in prefixes)
+        {
+            if (cleaned.ToLower().StartsWith(p))
+            {
+                cleaned = cleaned.Substring(p.Length).Trim();
+                break;
+            }
+        }
+        var parts = cleaned.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+        {
+            return (parts[0].Substring(0, 1) + parts[1].Substring(0, 1)).ToUpper();
+        }
+        return cleaned.Length >= 2 ? cleaned.Substring(0, 2).ToUpper() : cleaned.ToUpper();
+    }
+}
+
+<!-- TIÊU ĐỀ & THANH TÌM KIẾM CÔNG TY -->
+<div class="comp-toolbar">
+    <div class="job-section-header mb-0">
+        <h2 class="fw-bold text-dark mb-1">Danh sách Công ty đối tác</h2>
+        <p class="text-muted small mb-0">Khám phá <strong>@compList.Count</strong> doanh nghiệp uy tín đang tuyển dụng nhân tài tại D-JOBS</p>
+    </div>
+
+    <div class="comp-search-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" id="companySearchInput" placeholder="Tìm theo tên công ty, địa chỉ..." />
+    </div>
 </div>
 
-<!-- LƯỚI HIỂN THỊ CÔNG TY -->
-<div class="company-grid-results">
-    @if (Model == null || !Model.Any())
+<!-- LƯỚI DANH SÁCH CÔNG TY -->
+<div class="comp-modern-grid" id="companyGridList">
+    @if (!compList.Any())
     {
-        <div class="p-4 bg-white border rounded-3 text-muted w-100">
-            Chưa có thông tin công ty nào.
+        <div class="p-5 bg-white border rounded-4 text-muted text-center" style="grid-column: span 2;">
+            Chưa có thông tin công ty nào trên hệ thống.
         </div>
     }
     else
     {
-        foreach (var item in Model)
+        foreach (var item in compList)
         {
-            <div class="company-card">
-                <!-- Phần Logo công ty (Tự động đồng bộ thông minh với dữ liệu) -->
-                <div class="company-logo-box">
-                    @{
-                        string logoUrl = item.Logo_Url;
+            int openCnt = openJobCounts.ContainsKey(item.CompanyId) ? openJobCounts[item.CompanyId] : 0;
+            string initials = GetCompanyInitials(item.CompanyName);
+            string logoUrl = item.Logo_Url;
 
-                        // Nếu trong CSDL chưa có hoặc để trống thì dùng ảnh mặc định
-                        if (string.IsNullOrEmpty(logoUrl))
+            if (!string.IsNullOrEmpty(logoUrl) && logoUrl.StartsWith("http://localhost"))
+            {
+                Uri uri = new Uri(logoUrl);
+                logoUrl = uri.AbsolutePath;
+            }
+
+            // Chỉ dùng ảnh khi là logo thật (bỏ qua ảnh via.placeholder.com bị mờ chữ)
+            bool hasRealLogo = !string.IsNullOrWhiteSpace(logoUrl)
+                               && logoUrl.IndexOf("via.placeholder.com", StringComparison.OrdinalIgnoreCase) < 0;
+
+            <div class="comp-modern-card" data-search="@((item.CompanyName + " " + item.Address).ToLower())">
+                <div>
+                    <!-- Dải nền cam nhẹ trên đầu thẻ + Số tin đang tuyển -->
+                    <div class="comp-card-top-strip">
+                        @if (openCnt > 0)
                         {
-                            logoUrl = Url.Content("~/Content/Images/Logo.png");
+                            <span class="comp-open-jobs-pill">
+                                <i class="bi bi-briefcase-fill"></i> @openCnt việc đang tuyển
+                            </span>
                         }
-                        // Nếu trong CSDL lưu link localhost cũ, tự lọc lại
-                        else if (logoUrl.StartsWith("http://localhost"))
+                        else
                         {
-                            Uri uri = new Uri(logoUrl);
-                            logoUrl = uri.AbsolutePath;
+                            <span class="comp-open-jobs-pill no-open">
+                                <i class="bi bi-building-check"></i> Đối tác D-JOBS
+                            </span>
                         }
-                        // Nếu là link ngoài (như fptsoftware.com/logo.png dễ bị gãy),
-                        // ta có thể giữ nguyên hoặc cho nó tự động fallback sang ảnh mặc định khi lỗi bằng Javascript bên dưới.
-                    }
-                    <img src="@logoUrl" alt="@item.CompanyName"
-                         onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=@HttpUtility.UrlEncode(item.CompanyName)';" />
+                    </div>
+
+                    <!-- Thân thẻ: Logo + Tên + Địa chỉ + Mô tả -->
+                    <div class="comp-card-body">
+                        <div class="comp-logo-wrap">
+                            @if (hasRealLogo)
+                            {
+                                <img src="@logoUrl" alt="@item.CompanyName" class="comp-logo-img"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                <div class="comp-logo-monogram" style="display:none;">@initials</div>
+                            }
+                            else
+                            {
+                                <div class="comp-logo-monogram">@initials</div>
+                            }
+                        </div>
+
+                        <h3 class="comp-name-title">
+                            <a href="@Url.Action("Details", "Companies", new { id = item.CompanyId })">
+                                @item.CompanyName
+                            </a>
+                        </h3>
+
+                        <div class="comp-meta-line">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>@(string.IsNullOrWhiteSpace(item.Address) ? "Đang cập nhật địa chỉ" : item.Address)</span>
+                        </div>
+
+                        <p class="comp-desc-text">
+                            @(string.IsNullOrWhiteSpace(item.Description) ? "Doanh nghiệp đối tác tuyển dụng chính thức trên nền tảng D-JOBS." : item.Description)
+                        </p>
+                    </div>
                 </div>
 
-                <!-- Phần Thông tin -->
-                <div class="company-info-content">
-                    <h3 class="company-title">
-                        <a href="@Url.Action("Details", "Companies", new { id = item.CompanyId })">@item.CompanyName</a>
-                    </h3>
-
-                    <p class="company-address">
-                        <i class="me-1">Địa chỉ: </i> @(string.IsNullOrEmpty(item.Address) ? "Đang cập nhật địa chỉ" : item.Address)
-                    </p>
-
-                    <p class="company-desc">
-                        @(item.Description != null && item.Description.Length > 90 ? item.Description.Substring(0, 90) + "..." : (item.Description ?? "Chưa có mô tả chi tiết cho công ty này."))
-                    </p>
-                </div>
-
-                <!-- Nút xem chi tiết -->
-                <div class="mt-3 pt-3 border-top">
-                    <a href="@Url.Action("Details", "Companies", new { id = item.CompanyId })" class="btn-view-company">
-                        Xem chi tiết công ty
+                <!-- Nút Xem chi tiết công ty -->
+                <div class="comp-card-footer">
+                    <a href="@Url.Action("Details", "Companies", new { id = item.CompanyId })" class="btn-comp-detail">
+                        <span>Xem chi tiết công ty</span>
+                        <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
         }
     }
 </div>
+
+@section scripts {
+    <script>
+        (function () {
+            var input = document.getElementById('companySearchInput');
+            var cards = document.querySelectorAll('#companyGridList .comp-modern-card');
+            if (!input) return;
+
+            input.addEventListener('input', function () {
+                var kw = this.value.toLowerCase().trim();
+                cards.forEach(function (card) {
+                    var hay = card.getAttribute('data-search') || '';
+                    card.style.display = (kw === '' || hay.indexOf(kw) !== -1) ? '' : 'none';
+                });
+            });
+        })();
+    </script>
+}

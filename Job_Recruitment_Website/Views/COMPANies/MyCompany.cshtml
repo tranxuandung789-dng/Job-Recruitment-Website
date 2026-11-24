@@ -1,78 +1,220 @@
 ﻿@model Job_Recruitment_Website.Models.COMPANy
+@using Job_Recruitment_Website.Models
 
 @{
     ViewBag.Title = "Thông tin công ty";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+
+    int totalJobs = 0;
+    int openJobs = 0;
+    int totalApps = 0;
+
+    if (Model != null)
+    {
+        using (var db = new RecruitmentDBEntities())
+        {
+            var compJobs = db.JOBS.Where(j => j.CompanyId == Model.CompanyId).ToList();
+            totalJobs = compJobs.Count;
+            openJobs = compJobs.Count(j => j.Status == "Open" && j.Deadline >= DateTime.Today);
+
+            var jobIds = compJobs.Select(j => j.JobId).ToList();
+            if (jobIds.Any())
+            {
+                totalApps = db.APPLICATIONS.Count(a => jobIds.Contains(a.JobId));
+            }
+        }
+    }
+
+    string logoUrl = Model != null ? Model.Logo_Url : null;
+    if (!string.IsNullOrEmpty(logoUrl) && logoUrl.StartsWith("http://localhost"))
+    {
+        Uri uri = new Uri(logoUrl);
+        logoUrl = uri.AbsolutePath;
+    }
+
+    bool hasRealLogo = !string.IsNullOrWhiteSpace(logoUrl)
+                       && logoUrl.IndexOf("via.placeholder.com", StringComparison.OrdinalIgnoreCase) < 0;
+
+    string cleanDesc = (Model != null && !string.IsNullOrWhiteSpace(Model.Description))
+        ? Model.Description.Trim()
+        : "Chưa có mô tả chi tiết cho công ty này.";
 }
 
-<div class="job-section-header mb-4">
-    <h2 class="fw-bold text-dark mb-1">Công ty của tôi</h2>
-    <p class="text-muted small mb-0">Thông tin hồ sơ doanh nghiệp đang hiển thị với các ứng viên trên D-JOBS.</p>
+@functions {
+    public string GetCompanyInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "DJ";
+        string cleaned = name.Trim();
+        string[] prefixes = { "công ty tnhh", "công ty cổ phần", "công ty cp", "tổng công ty", "tập đoàn", "công ty" };
+        foreach (var p in prefixes)
+        {
+            if (cleaned.ToLower().StartsWith(p))
+            {
+                cleaned = cleaned.Substring(p.Length).Trim();
+                break;
+            }
+        }
+        var parts = cleaned.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+        {
+            return (parts[0].Substring(0, 1) + parts[1].Substring(0, 1)).ToUpper();
+        }
+        return cleaned.Length >= 2 ? cleaned.Substring(0, 2).ToUpper() : cleaned.ToUpper();
+    }
+}
+
+<!-- TIÊU ĐỀ TRANG -->
+<div class="job-section-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Công ty của tôi</h2>
+        <p class="text-muted small mb-0">Thông tin hồ sơ doanh nghiệp đang hiển thị với các ứng viên trên D-JOBS</p>
+    </div>
+    <a href="@Url.Action("Details", "Companies", new { id = Model.CompanyId })" class="btn-profile-nav">
+        <i class="bi bi-box-arrow-up-right text-orange"></i>
+        <span>Xem trang công khai</span>
+    </a>
 </div>
 
+<!-- THÔNG BÁO -->
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert" style="max-width: 780px;">
-        @TempData["Success"]
+    <div class="alert alert-success alert-dismissible fade show rounded-3 py-2 small fw-semibold mb-3" role="alert">
+        ✔ @TempData["Success"]
     </div>
 }
-
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="max-width: 780px;">
-        @TempData["Error"]
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 py-2 small fw-semibold mb-3" role="alert">
+        ⚠ @TempData["Error"]
     </div>
 }
 
-<div class="card shadow-sm border-0 rounded-4 p-4 p-md-5 bg-white mb-4" style="max-width: 780px;">
-    <div class="d-flex flex-column flex-md-row align-items-md-center gap-4 pb-4 mb-4 border-bottom">
-        <div class="d-flex align-items-center justify-content-center border rounded-3 p-2 bg-light" style="width: 120px; height: 90px; flex-shrink: 0;">
-            @if (!string.IsNullOrEmpty(Model.Logo_Url))
-            {
-                <img src="@Model.Logo_Url" alt="Logo công ty" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
-            }
-            else
-            {
-                <span class="text-muted small">Chưa có logo</span>
-            }
+<div class="mycomp-card mb-4">
+    <!-- HEADER DOANH NGHIỆP -->
+    <div class="mycomp-hero">
+        <div class="mycomp-brand-left">
+            <div class="mycomp-logo-box">
+                @if (hasRealLogo)
+                {
+                    <img src="@logoUrl" alt="@Model.CompanyName"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                    <div class="mycomp-monogram" style="display:none;">@GetCompanyInitials(Model.CompanyName)</div>
+                }
+                else
+                {
+                    <div class="mycomp-monogram">@GetCompanyInitials(Model.CompanyName)</div>
+                }
+            </div>
+
+            <div>
+                <span class="mycomp-verified-tag">
+                    <i class="bi bi-patch-check-fill"></i> Đối tác tuyển dụng chính thức
+                </span>
+                <h3 class="mycomp-title">@Model.CompanyName</h3>
+            </div>
         </div>
+    </div>
+
+    <!-- NỘI DUNG HỒ SƠ CÔNG TY -->
+    <div class="mycomp-body">
+        <!-- 3 CHỈ SỐ TUYỂN DỤNG CỦA CÔNG TY -->
+        <div class="mycomp-stats-row">
+            <div class="mycomp-stat-box">
+                <div class="mycomp-stat-icon st-jobs">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark fs-5" style="line-height: 1.1;">@totalJobs</div>
+                    <div class="text-muted small fw-semibold">Tổng tin đã đăng</div>
+                </div>
+            </div>
+
+            <div class="mycomp-stat-box">
+                <div class="mycomp-stat-icon st-open">
+                    <i class="bi bi-broadcast"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark fs-5" style="line-height: 1.1;">@openJobs</div>
+                    <div class="text-muted small fw-semibold">Tin đang mở tuyển</div>
+                </div>
+            </div>
+
+            <div class="mycomp-stat-box">
+                <div class="mycomp-stat-icon st-apps">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark fs-5" style="line-height: 1.1;">@totalApps</div>
+                    <div class="text-muted small fw-semibold">Hồ sơ ứng tuyển</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ĐỊA CHỈ & WEBSITE -->
+        <div class="mycomp-info-grid">
+            <div class="mycomp-info-tile">
+                <i class="bi bi-geo-alt-fill"></i>
+                <div>
+                    <div class="text-muted small fw-semibold mb-1">Địa chỉ trụ sở</div>
+                    <div class="fw-bold text-dark" style="font-size: 14px; line-height: 1.45;">
+                        @(string.IsNullOrWhiteSpace(Model.Address) ? "Đang cập nhật địa chỉ" : Model.Address)
+                    </div>
+                </div>
+            </div>
+
+            <div class="mycomp-info-tile">
+                <i class="bi bi-globe2"></i>
+                <div>
+                    <div class="text-muted small fw-semibold mb-1">Website chính thức</div>
+                    @if (!string.IsNullOrWhiteSpace(Model.Website))
+                    {
+                        <a href="@Model.Website" target="_blank" class="fw-bold text-orange" style="font-size: 14px; word-break: break-all;">
+                            @Model.Website <i class="bi bi-box-arrow-up-right small ms-1"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="text-muted fw-semibold" style="font-size: 14px;">Chưa cập nhật website</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- MÔ TẢ GIỚI THIỆU -->
         <div>
-            <h3 class="fw-bold text-dark mb-1">@Model.CompanyName</h3>
-            <p class="text-muted small mb-1">
-                <i class="bi bi-geo-alt-fill text-orange me-1"></i>
-                @(string.IsNullOrEmpty(Model.Address) ? "Đang cập nhật địa chỉ" : Model.Address)
-            </p>
-            @if (!string.IsNullOrEmpty(Model.Website))
-            {
-                <p class="small mb-0">
-                    <i class="bi bi-globe text-orange me-1"></i>
-                    <a href="@Model.Website" target="_blank" class="text-orange fw-semibold">@Model.Website</a>
-                </p>
-            }
+            <h5 class="job-section-subtitle">Giới thiệu doanh nghiệp</h5>
+            <div class="job-desc-box">@cleanDesc</div>
         </div>
-    </div>
 
-    <div class="mb-4">
-        <h6 class="fw-bold text-dark mb-2">Giới thiệu doanh nghiệp</h6>
-        <p class="text-secondary mb-0" style="line-height: 1.6; white-space: pre-line;">
-            @(string.IsNullOrEmpty(Model.Description) ? "Chưa có mô tả chi tiết cho công ty này." : Model.Description)
-        </p>
-    </div>
+        <!-- THANH THAO TÁC DƯỚI CÙNG -->
+        <div class="mycomp-footer">
+            <div class="d-flex flex-wrap gap-2">
+                <a href="@Url.Action("Edit", "Companies")" class="btn-submit-job d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-pencil-square"></i>
+                    <span>Chỉnh sửa thông tin</span>
+                </a>
 
-    <div class="d-flex flex-wrap gap-2 pt-3 border-top">
-        <a href="@Url.Action("Edit", "Companies")" class="btn btn-primary-custom px-4 py-2">
-            Chỉnh sửa thông tin
-        </a>
-        <a href="@Url.Action("MyJobs", "Jobs")" class="btn btn-outline-secondary px-4 py-2 rounded-3">
-            Quản lý tin đăng
-        </a>
+                <a href="@Url.Action("MyJobs", "Jobs")" class="btn-profile-nav">
+                    <i class="bi bi-briefcase"></i>
+                    <span>Quản lý tin đăng</span>
+                </a>
 
-        @using (Html.BeginForm("Delete", "Companies", FormMethod.Post, new { style = "display:inline;" }))
-        {
-            @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-danger px-4 py-2 rounded-3 btn-delete-company" data-name="@Model.CompanyName">
-                Xóa công ty
-            </button>
-        }
+                <a href="@Url.Action("Create", "Jobs")" class="btn-profile-nav">
+                    <i class="bi bi-plus-circle text-orange"></i>
+                    <span>Đăng tin mới</span>
+                </a>
+            </div>
+
+            <div>
+                @using (Html.BeginForm("Delete", "Companies", FormMethod.Post, new { style = "display:inline;" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-delete-comp-soft btn-delete-company" data-name="@Model.CompanyName">
+                        <i class="bi bi-trash3"></i>
+                        <span>Xóa công ty</span>
+                    </button>
+                }
+            </div>
+        </div>
     </div>
 </div>
