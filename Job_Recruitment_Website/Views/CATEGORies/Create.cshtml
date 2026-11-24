@@ -5,24 +5,92 @@
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
 }
 
-<div class="card shadow-sm border-0 rounded-4 p-4 bg-white my-3" style="max-width: 600px;">
-    <h3 class="fw-bold text-dark mb-1">Thêm ngành nghề mới</h3>
-    <p class="text-muted small mb-4">Tạo danh mục ngành nghề tuyển dụng mới trên hệ thống D-JOBS.</p>
-
-    @using (Html.BeginForm())
-    {
-        @Html.AntiForgeryToken()
-        @Html.ValidationSummary(true, "", new { @class = "text-danger small mb-3" })
-
-        <div class="mb-4">
-            <label class="form-label fw-semibold">Tên ngành nghề <span class="text-danger">*</span></label>
-            @Html.TextBoxFor(model => model.CategoryName, new { @class = "form-control rounded-3 py-2", placeholder = "VD: Tài chính - Ngân hàng...", required = "required" })
-            @Html.ValidationMessageFor(model => model.CategoryName, "", new { @class = "text-danger small" })
+<div class="job-create-card mb-4">
+    <!-- HEADER -->
+    <div class="job-create-header d-flex align-items-center gap-3">
+        <div class="job-create-icon">
+            <i class="bi bi-folder-plus"></i>
         </div>
-
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary-custom px-4 py-2">Thêm mới</button>
-            <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4 py-2 rounded-3">Quay lại</a>
+        <div>
+            <h3 class="fw-bold text-dark mb-1" style="font-size: 22px;">Thêm ngành nghề mới</h3>
+            <p class="text-muted small mb-0">Tạo danh mục lĩnh vực chuyên môn mới để phân loại tin tuyển dụng trên D-JOBS</p>
         </div>
-    }
+    </div>
+
+    <!-- BODY -->
+    <div class="job-create-body">
+        @using (Html.BeginForm("Create", "CATEGORies", FormMethod.Post, new { novalidate = "novalidate", id = "createCategoryForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger py-2 small rounded-3 mb-3" })
+
+            <div class="mb-4">
+                <label class="job-label" for="CategoryName">
+                    <i class="bi bi-tag-fill"></i>
+                    <span>Tên ngành nghề <span class="text-danger">*</span></span>
+                </label>
+                @Html.TextBoxFor(model => model.CategoryName, new
+                {
+                    @class = "form-control job-input",
+                    id = "CategoryName",
+                    maxlength = "150",
+                    placeholder = "VD: Trí tuệ nhân tạo (AI), Tài chính - Ngân hàng, Nhân sự..."
+                })
+                <div class="invalid-feedback" id="err-CategoryName">
+                    Vui lòng nhập tên ngành nghề.
+                </div>
+                @Html.ValidationMessageFor(model => model.CategoryName, "", new { @class = "text-danger small fw-semibold d-block mt-1" })
+            </div>
+
+            <hr class="my-4 text-secondary opacity-25" />
+
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <button type="submit" class="btn-submit-job d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-plus-circle-fill"></i>
+                    <span>Thêm ngành nghề</span>
+                </button>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-back-job d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Quay lại danh sách</span>
+                </a>
+            </div>
+        }
+    </div>
 </div>
+
+@section scripts {
+    <script>
+        (function () {
+            var form = document.getElementById('createCategoryForm');
+            var input = document.getElementById('CategoryName');
+            var errEl = document.getElementById('err-CategoryName');
+            if (!form || !input) return;
+
+            function checkCatName(forceEmptyCheck) {
+                var v = input.value.trim();
+                if (v.length === 0) {
+                    input.classList.toggle('is-invalid', forceEmptyCheck);
+                    if (errEl) errEl.textContent = 'Vui lòng nhập tên ngành nghề.';
+                    return false;
+                }
+                if (v.length < 2) {
+                    input.classList.add('is-invalid');
+                    if (errEl) errEl.textContent = 'Tên ngành nghề phải có ít nhất 2 ký tự.';
+                    return false;
+                }
+                input.classList.remove('is-invalid');
+                return true;
+            }
+
+            input.addEventListener('input', function () { checkCatName(false); });
+            input.addEventListener('blur', function () { checkCatName(true); });
+
+            form.addEventListener('submit', function (e) {
+                if (!checkCatName(true)) {
+                    e.preventDefault();
+                    input.focus();
+                }
+            });
+        })();
+    </script>
+}

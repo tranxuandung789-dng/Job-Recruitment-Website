@@ -3,71 +3,304 @@
 @{
     ViewBag.Title = "Đăng tin tuyển dụng";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+
+    string todayStr = DateTime.Today.ToString("yyyy-MM-dd");
+    string deadlineVal = (Model != null && Model.Deadline > DateTime.MinValue)
+        ? Model.Deadline.ToString("yyyy-MM-dd")
+        : "";
 }
 
-<h2>Đăng tin tuyển dụng mới</h2>
-
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-
-    <div class="form-horizontal">
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-
-        <div class="form-group">
-            <label class="control-label col-md-2">Tiêu đề công việc</label>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control", required = "required" } })
-                @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
-            </div>
+<div class="job-create-card mb-4">
+    <!-- HEADER FORM -->
+    <div class="job-create-header d-flex align-items-center gap-3">
+        <div class="job-create-icon">
+            <i class="bi bi-briefcase-fill"></i>
         </div>
-
-        <div class="form-group">
-            <label class="control-label col-md-2">Mô tả chi tiết</label>
-            <div class="col-md-10">
-                @Html.TextAreaFor(model => model.Description, new { @class = "form-control", rows = 5, required = "required" })
-                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="control-label col-md-2">Mức lương</label>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.SalaryRange, new { htmlAttributes = new { @class = "form-control", required = "required", placeholder = "VD: 15 - 20 triệu VNĐ" } })
-                @Html.ValidationMessageFor(model => model.SalaryRange, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="control-label col-md-2">Địa điểm làm việc</label>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Location, new { htmlAttributes = new { @class = "form-control", required = "required" } })
-                @Html.ValidationMessageFor(model => model.Location, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="control-label col-md-2">Hạn chót nộp hồ sơ</label>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Deadline, new { htmlAttributes = new { @class = "form-control", type = "date", required = "required" } })
-                @Html.ValidationMessageFor(model => model.Deadline, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="control-label col-md-2">Ngành nghề</label>
-            <div class="col-md-10">
-                @Html.DropDownList("CategoryId", null, "-- Chọn ngành --", new { @class = "form-control", required = "required" })
-                @Html.ValidationMessageFor(model => model.CategoryId, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group" style="margin-top: 15px;">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Đăng tin" class="btn btn-primary" />
-                @Html.ActionLink("Quay lại danh sách", "MyJobs", null, new { @class = "btn btn-outline-secondary ms-2" })
-            </div>
+        <div>
+            <h3 class="fw-bold text-dark mb-1" style="font-size: 22px;">Đăng tin tuyển dụng mới</h3>
+            <p class="text-muted small mb-0">Điền đầy đủ thông tin bên dưới để tiếp cận ứng viên phù hợp nhất trên D-JOBS</p>
         </div>
     </div>
+
+    <!-- BODY FORM -->
+    <div class="job-create-body">
+        @using (Html.BeginForm("Create", "Jobs", FormMethod.Post, new { novalidate = "novalidate", id = "createJobForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger py-2 small rounded-3 mb-3" })
+
+            <div class="row g-3">
+                <!-- 1. TIÊU ĐỀ CÔNG VIỆC -->
+                <div class="col-12">
+                    <label class="job-label" for="Title">
+                        <i class="bi bi-pencil-square"></i>
+                        <span>Tiêu đề công việc <span class="text-danger">*</span></span>
+                    </label>
+                    @Html.TextBoxFor(model => model.Title, new
+                    {
+                        @class = "form-control job-input",
+                        id = "Title",
+                        maxlength = "200",
+                        placeholder = "VD: Tuyển Lập trình viên .NET / Nhân viên Marketing..."
+                    })
+                    <div class="invalid-feedback" id="err-Title">
+                        Vui lòng nhập tiêu đề công việc.
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger small" })
+                </div>
+
+                <!-- 2. NGÀNH NGHỀ -->
+                <div class="col-md-6">
+                    <label class="job-label" for="CategoryId">
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Ngành nghề <span class="text-danger">*</span></span>
+                    </label>
+                    @Html.DropDownList("CategoryId", null, "-- Chọn ngành nghề --", new
+                    {
+                        @class = "form-select job-input",
+                        id = "CategoryId"
+                    })
+                    <div class="invalid-feedback" id="err-CategoryId">
+                        Vui lòng chọn ngành nghề tuyển dụng.
+                    </div>
+                    @Html.ValidationMessageFor(model => model.CategoryId, "", new { @class = "text-danger small" })
+                </div>
+
+                <!-- 3. MỨC LƯƠNG -->
+                <div class="col-md-6">
+                    <label class="job-label" for="SalaryRange">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>Mức lương <span class="text-danger">*</span></span>
+                    </label>
+                    @Html.TextBoxFor(model => model.SalaryRange, new
+                    {
+                        @class = "form-control job-input",
+                        id = "SalaryRange",
+                        maxlength = "100",
+                        placeholder = "VD: 15 - 20 triệu VNĐ hoặc Thỏa thuận"
+                    })
+                    <div class="invalid-feedback" id="err-SalaryRange">
+                        Vui lòng nhập mức lương.
+                    </div>
+                    @Html.ValidationMessageFor(model => model.SalaryRange, "", new { @class = "text-danger small" })
+                </div>
+
+                <!-- 4. ĐỊA ĐIỂM LÀM VIỆC -->
+                <div class="col-md-6">
+                    <label class="job-label" for="Location">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <span>Địa điểm làm việc <span class="text-danger">*</span></span>
+                    </label>
+                    @Html.TextBoxFor(model => model.Location, new
+                    {
+                        @class = "form-control job-input",
+                        id = "Location",
+                        maxlength = "150",
+                        placeholder = "VD: Quận 1, TP. Hồ Chí Minh"
+                    })
+                    <div class="invalid-feedback" id="err-Location">
+                        Vui lòng nhập địa điểm làm việc.
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Location, "", new { @class = "text-danger small" })
+                </div>
+
+                <!-- 5. HẠN CHÓT NỘP HỒ SƠ -->
+                <div class="col-md-6">
+                    <label class="job-label" for="Deadline">
+                        <i class="bi bi-calendar-event-fill"></i>
+                        <span>Hạn chót nộp hồ sơ <span class="text-danger">*</span></span>
+                    </label>
+                    <input type="date" id="Deadline" name="Deadline" value="@deadlineVal" min="@todayStr" class="form-control job-input" />
+                    <div class="invalid-feedback" id="err-Deadline">
+                        Vui lòng chọn hạn chót nộp hồ sơ.
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Deadline, "", new { @class = "text-danger small" })
+                </div>
+
+                <!-- 6. MÔ TẢ CHI TIẾT -->
+                <div class="col-12">
+                    <label class="job-label" for="Description">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                        <span>Mô tả chi tiết công việc <span class="text-danger">*</span></span>
+                    </label>
+                    @Html.TextAreaFor(model => model.Description, new
+                    {
+                        @class = "form-control job-input",
+                        id = "Description",
+                        rows = 6,
+                        placeholder = "- Mô tả công việc hàng ngày...\n- Yêu cầu kinh nghiệm, kỹ năng...\n- Chế độ đãi ngộ, quyền lợi..."
+                    })
+                    <div class="invalid-feedback" id="err-Description">
+                        Vui lòng nhập mô tả chi tiết công việc.
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger small" })
+                </div>
+            </div>
+
+            <hr class="my-4 text-secondary opacity-25" />
+
+            <!-- NÚT BẤM -->
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <button type="submit" class="btn btn-submit-job d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-send-fill"></i>
+                    <span>Đăng tin tuyển dụng</span>
+                </button>
+                <a href="@Url.Action("MyJobs", "Jobs")" class="btn btn-outline-secondary btn-back-job d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Quay lại danh sách</span>
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        (function () {
+            var form = document.getElementById('createJobForm');
+            if (!form) return;
+
+            var title = document.getElementById('Title');
+            var category = document.getElementById('CategoryId');
+            var salary = document.getElementById('SalaryRange');
+            var locationInput = document.getElementById('Location');
+            var deadline = document.getElementById('Deadline');
+            var description = document.getElementById('Description');
+
+            var negativeSalaryRe = /(^|[^\d\s])\s*-\s*\d/;
+            var validSalaryCharsRe = /^[\p{L}\d\s\-\/.,+$]+$/u;
+            var hasLetterOrDigitRe = /[\p{L}\d]/u;
+
+            function setInvalid(input, errId, isInvalid, msg) {
+                if (!input) return;
+                var errEl = document.getElementById(errId);
+                if (errEl && msg) {
+                    errEl.textContent = msg;
+                }
+                input.classList.toggle('is-invalid', isInvalid);
+            }
+
+            function checkTitle(forceEmptyCheck) {
+                var v = title.value.trim();
+                if (v.length === 0) {
+                    setInvalid(title, 'err-Title', forceEmptyCheck, 'Vui lòng nhập tiêu đề công việc.');
+                    return false;
+                }
+                if (v.length < 5) {
+                    setInvalid(title, 'err-Title', true, 'Tiêu đề công việc phải có ít nhất 5 ký tự.');
+                    return false;
+                }
+                setInvalid(title, 'err-Title', false);
+                return true;
+            }
+
+            function checkCategory(forceEmptyCheck) {
+                var v = category.value;
+                if (!v || v.trim() === '') {
+                    setInvalid(category, 'err-CategoryId', forceEmptyCheck, 'Vui lòng chọn ngành nghề tuyển dụng.');
+                    return false;
+                }
+                setInvalid(category, 'err-CategoryId', false);
+                return true;
+            }
+
+            function checkSalary(forceEmptyCheck) {
+                var v = salary.value.trim();
+                if (v.length === 0) {
+                    setInvalid(salary, 'err-SalaryRange', forceEmptyCheck, 'Vui lòng nhập mức lương (VD: 15 - 20 triệu VNĐ).');
+                    return false;
+                }
+                if (negativeSalaryRe.test(v)) {
+                    setInvalid(salary, 'err-SalaryRange', true, 'Mức lương không được chứa số âm.');
+                    return false;
+                }
+                if (!validSalaryCharsRe.test(v) || !hasLetterOrDigitRe.test(v)) {
+                    setInvalid(salary, 'err-SalaryRange', true, 'Mức lương không hợp lệ (không nhập ký tự đặc biệt như @@, #, %...).');
+                    return false;
+                }
+                setInvalid(salary, 'err-SalaryRange', false);
+                return true;
+            }
+
+            function checkLocation(forceEmptyCheck) {
+                var v = locationInput.value.trim();
+                if (v.length === 0) {
+                    setInvalid(locationInput, 'err-Location', forceEmptyCheck, 'Vui lòng nhập địa điểm làm việc.');
+                    return false;
+                }
+                if (v.length < 2) {
+                    setInvalid(locationInput, 'err-Location', true, 'Địa điểm làm việc phải có ít nhất 2 ký tự.');
+                    return false;
+                }
+                setInvalid(locationInput, 'err-Location', false);
+                return true;
+            }
+
+            function checkDeadline(forceEmptyCheck) {
+                var v = deadline.value;
+                if (!v) {
+                    setInvalid(deadline, 'err-Deadline', forceEmptyCheck, 'Vui lòng chọn hạn chót nộp hồ sơ.');
+                    return false;
+                }
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+                var parts = v.split('-');
+                var selectedDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+
+                if (selectedDate < today) {
+                    setInvalid(deadline, 'err-Deadline', true, 'Hạn chót nộp hồ sơ không được nhỏ hơn ngày hiện tại.');
+                    return false;
+                }
+                setInvalid(deadline, 'err-Deadline', false);
+                return true;
+            }
+
+            function checkDescription(forceEmptyCheck) {
+                var v = description.value.trim();
+                if (v.length === 0) {
+                    setInvalid(description, 'err-Description', forceEmptyCheck, 'Vui lòng nhập mô tả chi tiết công việc.');
+                    return false;
+                }
+                if (v.length < 20) {
+                    setInvalid(description, 'err-Description', true, 'Mô tả chi tiết quá ngắn (vui lòng nhập ít nhất 20 ký tự).');
+                    return false;
+                }
+                setInvalid(description, 'err-Description', false);
+                return true;
+            }
+
+            title.addEventListener('input', function () { checkTitle(false); });
+            title.addEventListener('blur', function () { checkTitle(true); });
+
+            category.addEventListener('change', function () { checkCategory(true); });
+            category.addEventListener('blur', function () { checkCategory(true); });
+
+            salary.addEventListener('input', function () { checkSalary(false); });
+            salary.addEventListener('blur', function () { checkSalary(true); });
+
+            locationInput.addEventListener('input', function () { checkLocation(false); });
+            locationInput.addEventListener('blur', function () { checkLocation(true); });
+
+            deadline.addEventListener('change', function () { checkDeadline(true); });
+            deadline.addEventListener('blur', function () { checkDeadline(true); });
+
+            description.addEventListener('input', function () { checkDescription(false); });
+            description.addEventListener('blur', function () { checkDescription(true); });
+
+            form.addEventListener('submit', function (e) {
+                var okTitle = checkTitle(true);
+                var okCat = checkCategory(true);
+                var okSalary = checkSalary(true);
+                var okLoc = checkLocation(true);
+                var okDead = checkDeadline(true);
+                var okDesc = checkDescription(true);
+
+                if (!okTitle || !okCat || !okSalary || !okLoc || !okDead || !okDesc) {
+                    e.preventDefault();
+                    var firstInvalid = form.querySelector('.is-invalid');
+                    if (firstInvalid) firstInvalid.focus();
+                }
+            });
+        })();
+    </script>
 }

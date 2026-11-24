@@ -1,37 +1,113 @@
 ﻿@model Job_Recruitment_Website.Models.CATEGORy
+@using Job_Recruitment_Website.Models
 
 @{
     ViewBag.Title = "Xóa ngành nghề";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
-    int jobCount = Model.JOBS != null ? Model.JOBS.Count : 0;
-}
 
-<div class="card shadow-sm border-0 rounded-4 p-4 bg-white my-3" style="max-width: 600px;">
-    <h3 class="fw-bold text-danger mb-2">Xác nhận xóa ngành nghề</h3>
-    <p class="text-muted mb-3">Bạn có chắc chắn muốn xóa ngành nghề dưới đây khỏi hệ thống?</p>
-
-    <div class="p-3 bg-light rounded-3 border mb-4">
-        <div class="mb-1"><strong>Mã ngành:</strong> #@Model.CategoryId</div>
-        <div class="mb-1"><strong>Tên ngành nghề:</strong> @Model.CategoryName</div>
-        <div><strong>Số tin tuyển dụng thuộc ngành này:</strong> @jobCount tin</div>
-    </div>
-
-    @if (jobCount > 0)
+    int jobCount = 0;
+    if (Model != null)
     {
-        <div class="alert alert-warning rounded-3 small fw-semibold mb-3">
-             Ngành nghề này đang có <strong>@jobCount</strong> tin tuyển dụng nên không thể xóa. Vui lòng chuyển hoặc xóa các tin tuyển dụng trước!
-        </div>
-        <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4 py-2 rounded-3">Quay lại danh sách</a>
-    }
-    else
-    {
-        using (Html.BeginForm())
+        using (var db = new RecruitmentDBEntities())
         {
-            @Html.AntiForgeryToken()
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-danger fw-bold px-4 py-2 rounded-3">Xác nhận xóa</button>
-                <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4 py-2 rounded-3">Hủy bỏ</a>
-            </div>
+            jobCount = db.JOBS.Count(j => j.CategoryId == Model.CategoryId);
         }
     }
+}
+
+<div class="job-create-card mb-4">
+    <!-- HEADER CẢNH BÁO -->
+    <div class="job-create-header d-flex align-items-center gap-3" style="background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%); border-bottom-color: #fecaca;">
+        <div class="job-create-icon" style="background-color: #fee2e2; color: #dc2626;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <div>
+            <h3 class="fw-bold text-danger mb-1" style="font-size: 22px;">Xác nhận xóa ngành nghề</h3>
+            <p class="text-muted small mb-0">Kiểm tra ràng buộc toàn vẹn dữ liệu trước khi xóa danh mục khỏi hệ thống</p>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="job-create-body">
+        <div class="mycomp-stats-row mb-4">
+            <div class="mycomp-stat-box">
+                <div class="mycomp-stat-icon st-jobs">
+                    <i class="bi bi-hash"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark fs-5">#@Model.CategoryId</div>
+                    <div class="text-muted small fw-semibold">Mã ngành nghề</div>
+                </div>
+            </div>
+
+            <div class="mycomp-stat-box">
+                <div class="mycomp-stat-icon st-open">
+                    <i class="bi bi-tag-fill"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark" style="font-size: 15px;">@Model.CategoryName</div>
+                    <div class="text-muted small fw-semibold">Tên ngành nghề</div>
+                </div>
+            </div>
+
+            <div class="mycomp-stat-box">
+                <div class="mycomp-stat-icon st-apps">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+                <div>
+                    <div class="fw-bold @(jobCount > 0 ? "text-danger" : "text-success") fs-5">@jobCount tin</div>
+                    <div class="text-muted small fw-semibold">Tin tuyển dụng liên kết</div>
+                </div>
+            </div>
+        </div>
+
+        @if (jobCount > 0)
+        {
+            <div class="alert alert-danger rounded-3 py-3 px-4 mb-4" style="border-left: 4px solid #dc2626;">
+                <div class="fw-bold mb-1">
+                    <i class="bi bi-shield-exclamation me-1"></i> Không thể xóa ngành nghề này (Bảo toàn khóa ngoại)!
+                </div>
+                <div class="small">
+                    Ngành <strong>@Model.CategoryName</strong> hiện đang được tham chiếu bởi <strong>@jobCount tin tuyển dụng</strong> trong cơ sở dữ liệu. Hệ thống tự động chặn thao tác xóa để bảo vệ toàn vẹn dữ liệu (tránh mất mát tin đăng và hồ sơ ứng viên).
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="@Url.Action("Details", new { id = Model.CategoryId })" class="btn-profile-nav">
+                    <i class="bi bi-eye text-orange"></i>
+                    <span>Xem các tin đang liên kết</span>
+                </a>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-back-job d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Quay lại danh sách</span>
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning rounded-3 py-3 px-4 mb-4">
+                <div class="fw-bold mb-1">
+                    <i class="bi bi-question-circle-fill me-1"></i> Bạn có chắc chắn muốn xóa vĩnh viễn ngành "@Model.CategoryName" không?
+                </div>
+                <div class="small">
+                    Ngành nghề này hiện chưa có tin tuyển dụng nào tham chiếu và có thể xóa an toàn. Thao tác sau khi xác nhận sẽ không thể hoàn tác.
+                </div>
+            </div>
+
+            using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <button type="submit" class="btn btn-danger fw-bold px-4 py-2 rounded-3 d-inline-flex align-items-center gap-2">
+                        <i class="bi bi-trash3-fill"></i>
+                        <span>Xác nhận xóa vĩnh viễn</span>
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-back-job d-inline-flex align-items-center gap-2">
+                        <i class="bi bi-arrow-left"></i>
+                        <span>Hủy bỏ</span>
+                    </a>
+                </div>
+            }
+        }
+    </div>
 </div>

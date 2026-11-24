@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Data.Entity;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Web;
 using System.Web.Mvc;
 using Job_Recruitment_Website.Models;
 using Job_Recruitment_Website.Helpers;
-using System.Text.RegularExpressions;
 
 namespace Job_Recruitment_Website.Controllers
 {
@@ -14,13 +15,11 @@ namespace Job_Recruitment_Website.Controllers
 
         private const int PageSize = 6; // Chuẩn 6 việc làm / 1 trang (3 hàng x 2 cột)
 
-        // Lấy UserId an toàn từ Session
         private int CurrentUserId
         {
             get { return Session["UserId"] != null ? (int)Session["UserId"] : 0; }
         }
 
-        // Hàm hỗ trợ tìm Công ty của Nhà tuyển dụng hiện tại (tương thích hoàn toàn với DB mẫu)
         private COMPANy GetRecruiterCompany()
         {
             int uid = CurrentUserId;
@@ -36,17 +35,65 @@ namespace Job_Recruitment_Website.Controllers
             return db.COMPANIES.FirstOrDefault(c => c.UserId == uid);
         }
 
-        // ==========================================
-        // 1. DÀNH CHO TẤT CẢ MỌI NGƯỜI (ỨNG VIÊN & KHÁCH)
-        // ==========================================
+        // Kiểm tra dữ liệu đầu vào dùng chung cho cả Create & Edit (TC12)
+        private void ValidateJobInput(JOB job, DateTime minDeadline, string deadlineErrorMsg)
+        {
+            job.Title = (job.Title ?? "").Trim();
+            job.Description = (job.Description ?? "").Trim();
+            job.SalaryRange = (job.SalaryRange ?? "").Trim();
+            job.Location = (job.Location ?? "").Trim();
 
+            if (job.Title.Length < 5)
+            {
+                ModelState.AddModelError("Title", "Tiêu đề công việc phải có ít nhất 5 ký tự.");
+            }
+
+            if (job.CategoryId <= 0 || !db.CATEGORIES.Any(c => c.CategoryId == job.CategoryId))
+            {
+                ModelState.AddModelError("CategoryId", "Vui lòng chọn ngành nghề hợp lệ.");
+            }
+
+            if (job.SalaryRange.Length == 0)
+            {
+                ModelState.AddModelError("SalaryRange", "Vui lòng nhập mức lương.");
+            }
+            else
+            {
+                bool hasNegativeNumber = Regex.IsMatch(job.SalaryRange, @"(^|[^\d\s])\s*-\s*\d");
+                bool hasInvalidChars = !Regex.IsMatch(job.SalaryRange, @"^[\p{L}\d\s\-\/\.,\+\$]+$");
+                bool hasLetterOrDigit = Regex.IsMatch(job.SalaryRange, @"[\p{L}\d]");
+
+                if (hasNegativeNumber || hasInvalidChars || !hasLetterOrDigit)
+                {
+                    ModelState.AddModelError("SalaryRange", "Mức lương không hợp lệ (không được nhập số âm hoặc ký tự đặc biệt như @, #, %...).");
+                }
+            }
+
+            if (job.Location.Length < 2)
+            {
+                ModelState.AddModelError("Location", "Vui lòng nhập địa điểm làm việc hợp lệ.");
+            }
+
+            if (job.Deadline < minDeadline)
+            {
+                ModelState.AddModelError("Deadline", deadlineErrorMsg);
+            }
+
+            if (job.Description.Length < 20)
+            {
+                ModelState.AddModelError("Description", "Mô tả chi tiết công việc phải có ít nhất 20 ký tự.");
+            }
+        }
+
+        // ==========================================
+        // 1. DÀNH CHO TẤT CẢ MỌI NGƯỜI (ỨNG VIÊN & KHÁCH - TC01..TC04, TC32)
+        // ==========================================
         public ActionResult Index(string search, int? categoryId, string location, int page = 1)
         {
             var jobs = db.JOBS.Include(j => j.COMPANy)
                               .Include(j => j.CATEGORy)
                               .Where(j => j.Status == "Open");
 
-            // Lọc theo từ khóa (Tiêu đề, Tên công ty, Địa điểm, Mô tả, HOẶC Tên ngành nghề)
             if (!string.IsNullOrWhiteSpace(search))
             {
                 string kw = search.Trim();
@@ -57,13 +104,11 @@ namespace Job_Recruitment_Website.Controllers
                                     || j.CATEGORy.CategoryName.Contains(kw));
             }
 
-            // Lọc theo Ngành nghề (Chỉ lọc khi có chọn ID cụ thể và hợp lệ)
             if (categoryId.HasValue && categoryId.Value > 0)
             {
                 jobs = jobs.Where(j => j.CategoryId == categoryId.Value);
             }
 
-            // Lọc theo Địa điểm (Cột Aside bên trái: TP.HCM, Hà Nội, Đà Nẵng, hoặc Khu vực khác)
             if (!string.IsNullOrWhiteSpace(location))
             {
                 string loc = location.Trim();
@@ -84,11 +129,9 @@ namespace Job_Recruitment_Website.Controllers
                 }
             }
 
-            // Sắp xếp tin mới nhất lên đầu
             var orderedJobs = jobs.OrderByDescending(j => j.PostedDate)
                                   .ThenByDescending(j => j.JobId);
 
-            // Tính toán phân trang (6 việc / trang)
             int totalItems = orderedJobs.Count();
             int totalPages = (int)Math.Ceiling((double)totalItems / PageSize);
             if (totalPages < 1) totalPages = 1;
@@ -119,9 +162,8 @@ namespace Job_Recruitment_Website.Controllers
         }
 
         // ==========================================
-        // 2. DÀNH RIÊNG CHO NHÀ TUYỂN DỤNG (RECRUITER)
+        // 2. DÀNH RIÊNG CHO NHÀ TUYỂN DỤNG (EMPLOYER - TC11, TC12, TC23, TC27)
         // ==========================================
-
         [RoleAuthorize("Recruiter")]
         public ActionResult MyJobs()
         {
@@ -153,31 +195,7 @@ namespace Job_Recruitment_Website.Controllers
             var company = GetRecruiterCompany();
             if (company == null) return RedirectToAction("Create", "COMPANies");
 
-            // Kiểm tra ràng buộc CK_JOBS_Dates trong SQL: Deadline phải >= PostedDate
-            if (job.Deadline < DateTime.Today)
-            {
-                ModelState.AddModelError("Deadline", "Hạn nộp hồ sơ không được nhỏ hơn ngày hiện tại!");
-            }
-
-            // Kiểm tra định dạng Mức lương (chặn số âm, ký tự lạ, chuỗi chỉ toàn khoảng trắng)
-            if (!string.IsNullOrWhiteSpace(job.SalaryRange))
-            {
-                string salary = job.SalaryRange.Trim();
-
-                // 1. Chặn số âm (chỉ bắt dấu trừ đứng đầu hoặc không có số phía trước, không bắt nhầm 15 - 20)
-                bool hasNegativeNumber = Regex.IsMatch(salary, @"(^|[^\d\s])\s*-\s*\d");
-
-                // 2. Chỉ cho phép chữ cái (có dấu tiếng Việt), số, khoảng trắng và các ký tự hợp lệ (- / . , + $)
-                bool hasInvalidChars = !Regex.IsMatch(salary, @"^[\p{L}\d\s\-\/\.,\+\$]+$");
-
-                // 3. Bắt buộc phải có ít nhất 1 chữ cái hoặc chữ số (chặn nhập toàn dấu --- hoặc ...)
-                bool hasLetterOrDigit = Regex.IsMatch(salary, @"[\p{L}\d]");
-
-                if (hasNegativeNumber || hasInvalidChars || !hasLetterOrDigit)
-                {
-                    ModelState.AddModelError("SalaryRange", "Mức lương không hợp lệ (không được nhập số âm hoặc ký tự đặc biệt như @, #, %...).");
-                }
-            }
+            ValidateJobInput(job, DateTime.Today, "Hạn nộp hồ sơ không được nhỏ hơn ngày hiện tại!");
 
             if (ModelState.IsValid)
             {
@@ -200,14 +218,22 @@ namespace Job_Recruitment_Website.Controllers
         {
             if (id == null) return RedirectToAction("MyJobs");
 
+            var targetJob = db.JOBS.Find(id.Value);
+            if (targetJob == null) return HttpNotFound();
+
             var company = GetRecruiterCompany();
-            if (company == null) return RedirectToAction("Create", "COMPANies");
+            // Chặn Employer B cố truy cập URL sửa Job của Employer A bằng mã 403 Forbidden (TC23)
+            if (company == null || targetJob.CompanyId != company.CompanyId)
+            {
+                return RoleAuthorizeAttribute.ForbiddenResult(
+                    Response,
+                    "Bạn không có quyền chỉnh sửa tin tuyển dụng <strong>#" + targetJob.JobId + " (" + HttpUtility.HtmlEncode(targetJob.Title) + ")</strong> vì tin đăng này thuộc quyền sở hữu của công ty khác!",
+                    Url.Action("MyJobs", "Jobs")
+                );
+            }
 
-            var job = db.JOBS.FirstOrDefault(j => j.JobId == id.Value && j.CompanyId == company.CompanyId);
-            if (job == null) return HttpNotFound();
-
-            ViewBag.CategoryId = new SelectList(db.CATEGORIES, "CategoryId", "CategoryName", job.CategoryId);
-            return View(job);
+            ViewBag.CategoryId = new SelectList(db.CATEGORIES, "CategoryId", "CategoryName", targetJob.CategoryId);
+            return View(targetJob);
         }
 
         [HttpPost]
@@ -215,25 +241,30 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Recruiter")]
         public ActionResult Edit(JOB model)
         {
+            var existingJob = db.JOBS.Find(model.JobId);
+            if (existingJob == null) return HttpNotFound();
+
             var company = GetRecruiterCompany();
-            if (company == null) return RedirectToAction("Create", "COMPANies");
-
-            var job = db.JOBS.FirstOrDefault(j => j.JobId == model.JobId && j.CompanyId == company.CompanyId);
-            if (job == null) return HttpNotFound();
-
-            if (model.Deadline < job.PostedDate)
+            if (company == null || existingJob.CompanyId != company.CompanyId)
             {
-                ModelState.AddModelError("Deadline", "Hạn nộp hồ sơ không được nhỏ hơn ngày đăng tin!");
+                return RoleAuthorizeAttribute.ForbiddenResult(
+                    Response,
+                    "Từ chối lưu thay đổi: Bạn không sở hữu tin tuyển dụng <strong>#" + existingJob.JobId + "</strong>!",
+                    Url.Action("MyJobs", "Jobs")
+                );
             }
+
+            model.PostedDate = existingJob.PostedDate;
+            ValidateJobInput(model, existingJob.PostedDate, "Hạn nộp hồ sơ không được nhỏ hơn ngày đăng tin (" + existingJob.PostedDate.ToString("dd/MM/yyyy") + ")!");
 
             if (ModelState.IsValid)
             {
-                job.Title = model.Title;
-                job.Description = model.Description;
-                job.SalaryRange = model.SalaryRange;
-                job.Location = model.Location;
-                job.Deadline = model.Deadline;
-                job.CategoryId = model.CategoryId;
+                existingJob.Title = model.Title;
+                existingJob.Description = model.Description;
+                existingJob.SalaryRange = model.SalaryRange;
+                existingJob.Location = model.Location;
+                existingJob.Deadline = model.Deadline;
+                existingJob.CategoryId = model.CategoryId;
 
                 db.SaveChanges();
                 TempData["Success"] = "Cập nhật tin tuyển dụng thành công!";
@@ -248,17 +279,18 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Recruiter")]
         public ActionResult Close(int id)
         {
+            var job = db.JOBS.Find(id);
+            if (job == null) return RedirectToAction("MyJobs");
+
             var company = GetRecruiterCompany();
-            if (company != null)
+            if (company == null || job.CompanyId != company.CompanyId)
             {
-                var job = db.JOBS.FirstOrDefault(j => j.JobId == id && j.CompanyId == company.CompanyId);
-                if (job != null)
-                {
-                    job.Status = "Closed";
-                    db.SaveChanges();
-                    TempData["Success"] = "Đã đóng tin tuyển dụng: " + job.Title;
-                }
+                return RoleAuthorizeAttribute.ForbiddenResult(Response, "Bạn không có quyền đóng tin tuyển dụng của công ty khác!", Url.Action("MyJobs", "Jobs"));
             }
+
+            job.Status = "Closed";
+            db.SaveChanges();
+            TempData["Success"] = "Đã đóng tin tuyển dụng: " + job.Title;
             return RedirectToAction("MyJobs");
         }
 
@@ -266,22 +298,22 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Recruiter")]
         public ActionResult Reopen(int id)
         {
+            var job = db.JOBS.Find(id);
+            if (job == null) return RedirectToAction("MyJobs");
+
             var company = GetRecruiterCompany();
-            if (company != null)
+            if (company == null || job.CompanyId != company.CompanyId)
             {
-                var job = db.JOBS.FirstOrDefault(j => j.JobId == id && j.CompanyId == company.CompanyId);
-                if (job != null)
-                {
-                    job.Status = "Open";
-                    // Nếu hạn nộp cũ đã qua thì tự động gia hạn thêm 30 ngày
-                    if (job.Deadline < DateTime.Today)
-                    {
-                        job.Deadline = DateTime.Today.AddDays(30);
-                    }
-                    db.SaveChanges();
-                    TempData["Success"] = "Đã mở lại tin tuyển dụng: " + job.Title;
-                }
+                return RoleAuthorizeAttribute.ForbiddenResult(Response, "Bạn không có quyền mở lại tin tuyển dụng của công ty khác!", Url.Action("MyJobs", "Jobs"));
             }
+
+            job.Status = "Open";
+            if (job.Deadline < DateTime.Today)
+            {
+                job.Deadline = DateTime.Today.AddDays(30);
+            }
+            db.SaveChanges();
+            TempData["Success"] = "Đã mở lại tin tuyển dụng: " + job.Title;
             return RedirectToAction("MyJobs");
         }
 
@@ -290,19 +322,22 @@ namespace Job_Recruitment_Website.Controllers
         [RoleAuthorize("Recruiter")]
         public ActionResult Delete(int id)
         {
-            var company = GetRecruiterCompany();
-            if (company == null) return RedirectToAction("Create", "COMPANies");
-
-            var job = db.JOBS.FirstOrDefault(j => j.JobId == id && j.CompanyId == company.CompanyId);
+            var job = db.JOBS.Find(id);
             if (job == null)
             {
-                TempData["Error"] = "Không tìm thấy tin tuyển dụng hoặc bạn không có quyền xóa.";
+                TempData["Error"] = "Không tìm thấy tin tuyển dụng.";
                 return RedirectToAction("MyJobs");
+            }
+
+            var company = GetRecruiterCompany();
+            if (company == null || job.CompanyId != company.CompanyId)
+            {
+                return RoleAuthorizeAttribute.ForbiddenResult(Response, "Bạn không có quyền xóa tin tuyển dụng của công ty khác!", Url.Action("MyJobs", "Jobs"));
             }
 
             if (db.APPLICATIONS.Any(a => a.JobId == id))
             {
-                TempData["Error"] = "Tin tuyển dụng này đã có ứng viên nộp hồ sơ nên không thể xóa. Vui lòng dùng chức năng Đóng tin!";
+                TempData["Error"] = "Bảo toàn khóa ngoại: Tin tuyển dụng này đã có ứng viên nộp hồ sơ nên không thể xóa. Vui lòng dùng chức năng Đóng tin!";
                 return RedirectToAction("MyJobs");
             }
 

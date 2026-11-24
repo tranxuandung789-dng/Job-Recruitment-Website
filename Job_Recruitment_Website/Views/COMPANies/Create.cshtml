@@ -7,59 +7,240 @@
 
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert" style="max-width: 760px;">
-        @TempData["Success"]
+    <div class="alert alert-success alert-dismissible fade show rounded-3 py-2 small fw-semibold mb-3" role="alert">
+        ✔ @TempData["Success"]
     </div>
 }
-
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="max-width: 760px;">
-        @TempData["Error"]
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 py-2 small fw-semibold mb-3" role="alert">
+        ⚠ @TempData["Error"]
     </div>
 }
 
-<div class="card shadow-sm border-0 rounded-4 p-4 p-md-5 bg-white mb-4" style="max-width: 760px;">
-    <h3 class="fw-bold text-dark mb-1">Đăng ký hồ sơ công ty</h3>
-    <p class="text-muted small mb-4">Vui lòng cập nhật thông tin doanh nghiệp trước khi đăng tin tuyển dụng.</p>
-
-    @using (Html.BeginForm("Create", "Companies", FormMethod.Post, new { enctype = "multipart/form-data" }))
-    {
-        @Html.AntiForgeryToken()
-        @Html.ValidationSummary(true, "", new { @class = "text-danger small mb-3" })
-
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Tên công ty <span class="text-danger">*</span></label>
-            @Html.TextBoxFor(model => model.CompanyName, new { @class = "form-control rounded-3 py-2", required = "required", placeholder = "Nhập tên công ty..." })
-            @Html.ValidationMessageFor(model => model.CompanyName, "", new { @class = "text-danger small" })
+<div class="comp-edit-card mb-4">
+    <!-- HEADER FORM -->
+    <div class="job-create-header d-flex align-items-center gap-3">
+        <div class="job-create-icon">
+            <i class="bi bi-building-add"></i>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Logo công ty (.jpg, .jpeg, .png)</label>
-            <input type="file" name="logoFile" class="form-control rounded-3 py-2" accept=".jpg,.jpeg,.png" />
+        <div>
+            <h3 class="fw-bold text-dark mb-1" style="font-size: 22px;">Đăng ký hồ sơ công ty</h3>
+            <p class="text-muted small mb-0">Thiết lập thông tin doanh nghiệp để bắt đầu đăng tin tuyển dụng nhân tài trên D-JOBS</p>
         </div>
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Địa chỉ trụ sở <span class="text-danger">*</span></label>
-            @Html.TextBoxFor(model => model.Address, new { @class = "form-control rounded-3 py-2", required = "required", placeholder = "Nhập địa chỉ công ty..." })
-            @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger small" })
-        </div>
+    <!-- BODY FORM -->
+    <div class="job-create-body">
+        @using (Html.BeginForm("Create", "Companies", FormMethod.Post, new { enctype = "multipart/form-data", id = "createCompanyForm", novalidate = "novalidate" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger py-2 small rounded-3 mb-3" })
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Website</label>
-            @Html.TextBoxFor(model => model.Website, new { @class = "form-control rounded-3 py-2", placeholder = "https://example.com" })
-            @Html.ValidationMessageFor(model => model.Website, "", new { @class = "text-danger small" })
-        </div>
+            <div class="row g-3">
+                <!-- 1. KHUNG TẢI LÊN & XEM TRƯỚC LOGO -->
+                <div class="col-12 mb-1">
+                    <label class="job-label">
+                        <i class="bi bi-image-fill"></i>
+                        <span>Logo thương hiệu công ty</span>
+                    </label>
 
-        <div class="mb-4">
-            <label class="form-label fw-semibold">Mô tả giới thiệu công ty</label>
-            @Html.TextAreaFor(model => model.Description, new { @class = "form-control rounded-3", rows = 5, placeholder = "Giới thiệu về lĩnh vực hoạt động, quy mô và văn hóa doanh nghiệp..." })
-            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger small" })
-        </div>
+                    <div class="comp-logo-editor">
+                        <div class="comp-logo-preview-frame">
+                            <img id="logo-preview-img" src="" alt="Xem trước Logo" style="display:none;" />
+                            <div id="logo-monogram-box" class="mycomp-monogram" style="display:flex; font-size: 26px;">
+                                <i class="bi bi-building"></i>
+                            </div>
+                        </div>
 
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary-custom px-4 py-2">Tạo hồ sơ công ty</button>
-            <a href="@Url.Action("Index", "Jobs")" class="btn btn-outline-secondary px-4 py-2 rounded-3">Quay lại</a>
-        </div>
-    }
+                        <div class="comp-logo-editor-info">
+                            <input type="file" id="logoFile" name="logoFile" class="form-control job-input bg-white" accept=".jpg,.jpeg,.png" />
+                            <div class="text-muted small mt-2">
+                                <i class="bi bi-info-circle text-orange me-1"></i>
+                                Chấp nhận ảnh <strong>.JPG, .JPEG, .PNG</strong> (tối đa 2MB). Nếu chưa có logo, hệ thống sẽ tự tạo biểu tượng chữ viết tắt.
+                            </div>
+                            @Html.ValidationMessage("logoFile", "", new { @class = "text-danger small fw-semibold d-block mt-1" })
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. TÊN CÔNG TY -->
+                <div class="col-md-7">
+                    <label class="job-label" for="CompanyName">
+                        <i class="bi bi-building-fill"></i>
+                        <span>Tên công ty <span class="text-danger">*</span></span>
+                    </label>
+                    @Html.TextBoxFor(model => model.CompanyName, new
+                    {
+                        @class = "form-control job-input",
+                        id = "CompanyName",
+                        maxlength = "200",
+                        placeholder = "Nhập tên đầy đủ của doanh nghiệp..."
+                    })
+                    <div class="invalid-feedback" id="err-CompanyName">
+                        Vui lòng nhập tên công ty.
+                    </div>
+                    @Html.ValidationMessageFor(model => model.CompanyName, "", new { @class = "text-danger small fw-semibold" })
+                </div>
+
+                <!-- 3. WEBSITE -->
+                <div class="col-md-5">
+                    <label class="job-label" for="Website">
+                        <i class="bi bi-globe2"></i>
+                        <span>Website doanh nghiệp</span>
+                    </label>
+                    @Html.TextBoxFor(model => model.Website, new
+                    {
+                        @class = "form-control job-input",
+                        id = "Website",
+                        maxlength = "255",
+                        placeholder = "https://tencongty.vn"
+                    })
+                    <div class="invalid-feedback" id="err-Website">
+                        Website nên bắt đầu bằng http:// hoặc https://
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Website, "", new { @class = "text-danger small fw-semibold" })
+                </div>
+
+                <!-- 4. ĐỊA CHỈ TRỤ SỞ -->
+                <div class="col-12">
+                    <label class="job-label" for="Address">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <span>Địa chỉ trụ sở <span class="text-danger">*</span></span>
+                    </label>
+                    @Html.TextBoxFor(model => model.Address, new
+                    {
+                        @class = "form-control job-input",
+                        id = "Address",
+                        maxlength = "255",
+                        placeholder = "VD: Tòa nhà Bitexco, Quận 1, TP. Hồ Chí Minh"
+                    })
+                    <div class="invalid-feedback" id="err-Address">
+                        Vui lòng nhập địa chỉ trụ sở công ty.
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger small fw-semibold" })
+                </div>
+
+                <!-- 5. MÔ TẢ GIỚI THIỆU CÔNG TY -->
+                <div class="col-12">
+                    <label class="job-label" for="Description">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                        <span>Mô tả giới thiệu công ty</span>
+                    </label>
+                    @Html.TextAreaFor(model => model.Description, new
+                    {
+                        @class = "form-control job-input",
+                        id = "Description",
+                        rows = 5,
+                        placeholder = "Giới thiệu về lĩnh vực hoạt động, quy mô nhân sự, môi trường làm việc và chế độ phúc lợi..."
+                    })
+                    @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger small fw-semibold" })
+                </div>
+            </div>
+
+            <hr class="my-4 text-secondary opacity-25" />
+
+            <!-- NÚT TẠO HỒ SƠ & QUAY LẠI -->
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <button type="submit" class="btn-submit-job d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-check2-circle"></i>
+                    <span>Tạo hồ sơ công ty</span>
+                </button>
+
+                <a href="@Url.Action("Index", "Jobs")" class="btn btn-outline-secondary btn-back-job d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Quay lại</span>
+                </a>
+            </div>
+        }
+    </div>
 </div>
+
+@section scripts {
+    <script>
+        (function () {
+            var form = document.getElementById('createCompanyForm');
+            if (!form) return;
+
+            var compName = document.getElementById('CompanyName');
+            var address = document.getElementById('Address');
+            var website = document.getElementById('Website');
+            var logoInput = document.getElementById('logoFile');
+            var previewImg = document.getElementById('logo-preview-img');
+            var monogramBox = document.getElementById('logo-monogram-box');
+
+            if (logoInput && previewImg && monogramBox) {
+                logoInput.addEventListener('change', function () {
+                    setTimeout(function () {
+                        if (logoInput.files && logoInput.files[0]) {
+                            previewImg.style.display = 'block';
+                            monogramBox.style.display = 'none';
+                        } else {
+                            previewImg.style.display = 'none';
+                            monogramBox.style.display = 'flex';
+                        }
+                    }, 25);
+                });
+            }
+
+            function setInvalid(input, errId, isInvalid, msg) {
+                if (!input) return;
+                var errEl = document.getElementById(errId);
+                if (errEl && msg) errEl.textContent = msg;
+                input.classList.toggle('is-invalid', isInvalid);
+            }
+
+            function checkName(forceEmptyCheck) {
+                var v = compName.value.trim();
+                if (v.length === 0) {
+                    setInvalid(compName, 'err-CompanyName', forceEmptyCheck, 'Vui lòng nhập tên công ty.');
+                    return false;
+                }
+                setInvalid(compName, 'err-CompanyName', false);
+                return true;
+            }
+
+            function checkAddress(forceEmptyCheck) {
+                var v = address.value.trim();
+                if (v.length === 0) {
+                    setInvalid(address, 'err-Address', forceEmptyCheck, 'Vui lòng nhập địa chỉ trụ sở công ty.');
+                    return false;
+                }
+                setInvalid(address, 'err-Address', false);
+                return true;
+            }
+
+            function checkWebsite() {
+                var v = website.value.trim();
+                if (v.length === 0) {
+                    setInvalid(website, 'err-Website', false);
+                    return true;
+                }
+                var ok = /^https?:\/\/[^\s]+$/i.test(v);
+                setInvalid(website, 'err-Website', !ok, 'Website nên bắt đầu bằng http:// hoặc https:// (VD: https://fptsoftware.com).');
+                return ok;
+            }
+
+            compName.addEventListener('input', function () { checkName(false); });
+            compName.addEventListener('blur', function () { checkName(true); });
+
+            address.addEventListener('input', function () { checkAddress(false); });
+            address.addEventListener('blur', function () { checkAddress(true); });
+
+            website.addEventListener('input', checkWebsite);
+            website.addEventListener('blur', checkWebsite);
+
+            form.addEventListener('submit', function (e) {
+                var okName = checkName(true);
+                var okAddr = checkAddress(true);
+                var okWeb = checkWebsite();
+
+                if (!okName || !okAddr || !okWeb) {
+                    e.preventDefault();
+                    var firstInvalid = form.querySelector('.is-invalid');
+                    if (firstInvalid) firstInvalid.focus();
+                }
+            });
+        })();
+    </script>
+}

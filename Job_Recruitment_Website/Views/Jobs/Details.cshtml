@@ -3,116 +3,197 @@
 @{
     ViewBag.Title = "Chi tiết công việc";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+
     bool isExpired = Model.Deadline < DateTime.Today;
+    int daysLeft = (Model.Deadline.Date - DateTime.Today).Days;
+    string companyName = Model.COMPANy != null ? Model.COMPANy.CompanyName : "Chưa cập nhật";
+    string companyLogo = Model.COMPANy != null ? Model.COMPANy.Logo_Url : null;
+    string cleanDesc = Model.Description != null ? Model.Description.Trim() : "";
 }
 
-<div class="container my-4" style="max-width: 900px;">
-    <!-- Thông báo lỗi hoặc thành công nếu có -->
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["Error"]
-        </div>
-    }
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Success"]
-        </div>
-    }
+<!-- THÔNG BÁO TRẠNG THÁI -->
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger rounded-3 py-2 small fw-semibold mb-3">
+        ⚠ @TempData["Error"]
+    </div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success rounded-3 py-2 small fw-semibold mb-3">
+        ✔ @TempData["Success"]
+    </div>
+}
 
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                    <h2 class="text-primary fw-bold mb-1">@Model.Title</h2>
-                    <h5 class="text-muted mb-0">
-                        <i class="bi bi-building"></i> @(Model.COMPANy != null ? Model.COMPANy.CompanyName : "Chưa cập nhật")
-                    </h5>
+<div class="job-detail-card mb-4">
+    <!-- HEADER TIN TUYỂN DỤNG -->
+    <div class="job-detail-header">
+        <div class="job-detail-brand">
+            @if (!string.IsNullOrEmpty(companyLogo))
+            {
+                <img src="@companyLogo" alt="@companyName" class="job-detail-logo" />
+            }
+            else
+            {
+                <div class="job-detail-logo-fallback">
+                    <i class="bi bi-building"></i>
+                </div>
+            }
+
+            <div>
+                <h2 class="job-detail-title">@Model.Title</h2>
+                @if (Model.COMPANy != null)
+                {
+                    <a href="@Url.Action("Details", "Companies", new { id = Model.CompanyId })" class="job-detail-company-link">
+                        <i class="bi bi-building-check text-orange"></i>
+                        <span>@companyName</span>
+                    </a>
+                }
+                else
+                {
+                    <span class="job-detail-company-link">
+                        <i class="bi bi-building text-orange"></i>
+                        <span>@companyName</span>
+                    </span>
+                }
+            </div>
+        </div>
+
+        <div>
+            @if (Model.Status == "Open" && !isExpired)
+            {
+                <span class="job-status-pill status-open">
+                    <i class="bi bi-check-circle-fill"></i> Đang mở ứng tuyển
+                </span>
+            }
+            else if (isExpired)
+            {
+                <span class="job-status-pill status-expired">
+                    <i class="bi bi-exclamation-circle-fill"></i> Đã hết hạn nộp
+                </span>
+            }
+            else
+            {
+                <span class="job-status-pill status-closed">
+                    <i class="bi bi-lock-fill"></i> Đã đóng
+                </span>
+            }
+        </div>
+    </div>
+
+    <!-- NỘI DUNG CHI TIẾT -->
+    <div class="job-detail-body">
+        <!-- LƯỚI THÔNG TIN NHANH -->
+        <div class="job-meta-grid">
+            <div class="job-meta-item">
+                <div class="job-meta-icon icon-salary">
+                    <i class="bi bi-cash-stack"></i>
                 </div>
                 <div>
-                    @if (Model.Status == "Open" && !isExpired)
+                    <div class="job-meta-label">Mức lương</div>
+                    <div class="job-meta-value val-salary">
+                        @(string.IsNullOrEmpty(Model.SalaryRange) ? "Thỏa thuận" : Model.SalaryRange)
+                    </div>
+                </div>
+            </div>
+
+            <div class="job-meta-item">
+                <div class="job-meta-icon">
+                    <i class="bi bi-geo-alt-fill"></i>
+                </div>
+                <div>
+                    <div class="job-meta-label">Địa điểm làm việc</div>
+                    <div class="job-meta-value">@Model.Location</div>
+                </div>
+            </div>
+
+            <div class="job-meta-item">
+                <div class="job-meta-icon">
+                    <i class="bi bi-grid-fill"></i>
+                </div>
+                <div>
+                    <div class="job-meta-label">Ngành nghề</div>
+                    <div class="job-meta-value">
+                        @(Model.CATEGORy != null ? Model.CATEGORy.CategoryName : "Chưa phân loại")
+                    </div>
+                </div>
+            </div>
+
+            <div class="job-meta-item">
+                <div class="job-meta-icon">
+                    <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <div>
+                    <div class="job-meta-label">Ngày đăng tin</div>
+                    <div class="job-meta-value">@Model.PostedDate.ToString("dd/MM/yyyy")</div>
+                </div>
+            </div>
+
+            <div class="job-meta-item" style="grid-column: span 2;">
+                <div class="job-meta-icon">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <div>
+                    <div class="job-meta-label">Hạn chót nộp hồ sơ</div>
+                    <div class="job-meta-value @(isExpired ? "text-danger" : "")">
+                        @Model.Deadline.ToString("dd/MM/yyyy")
+                        @if (!isExpired && Model.Status == "Open")
+                        {
+                            <span class="small fw-semibold text-orange ms-1">
+                                (@(daysLeft == 0 ? "Hết hạn hôm nay" : "Còn " + daysLeft + " ngày"))
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÔ TẢ CHI TIẾT CÔNG VIỆC -->
+        <div>
+            <h5 class="job-section-subtitle">Mô tả chi tiết công việc</h5>
+            <div class="job-desc-box">@cleanDesc</div>
+        </div>
+
+        <!-- KHU VỰC NÚT BẤM -->
+        <div class="job-detail-footer">
+            <a href="@Url.Action("Index", "Jobs")" class="btn btn-outline-secondary btn-back-job d-inline-flex align-items-center gap-2">
+                <i class="bi bi-arrow-left"></i>
+                <span>Quay lại danh sách việc làm</span>
+            </a>
+
+            <div>
+                @if (Session["Role"] != null && Session["Role"].ToString() == "Candidate")
+                {
+                    if (Model.Status == "Open" && !isExpired)
                     {
-                        <span class="badge bg-success fs-6 px-3 py-2">Đang mở ứng tuyển</span>
+                        <a href="@Url.Action("Apply", "Applications", new { jobId = Model.JobId })" class="btn-apply-detail">
+                            <i class="bi bi-send-fill"></i>
+                            <span>Ứng tuyển ngay</span>
+                        </a>
                     }
                     else if (isExpired)
                     {
-                        <span class="badge bg-danger fs-6 px-3 py-2">Đã hết hạn nộp</span>
+                        <button class="btn btn-danger px-4 py-2 rounded-3 fw-bold" disabled>Đã quá hạn ứng tuyển</button>
                     }
                     else
                     {
-                        <span class="badge bg-secondary fs-6 px-3 py-2">Đã đóng</span>
+                        <button class="btn btn-secondary px-4 py-2 rounded-3 fw-bold" disabled>Tin đã đóng</button>
                     }
-                </div>
-            </div>
-
-            <hr />
-
-            <!-- Thông tin nhanh về công việc -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <p class="mb-2"><strong>Ngành nghề:</strong> @(Model.CATEGORy != null ? Model.CATEGORy.CategoryName : "Chưa phân loại")</p>
-                    <p class="mb-2"><strong>Mức lương:</strong> <span class="text-danger fw-bold">@(string.IsNullOrEmpty(Model.SalaryRange) ? "Thỏa thuận" : Model.SalaryRange)</span></p>
-                    <p class="mb-2"><strong>Địa điểm làm việc:</strong> @Model.Location</p>
-                </div>
-                <div class="col-md-6">
-                    <p class="mb-2"><strong>Ngày đăng tin:</strong> @Model.PostedDate.ToString("dd/MM/yyyy")</p>
-                    <p class="mb-2">
-                        <strong>Hạn chót nộp hồ sơ:</strong>
-                        <span class="@(isExpired ? "text-danger" : "text-primary") fw-bold">
-                            @Model.Deadline.ToString("dd/MM/yyyy")
-                        </span>
-                    </p>
-                </div>
-            </div>
-
-            <!-- Khung mô tả chi tiết công việc -->
-            <div class="mb-4">
-                <h5 class="fw-bold text-dark">Mô tả chi tiết công việc:</h5>
-                <div class="p-3 bg-light rounded border" style="white-space: pre-line; line-height: 1.6;">
-                    @Model.Description
-                </div>
-            </div>
-
-            <!-- Khu vực thao tác nút Ứng tuyển & Quay lại -->
-            <div class="pt-3 border-top d-flex align-items-center justify-content-between">
-                <div>
-                    @Html.ActionLink("Quay lại danh sách việc làm", "Index", "Jobs", null, new { @class = "btn btn-outline-secondary" })
-                </div>
-
-                <div>
-                    @if (Session["Role"] != null && Session["Role"].ToString() == "Candidate")
+                }
+                else if (Session["Role"] == null)
+                {
+                    if (Model.Status == "Open" && !isExpired)
                     {
-                        if (Model.Status == "Open" && !isExpired)
-                        {
-                            <a href="@Url.Action("Apply", "Applications", new { jobId = Model.JobId })" class="btn btn-primary btn-lg px-4 shadow-sm">
-                                Ứng tuyển ngay
-                            </a>
-                        }
-                        else if (isExpired)
-                        {
-                            <button class="btn btn-danger btn-lg" disabled>Đã quá hạn ứng tuyển</button>
-                        }
-                        else
-                        {
-                            <button class="btn btn-secondary btn-lg" disabled>Tin đã đóng</button>
-                        }
+                        <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Apply", "Applications", new { jobId = Model.JobId }) })" class="btn-apply-detail">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            <span>Đăng nhập để ứng tuyển</span>
+                        </a>
                     }
-                    else if (Session["Role"] == null)
+                    else
                     {
-                        if (Model.Status == "Open" && !isExpired)
-                        {
-                            <span class="text-muted me-2 small">Đăng nhập tài khoản ứng viên để nộp hồ sơ:</span>
-                            <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Apply", "Applications", new { jobId = Model.JobId }) })" class="btn btn-primary">
-                                Đăng nhập để ứng tuyển
-                            </a>
-                        }
-                        else
-                        {
-                            <button class="btn btn-secondary" disabled>Không còn nhận hồ sơ</button>
-                        }
+                        <button class="btn btn-secondary px-4 py-2 rounded-3 fw-bold" disabled>Không còn nhận hồ sơ</button>
                     }
-                </div>
+                }
             </div>
         </div>
     </div>

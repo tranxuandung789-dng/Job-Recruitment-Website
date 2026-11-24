@@ -37,7 +37,6 @@ namespace Job_Recruitment_Website.Controllers
                 return View(user);
             }
 
-            // Kiểm tra định dạng số điện thoại: chỉ gồm 10-11 chữ số
             user.Phone = (user.Phone ?? "").Trim();
             if (!Regex.IsMatch(user.Phone, @"^[0-9]{10,11}$"))
             {
@@ -70,22 +69,29 @@ namespace Job_Recruitment_Website.Controllers
             return View();
         }
 
-        // POST: Account/Login
+        // POST: Account/Login (Xác thực mật khẩu có Salt & tự nâng cấp hash cũ)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Login(string email, string password, string returnUrl)
         {
-            string hash = PasswordHelper.Hash(password);
-
-            var user = db.USERS.FirstOrDefault(u => u.Email == email
-                                && (u.PasswordHash == hash || u.PasswordHash == password || (password == "123456" && u.PasswordHash.StartsWith("$2b$12$HashPass")))
-                                && u.IsActive == true);
+            email = (email ?? "").Trim();
+            var candidateUser = db.USERS.FirstOrDefault(u => u.Email == email && u.IsActive == true);
+            var user = (candidateUser != null && PasswordHelper.Verify(password, candidateUser.PasswordHash))
+                ? candidateUser
+                : null;
 
             if (user == null)
             {
                 ViewBag.Error = "Sai email hoặc mật khẩu, hoặc tài khoản đã bị khóa";
                 ViewBag.ReturnUrl = returnUrl;
                 return View();
+            }
+
+            // Tự động nâng cấp các mật khẩu mẫu cũ sang chuẩn PBKDF2 có Salt ngay khi đăng nhập
+            if (!user.PasswordHash.StartsWith("PBKDF2$"))
+            {
+                user.PasswordHash = PasswordHelper.Hash(password);
+                db.SaveChanges();
             }
 
             Session["UserId"] = user.UserId;
@@ -112,7 +118,7 @@ namespace Job_Recruitment_Website.Controllers
             }
         }
 
-        // GET: Account/Profile (Trang Hồ sơ ứng viên / Cá nhân + CV)
+        // GET: Account/Profile
         public new ActionResult Profile()
         {
             if (Session["UserId"] == null)
@@ -131,10 +137,39 @@ namespace Job_Recruitment_Website.Controllers
             return View(user);
         }
 
-        // POST: Account/Profile (Cập nhật thông tin cá nhân + Hồ sơ CV ứng viên)
+        // GET: Account/MyCv
+        public ActionResult MyCv()
+        {
+            if (Session["UserId"] == null)
+            {
+                return RedirectToAction("Login", new { returnUrl = Url.Action("MyCv", "Account") });
+            }
+
+            int uid = (int)Session["UserId"];
+            var profile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == uid);
+            if (profile == null || string.IsNullOrWhiteSpace(profile.CV_Url) || profile.CV_Url == "Đang cập nhật")
+            {
+                return HttpNotFound();
+            }
+
+            string fileName = Path.GetFileName(profile.CV_Url);
+            string appDataPath = Path.Combine(Server.MapPath("~/App_Data/CVs/"), fileName);
+            string legacyPath = Path.Combine(Server.MapPath("~/Content/CVs/"), fileName);
+
+            string physicalPath = System.IO.File.Exists(appDataPath) ? appDataPath : (System.IO.File.Exists(legacyPath) ? legacyPath : null);
+            if (physicalPath == null)
+            {
+                return HttpNotFound();
+            }
+
+            Response.AppendHeader("Content-Disposition", "inline; filename=\"My_CV.pdf\"");
+            return File(physicalPath, "application/pdf");
+        }
+
+        // POST: Account/Profile
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public new ActionResult Profile(string FullName, string Phone, string Education, string Skills, string Experience, HttpPostedFileBase cvFile)
+        public new ActionResult Profile(string FullName, string Email, string Phone, string Education, string Skills, string Experience, HttpPostedFileBase cvFile)
         {
             if (Session["UserId"] == null)
             {
@@ -146,9 +181,9 @@ namespace Job_Recruitment_Website.Controllers
             if (user != null)
             {
                 FullName = (FullName ?? "").Trim();
+                Email = (Email ?? "").Trim();
                 Phone = (Phone ?? "").Trim();
 
-                // Kiểm tra họ tên
                 if (FullName.Length == 0)
                 {
                     ViewBag.Error = "Vui lòng nhập họ và tên!";
@@ -156,26 +191,42 @@ namespace Job_Recruitment_Website.Controllers
                     return View(user);
                 }
 
-                // Kiểm tra định dạng số điện thoại: chỉ gồm 10-11 chữ số
+                if (Email.Length == 0 || !Regex.IsMatch(Email, @"^[^\s@]+@[^\s@]{2,}\.[^\s@]{2,}$"))
+                {
+                    ViewBag.EmailError = "Email không đúng định dạng (ví dụ: name@example.com).";
+                    ViewBag.EmailValue = Email;
+                    ViewBag.CandidateProfile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == uid);
+                    return View(user);
+                }
+
+                if (db.USERS.Any(u => u.Email == Email && u.UserId != uid))
+                {
+                    ViewBag.EmailError = "Email này đã được tài khoản khác sử dụng!";
+                    ViewBag.EmailValue = Email;
+                    ViewBag.CandidateProfile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == uid);
+                    return View(user);
+                }
+
                 if (!Regex.IsMatch(Phone, @"^[0-9]{10,11}$"))
                 {
                     ViewBag.PhoneError = "Số điện thoại không hợp lệ! Chỉ nhập 10 hoặc 11 chữ số (VD: 0912345678).";
-                    ViewBag.PhoneValue = Phone; // giữ lại giá trị vừa nhập để người dùng sửa
+                    ViewBag.PhoneValue = Phone;
                     ViewBag.CandidateProfile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == uid);
                     return View(user);
                 }
 
                 if (db.USERS.Any(u => u.Phone == Phone && u.UserId != uid))
                 {
-                    ViewBag.Error = "Số điện thoại này đã được tài khoản khác sử dụng!";
+                    ViewBag.PhoneError = "Số điện thoại này đã được tài khoản khác sử dụng!";
+                    ViewBag.PhoneValue = Phone;
                     ViewBag.CandidateProfile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == uid);
                     return View(user);
                 }
 
                 user.FullName = FullName;
+                user.Email = Email;
                 user.Phone = Phone;
 
-                // Nếu là Ứng viên (Candidate) thì cập nhật thêm bảng CANDIDATEPROFILES (Education, Skills, Experience, CV_Url)
                 bool isCandidate = (user.ROLE != null && user.ROLE.RoleName == "Candidate") || user.RoleId == 3;
                 if (isCandidate)
                 {
@@ -185,18 +236,24 @@ namespace Job_Recruitment_Website.Controllers
                         string ext = Path.GetExtension(cvFile.FileName).ToLower();
                         if (ext != ".pdf")
                         {
-                            ViewBag.Error = "File CV chỉ chấp nhận định dạng PDF (.pdf)!";
+                            ViewBag.Error = "Từ chối tải lên: File CV chỉ chấp nhận định dạng PDF (.pdf)!";
                             ViewBag.CandidateProfile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == uid);
                             return View(user);
                         }
                         if (cvFile.ContentLength > 5 * 1024 * 1024)
                         {
-                            ViewBag.Error = "Dung lượng file CV không được vượt quá 5MB!";
+                            ViewBag.Error = "Từ chối tải lên: Dung lượng file CV không được vượt quá 5MB!";
+                            ViewBag.CandidateProfile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == uid);
+                            return View(user);
+                        }
+                        if (!ApplicationsController.IsPdfFile(cvFile))
+                        {
+                            ViewBag.Error = "Từ chối tải lên: Phát hiện file giả mạo PDF (nội dung bên trong không đúng chuẩn chữ ký %PDF-)!";
                             ViewBag.CandidateProfile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == uid);
                             return View(user);
                         }
 
-                        string folderPath = Server.MapPath("~/Content/CVs/");
+                        string folderPath = Server.MapPath("~/App_Data/CVs/");
                         if (!Directory.Exists(folderPath))
                         {
                             Directory.CreateDirectory(folderPath);
@@ -204,7 +261,7 @@ namespace Job_Recruitment_Website.Controllers
 
                         string fileName = Guid.NewGuid().ToString() + ".pdf";
                         cvFile.SaveAs(Path.Combine(folderPath, fileName));
-                        uploadedCvPath = "/Content/CVs/" + fileName;
+                        uploadedCvPath = "/App_Data/CVs/" + fileName;
                     }
 
                     var profile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == uid);
