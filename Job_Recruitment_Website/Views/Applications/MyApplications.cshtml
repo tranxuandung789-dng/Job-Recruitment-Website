@@ -3,89 +3,210 @@
 @{
     ViewBag.Title = "Việc làm đã nộp";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+
+    var apps = Model != null ? Model.ToList() : new List<Job_Recruitment_Website.Models.APPLICATION>();
+    int totalCount = apps.Count;
+    int reviewCount = apps.Count(a => a.Status == "Pending" || a.Status == "Submitted" || a.Status == "Reviewed");
+    int interviewCount = apps.Count(a => a.Status == "Interview");
+    int acceptedCount = apps.Count(a => a.Status == "Accepted" || a.Status == "Approved");
 }
 
-<div class="container my-4">
-    <h3 class="mb-4">Danh sách công việc đã ứng tuyển</h3>
+<!-- TIÊU ĐỀ TRANG -->
+<div class="job-section-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Danh sách công việc đã ứng tuyển</h2>
+        <p class="text-muted small mb-0">Theo dõi trạng thái hồ sơ (Applied → Review → Interview → Accepted / Rejected) tại D-JOBS</p>
+    </div>
+    <a href="@Url.Action("Index", "Jobs")" class="btn btn-primary-custom px-3 py-2 d-inline-flex align-items-center gap-2 small">
+        <i class="bi bi-search"></i>
+        <span>Tìm thêm việc làm</span>
+    </a>
+</div>
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">@TempData["Success"]</div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger">@TempData["Error"]</div>
-    }
+<!-- THÔNG BÁO -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success rounded-3 py-2 small fw-semibold mb-3">
+        ✔ @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger rounded-3 py-2 small fw-semibold mb-3">
+        ⚠ @TempData["Error"]
+    </div>
+}
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Tên công việc</th>
-                    <th>Công ty</th>
-                    <th>Ngày nộp</th>
-                    <th>File CV</th>
-                    <th>Trạng thái</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (!Model.Any())
-                {
+<!-- 4 THẺ THỐNG KÊ NHANH -->
+<div class="myapp-stats-grid">
+    <div class="myapp-stat-card">
+        <div class="myapp-stat-icon stat-total">
+            <i class="bi bi-send-check-fill"></i>
+        </div>
+        <div>
+            <div class="myapp-stat-number">@totalCount</div>
+            <div class="myapp-stat-label">Tổng đơn đã nộp</div>
+        </div>
+    </div>
+
+    <div class="myapp-stat-card">
+        <div class="myapp-stat-icon stat-review">
+            <i class="bi bi-hourglass-split"></i>
+        </div>
+        <div>
+            <div class="myapp-stat-number">@reviewCount</div>
+            <div class="myapp-stat-label">Applied / Review</div>
+        </div>
+    </div>
+
+    <div class="myapp-stat-card">
+        <div class="myapp-stat-icon stat-interview">
+            <i class="bi bi-calendar2-check-fill"></i>
+        </div>
+        <div>
+            <div class="myapp-stat-number">@interviewCount</div>
+            <div class="myapp-stat-label">Interview (Phỏng vấn)</div>
+        </div>
+    </div>
+
+    <div class="myapp-stat-card">
+        <div class="myapp-stat-icon stat-accepted">
+            <i class="bi bi-patch-check-fill"></i>
+        </div>
+        <div>
+            <div class="myapp-stat-number">@acceptedCount</div>
+            <div class="myapp-stat-label">Accepted (Đã nhận)</div>
+        </div>
+    </div>
+</div>
+
+<!-- BẢNG DANH SÁCH ĐƠN ỨNG TUYỂN -->
+<div class="myapp-card mb-4">
+    @if (!apps.Any())
+    {
+        <div class="myapp-empty">
+            <div class="myapp-empty-icon">
+                <i class="bi bi-inbox-fill"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-1">Bạn chưa nộp hồ sơ vào công việc nào</h5>
+            <p class="text-muted small mb-3">Hãy khám phá hàng trăm cơ hội nghề nghiệp hấp dẫn đang chờ đón bạn tại D-JOBS.</p>
+            <a href="@Url.Action("Index", "Jobs")" class="btn btn-primary-custom px-4 py-2">
+                Khám phá việc làm ngay
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="myapp-table">
+                <thead>
                     <tr>
-                        <td colspan="5" class="text-center text-muted">Bạn chưa nộp hồ sơ vào công việc nào.</td>
+                        <th>Vị trí công việc</th>
+                        <th>Công ty</th>
+                        <th>Ngày nộp</th>
+                        <th class="text-center">Hồ sơ CV</th>
+                        <th class="text-center">Trạng thái</th>
                     </tr>
-                }
-                else
-                {
-                    foreach (var item in Model)
+                </thead>
+                <tbody>
+                    @foreach (var item in apps)
                     {
+                        string compName = (item.JOB != null && item.JOB.COMPANy != null) ? item.JOB.COMPANy.CompanyName : "Đang cập nhật";
+                        string compLogo = (item.JOB != null && item.JOB.COMPANy != null) ? item.JOB.COMPANy.Logo_Url : null;
+
                         <tr>
                             <td>
-                                <a href="@Url.Action("Details", "Jobs", new { id = item.JobId })" class="text-decoration-none text-dark">
-                                    <strong>@item.JOB.Title</strong>
-                                </a>
-                            </td>
-                            <td>@(item.JOB.COMPANy != null ? item.JOB.COMPANy.CompanyName : "Đang cập nhật")</td>
-                            <td>@item.AppliedDate.ToString("dd/MM/yyyy")</td>
-                            <td>
-                                @if (item.CANDIDATEPROFILE != null && !string.IsNullOrEmpty(item.CANDIDATEPROFILE.CV_Url))
+                                @if (item.JOB != null)
                                 {
-                                    <a href="@Url.Content(item.CANDIDATEPROFILE.CV_Url)" target="_blank" class="btn btn-sm btn-outline-info">Xem CV</a>
+                                    <a href="@Url.Action("Details", "Jobs", new { id = item.JobId })" class="myapp-job-title">
+                                        @item.JOB.Title
+                                    </a>
+                                    <div class="myapp-job-sub">
+                                        @if (!string.IsNullOrEmpty(item.JOB.Location))
+                                        {
+                                            <span><i class="bi bi-geo-alt text-orange"></i> @item.JOB.Location</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.JOB.SalaryRange))
+                                        {
+                                            <span class="fw-semibold" style="color: #059669;">• @item.JOB.SalaryRange</span>
+                                        }
+                                    </div>
+                                }
+                            </td>
+
+                            <td>
+                                <div class="myapp-company-box">
+                                    @if (!string.IsNullOrEmpty(compLogo))
+                                    {
+                                        <img src="@compLogo" alt="@compName" class="myapp-company-logo" />
+                                    }
+                                    else
+                                    {
+                                        <div class="myapp-company-fallback">
+                                            <i class="bi bi-building"></i>
+                                        </div>
+                                    }
+                                    <span class="myapp-company-name">@compName</span>
+                                </div>
+                            </td>
+
+                            <td class="myapp-date">
+                                <i class="bi bi-calendar3 me-1 text-muted"></i>@item.AppliedDate.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td class="text-center">
+                                @if (item.CANDIDATEPROFILE != null && !string.IsNullOrEmpty(item.CANDIDATEPROFILE.CV_Url) && item.CANDIDATEPROFILE.CV_Url != "Đang cập nhật")
+                                {
+                                    <a href="@Url.Action("ViewCv", "Applications", new { id = item.ApplicationId })" target="_blank" class="btn-view-cv-soft">
+                                        <i class="bi bi-file-earmark-pdf-fill"></i>
+                                        <span>Xem CV</span>
+                                    </a>
                                 }
                                 else
                                 {
                                     <span class="text-muted small">Chưa có CV</span>
                                 }
                             </td>
-                            <td>
+
+                            <td class="text-center">
                                 @switch (item.Status)
                                 {
                                     case "Pending":
                                     case "Submitted":
-                                        <span class="badge bg-secondary">Đã nộp</span>
+                                        <span class="myapp-badge badge-status-pending">
+                                            <i class="bi bi-clock"></i> Applied • Đã nộp
+                                        </span>
                                         break;
                                     case "Reviewed":
-                                        <span class="badge bg-info text-dark">Đã được xem xét</span>
+                                        <span class="myapp-badge badge-status-reviewed">
+                                            <i class="bi bi-eye-fill"></i> Review • Đang xét
+                                        </span>
                                         break;
                                     case "Interview":
-                                        <span class="badge bg-primary">Mời phỏng vấn</span>
+                                        <span class="myapp-badge badge-status-interview">
+                                            <i class="bi bi-calendar-event-fill"></i> Interview • Phỏng vấn
+                                        </span>
                                         break;
                                     case "Accepted":
                                     case "Approved":
-                                        <span class="badge bg-success">Đã được duyệt</span>
+                                        <span class="myapp-badge badge-status-accepted">
+                                            <i class="bi bi-check-circle-fill"></i> Accepted • Đã nhận
+                                        </span>
                                         break;
                                     case "Rejected":
-                                        <span class="badge bg-danger">Bị từ chối</span>
+                                        <span class="myapp-badge badge-status-rejected">
+                                            <i class="bi bi-x-circle-fill"></i> Rejected • Từ chối
+                                        </span>
                                         break;
                                     default:
-                                        <span class="badge bg-light text-dark">@item.Status</span>
+                                        <span class="myapp-badge badge-status-pending">@item.Status</span>
                                         break;
                                 }
                             </td>
                         </tr>
                     }
-                }
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
+    }
 </div>

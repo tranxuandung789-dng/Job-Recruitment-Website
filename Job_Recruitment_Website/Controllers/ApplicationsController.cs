@@ -23,7 +23,6 @@ namespace Job_Recruitment_Website.Controllers
             get { return Session["UserId"] != null ? (int)Session["UserId"] : 0; }
         }
 
-        // Hàm hỗ trợ tìm Công ty của Nhà tuyển dụng hiện tại
         private COMPANy GetRecruiterCompany()
         {
             int uid = CurrentUserId;
@@ -39,16 +38,25 @@ namespace Job_Recruitment_Website.Controllers
             return db.COMPANIES.FirstOrDefault(c => c.UserId == uid);
         }
 
-        // Kiểm tra file thật sự là PDF (header bắt đầu bằng "%PDF")
-        private static bool IsPdfFile(HttpPostedFileBase file)
+        // Kiểm tra chữ ký số chuẩn của PDF "%PDF-" (TC09, TC30)
+        public static bool IsPdfFile(HttpPostedFileBase file)
         {
+            if (file == null || file.ContentLength < 5)
+                return false;
+
             try
             {
-                var header = new byte[4];
-                int read = file.InputStream.Read(header, 0, 4);
+                byte[] header = new byte[5];
                 file.InputStream.Position = 0;
-                return read == 4 && header[0] == 0x25 && header[1] == 0x50
-                                 && header[2] == 0x44 && header[3] == 0x46;
+                int read = file.InputStream.Read(header, 0, 5);
+                file.InputStream.Position = 0;
+
+                return read == 5
+                    && header[0] == 0x25
+                    && header[1] == 0x50
+                    && header[2] == 0x44
+                    && header[3] == 0x46
+                    && header[4] == 0x2D;
             }
             catch
             {
@@ -56,7 +64,35 @@ namespace Job_Recruitment_Website.Controllers
             }
         }
 
-        // Kiểm tra luồng chuyển trạng thái hợp lệ: Applied -> Reviewed -> Interview -> Accepted / Rejected (và cho phép Xem xét lại)
+        // Ưu tiên lấy bản chụp Snapshot CV của đúng đơn ứng tuyển (app_{id}.pdf), sau đó mới fallback về CV hồ sơ
+        private string ResolveApplicationCvPath(int applicationId, string fallbackCvUrl)
+        {
+            string snapshotPath = Path.Combine(Server.MapPath("~/App_Data/CVs/"), "app_" + applicationId + ".pdf");
+            if (System.IO.File.Exists(snapshotPath))
+                return snapshotPath;
+
+            if (string.IsNullOrWhiteSpace(fallbackCvUrl) || fallbackCvUrl == "Đang cập nhật")
+                return null;
+
+            if (fallbackCvUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                fallbackCvUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            string fileName = Path.GetFileName(fallbackCvUrl);
+            if (string.IsNullOrWhiteSpace(fileName))
+                return null;
+
+            string appDataPath = Path.Combine(Server.MapPath("~/App_Data/CVs/"), fileName);
+            if (System.IO.File.Exists(appDataPath))
+                return appDataPath;
+
+            string legacyContentPath = Path.Combine(Server.MapPath("~/Content/CVs/"), fileName);
+            if (System.IO.File.Exists(legacyContentPath))
+                return legacyContentPath;
+
+            return null;
+        }
+
         private static bool IsValidTransition(string currentStatus, string nextStatus)
         {
             if (currentStatus == "Pending" || currentStatus == "Submitted")
@@ -69,16 +105,99 @@ namespace Job_Recruitment_Website.Controllers
                 return nextStatus == "Accepted" || nextStatus == "Approved" || nextStatus == "Rejected";
 
             if (currentStatus == "Accepted" || currentStatus == "Approved" || currentStatus == "Rejected")
-                return nextStatus == "Reviewed"; // Cho phép bấm "Xem xét lại"
+                return nextStatus == "Reviewed";
 
             return false;
         }
 
-        // ========================================================
-        // 1. DÀNH CHO ỨNG VIÊN (CANDIDATE)
-        // ========================================================
+        private static string FormatRubricStatus(string status)
+        {
+            switch (status)
+            {
+                case "Pending":
+                case "Submitted": return "Applied (Chờ duyệt)";
+                case "Reviewed": return "Review (Đang xem xét)";
+                case "Interview": return "Interview (Mời phỏng vấn)";
+                case "Accepted":
+                case "Approved": return "Accepted (Đã nhận việc)";
+                case "Rejected": return "Rejected (Đã từ chối)";
+                default: return status;
+            }
+        }
 
-        // GET: Hiển thị form nộp đơn ứng tuyển
+        // ========================================================
+        // XEM FILE CV BẢO VỆ PHÂN QUYỀN (TC30)
+        // ========================================================
+        public ActionResult ViewCv(int? id)
+        {
+            if (Session["UserId"] == null)
+            {
+                return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("ViewCv", "Applications", new { id = id }) });
+            }
+
+            if (id == null) return HttpNotFound();
+
+            var app = db.APPLICATIONS
+                        .Include(a => a.JOB)
+                        .Include(a => a.CANDIDATEPROFILE)
+                        .FirstOrDefault(a => a.ApplicationId == id.Value);
+
+            if (app == null) return HttpNotFound();
+
+            string role = Session["Role"] as string;
+            int uid = CurrentUserId;
+            bool isAuthorized = false;
+
+            if (role == "Admin")
+            {
+                isAuthorized = true;
+            }
+            else if (role == "Candidate")
+            {
+                isAuthorized = (app.UserId == uid);
+            }
+            else if (role == "Recruiter")
+            {
+                var company = GetRecruiterCompany();
+                if (company != null && app.JOB != null && app.JOB.CompanyId == company.CompanyId)
+                {
+                    isAuthorized = true;
+                }
+            }
+
+            if (!isAuthorized)
+            {
+                return RoleAuthorizeAttribute.ForbiddenResult(
+                    Response,
+                    "Bạn không có quyền truy cập file CV của đơn ứng tuyển <strong>#" + app.ApplicationId + "</strong> vì hồ sơ này thuộc quyền quản lý của nhà tuyển dụng khác."
+                );
+            }
+
+            string cvUrl = app.CANDIDATEPROFILE != null ? app.CANDIDATEPROFILE.CV_Url : null;
+            string physicalPath = ResolveApplicationCvPath(app.ApplicationId, cvUrl);
+
+            if (physicalPath == null)
+            {
+                Response.StatusCode = 404;
+                Response.TrySkipIisCustomErrors = true;
+                return Content(
+                    "<!DOCTYPE html><html lang='vi'><head><meta charset='utf-8'/><title>Không tìm thấy file CV</title></head>" +
+                    "<body style='font-family:Segoe UI,Arial,sans-serif;background:#f8f9fc;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;'>" +
+                    "<div style='background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:32px 40px;max-width:520px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.06);'>" +
+                    "<h3 style='color:#1e293b;margin:0 0 10px;'>Chưa có file PDF thực tế trên máy chủ</h3>" +
+                    "<p style='color:#64748b;line-height:1.6;margin:0;'>Đơn ứng tuyển này đang dùng dữ liệu mẫu ban đầu. Hãy dùng tài khoản Ứng viên tải lên file PDF thật để xem CV.</p>" +
+                    "</div></body></html>",
+                    "text/html"
+                );
+            }
+
+            Response.AppendHeader("Content-Disposition", "inline; filename=\"CV_UngVien_" + app.ApplicationId + ".pdf\"");
+            return File(physicalPath, "application/pdf");
+        }
+
+        // ========================================================
+        // 1. DÀNH CHO ỨNG VIÊN (CANDIDATE - TC13, TC14, TC21, TC22)
+        // ========================================================
         public ActionResult Apply(int? jobId)
         {
             if (Session["UserId"] == null)
@@ -103,17 +222,14 @@ namespace Job_Recruitment_Website.Controllers
                 return RedirectToAction("Index", "Jobs");
             }
 
-            // Hết hạn nộp hồ sơ
             if (job.Deadline < DateTime.Today)
             {
                 TempData["Error"] = "Tin tuyển dụng này đã hết hạn nộp hồ sơ.";
                 return RedirectToAction("Details", "Jobs", new { id = jobId.Value });
             }
 
-            // Kiểm tra ứng viên đã từng nộp vào việc này chưa
             int uid = CurrentUserId;
-            bool alreadyApplied = db.APPLICATIONS.Any(a => a.JobId == jobId.Value && a.UserId == uid);
-            if (alreadyApplied)
+            if (db.APPLICATIONS.Any(a => a.JobId == jobId.Value && a.UserId == uid))
             {
                 TempData["Error"] = "Bạn đã nộp hồ sơ vào vị trí này rồi!";
                 return RedirectToAction("Details", "Jobs", new { id = jobId.Value });
@@ -123,7 +239,6 @@ namespace Job_Recruitment_Website.Controllers
             return View();
         }
 
-        // POST: Xử lý upload file CV và lưu vào database
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("Candidate")]
@@ -141,7 +256,6 @@ namespace Job_Recruitment_Website.Controllers
 
             int uid = CurrentUserId;
 
-            // Chặn nộp trùng ở phía POST (Tránh lỗi UQ_APPLICATIONS_Job_User trong SQL)
             if (db.APPLICATIONS.Any(a => a.JobId == jobId && a.UserId == uid))
             {
                 TempData["Error"] = "Bạn đã nộp hồ sơ vào vị trí này rồi!";
@@ -157,22 +271,21 @@ namespace Job_Recruitment_Website.Controllers
                 string ext = Path.GetExtension(cvFile.FileName).ToLower();
                 if (ext != ".pdf")
                 {
-                    ModelState.AddModelError("cvFile", "Hệ thống chỉ chấp nhận định dạng file PDF.");
+                    ModelState.AddModelError("cvFile", "Từ chối tải lên: Hệ thống chỉ chấp nhận định dạng file PDF (.pdf)!");
                 }
                 else if (cvFile.ContentLength > MaxCvSizeBytes)
                 {
-                    ModelState.AddModelError("cvFile", "Dung lượng file CV không được vượt quá 5MB.");
+                    ModelState.AddModelError("cvFile", "Từ chối tải lên: Dung lượng file CV không được vượt quá 5MB!");
                 }
                 else if (!IsPdfFile(cvFile))
                 {
-                    ModelState.AddModelError("cvFile", "File tải lên không phải là PDF hợp lệ.");
+                    ModelState.AddModelError("cvFile", "Từ chối tải lên: Phát hiện file giả mạo PDF (nội dung bên trong không đúng chuẩn chữ ký %PDF-)!");
                 }
             }
 
             if (ModelState.IsValid)
             {
-                // Đảm bảo thư mục ~/Content/CVs/ luôn tồn tại trước khi lưu file
-                string folderPath = Server.MapPath("~/Content/CVs/");
+                string folderPath = Server.MapPath("~/App_Data/CVs/");
                 if (!Directory.Exists(folderPath))
                 {
                     Directory.CreateDirectory(folderPath);
@@ -182,11 +295,10 @@ namespace Job_Recruitment_Website.Controllers
                 string savePath = Path.Combine(folderPath, fileName);
                 cvFile.SaveAs(savePath);
 
-                string cvVirtualPath = "/Content/CVs/" + fileName;
+                string cvVirtualPath = "/App_Data/CVs/" + fileName;
 
                 try
                 {
-                    // Cập nhật hoặc tạo mới hồ sơ CANDIDATEPROFILES để lưu CV_Url và lấy ProfileId
                     var profile = db.CANDIDATEPROFILES.FirstOrDefault(p => p.UserId == uid);
                     if (profile == null)
                     {
@@ -206,9 +318,8 @@ namespace Job_Recruitment_Website.Controllers
                         profile.CV_Url = cvVirtualPath;
                         profile.UpdatedAt = DateTime.Today;
                     }
-                    db.SaveChanges(); // Cần có ProfileId trước khi tạo đơn
+                    db.SaveChanges();
 
-                    // Khởi tạo đơn ứng tuyển (APPLICATION không có CV_Url, CV nằm ở CANDIDATEPROFILE)
                     APPLICATION app = new APPLICATION
                     {
                         JobId = jobId,
@@ -221,10 +332,13 @@ namespace Job_Recruitment_Website.Controllers
 
                     db.APPLICATIONS.Add(app);
                     db.SaveChanges();
+
+                    // Lưu bản chụp (Snapshot) CV gắn riêng với ApplicationId tại thời điểm nộp đơn
+                    string snapshotPath = Path.Combine(folderPath, "app_" + app.ApplicationId + ".pdf");
+                    System.IO.File.Copy(savePath, snapshotPath, true);
                 }
                 catch (Exception)
                 {
-                    // Lưu DB thất bại thì xóa file vừa upload để không để lại file rác
                     if (System.IO.File.Exists(savePath))
                     {
                         System.IO.File.Delete(savePath);
@@ -234,7 +348,7 @@ namespace Job_Recruitment_Website.Controllers
                     return View();
                 }
 
-                TempData["Success"] = "Nộp hồ sơ ứng tuyển thành công!";
+                TempData["Success"] = "Nộp hồ sơ ứng tuyển thành công (Trạng thái khởi tạo: Applied)!";
                 return RedirectToAction("MyApplications");
             }
 
@@ -242,10 +356,8 @@ namespace Job_Recruitment_Website.Controllers
             return View();
         }
 
-        // GET: Xem lịch sử các công việc đã nộp
         public ActionResult MyApplications()
         {
-            // Kiểm tra đăng nhập và tự động đẩy về trang Login kèm returnUrl
             if (Session["UserId"] == null)
             {
                 return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("MyApplications", "Applications") });
@@ -263,24 +375,29 @@ namespace Job_Recruitment_Website.Controllers
         }
 
         // ========================================================
-        // 2. DÀNH CHO NHÀ TUYỂN DỤNG (RECRUITER)
+        // 2. DÀNH CHO NHÀ TUYỂN DỤNG (EMPLOYER - TC15, TC16, TC24, TC25, TC26)
         // ========================================================
-
-        // GET: Xem danh sách ứng viên đã nộp vào 1 tin tuyển dụng cụ thể
         [RoleAuthorize("Recruiter")]
         public ActionResult Candidates(int? jobId)
         {
             if (jobId == null) return RedirectToAction("MyJobs", "Jobs");
 
+            var targetJob = db.JOBS.Find(jobId.Value);
+            if (targetJob == null) return HttpNotFound();
+
             var company = GetRecruiterCompany();
-            if (company == null) return HttpNotFound();
+            // Chặn Employer B mở URL xem ứng viên thuộc Job của Employer A bằng mã 403 Forbidden (TC24)
+            if (company == null || targetJob.CompanyId != company.CompanyId)
+            {
+                return RoleAuthorizeAttribute.ForbiddenResult(
+                    Response,
+                    "Bạn không có quyền xem hoặc duyệt danh sách ứng viên của tin tuyển dụng <strong>#" + targetJob.JobId + " (" + HttpUtility.HtmlEncode(targetJob.Title) + ")</strong> vì tin này thuộc quyền quản lý của công ty khác!",
+                    Url.Action("MyJobs", "Jobs")
+                );
+            }
 
-            // Kiểm tra xem tin tuyển dụng này có thuộc về công ty của Recruiter đang đăng nhập không
-            var job = db.JOBS.FirstOrDefault(j => j.JobId == jobId.Value && j.CompanyId == company.CompanyId);
-            if (job == null) return HttpNotFound();
-
-            ViewBag.JobTitle = job.Title;
-            ViewBag.JobId = job.JobId;
+            ViewBag.JobTitle = targetJob.Title;
+            ViewBag.JobId = targetJob.JobId;
 
             var applicants = db.APPLICATIONS
                                .Include(a => a.USER)
@@ -291,30 +408,35 @@ namespace Job_Recruitment_Website.Controllers
             return View(applicants);
         }
 
-        // POST: Cập nhật trạng thái duyệt/từ chối hồ sơ theo đúng luồng chuẩn
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RoleAuthorize("Recruiter")]
         public ActionResult UpdateStatus(int applicationId, string newStatus)
         {
-            var company = GetRecruiterCompany();
-            if (company == null) return RedirectToAction("MyJobs", "Jobs");
-
             var app = db.APPLICATIONS.Include(a => a.JOB)
-                                     .FirstOrDefault(a => a.ApplicationId == applicationId
-                                                       && a.JOB.CompanyId == company.CompanyId);
+                                     .FirstOrDefault(a => a.ApplicationId == applicationId);
             if (app == null) return RedirectToAction("MyJobs", "Jobs");
 
-            // Kiểm tra trạng thái hợp lệ và đúng quy trình: Applied -> Review -> Interview -> Accepted / Rejected (hoặc Xem xét lại)
+            var company = GetRecruiterCompany();
+            if (company == null || app.JOB == null || app.JOB.CompanyId != company.CompanyId)
+            {
+                return RoleAuthorizeAttribute.ForbiddenResult(
+                    Response,
+                    "Từ chối cập nhật: Đơn ứng tuyển <strong>#" + applicationId + "</strong> không thuộc quyền quản lý của công ty bạn!",
+                    Url.Action("MyJobs", "Jobs")
+                );
+            }
+
             if (ValidStatuses.Contains(newStatus) && IsValidTransition(app.Status, newStatus))
             {
+                string oldLabel = FormatRubricStatus(app.Status);
                 app.Status = newStatus;
                 db.SaveChanges();
-                TempData["Success"] = "Đã cập nhật trạng thái hồ sơ thành công!";
+                TempData["Success"] = "Đã chuyển trạng thái hồ sơ #" + app.ApplicationId + " từ [" + oldLabel + "] sang [" + FormatRubricStatus(newStatus) + "]!";
             }
             else
             {
-                TempData["Error"] = "Không thể chuyển trạng thái từ " + app.Status + " sang " + newStatus + " (sai quy trình)!";
+                TempData["Error"] = "Từ chối chuyển trạng thái sai quy trình: Không thể nhảy từ [" + FormatRubricStatus(app.Status) + "] sang [" + FormatRubricStatus(newStatus) + "]. Quy trình chuẩn: Applied → Review → Interview → Accepted / Rejected!";
             }
 
             return RedirectToAction("Candidates", new { jobId = app.JobId });

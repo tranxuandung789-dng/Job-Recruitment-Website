@@ -3,85 +3,225 @@
 @{
     ViewBag.Title = "Trang quản trị Admin";
     Layout = "~/Views/Shared/_LayoutPageRecruitment.cshtml";
+
+    var usersList = Model != null ? Model.ToList() : new List<Job_Recruitment_Website.Models.USER>();
+    int currentAdminId = Session["UserId"] != null ? (int)Session["UserId"] : 0;
 }
 
-<div class="container" style="margin-top: 20px;">
-    <h2>Bảng điều khiển Quản trị viên (Admin Dashboard)</h2>
-    <hr />
+<!-- TIÊU ĐỀ DASHBOARD -->
+<div class="job-section-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Bảng điều khiển Quản trị viên</h2>
+        <p class="text-muted small mb-0">Tổng quan số liệu hệ thống và quản lý phân quyền tài khoản tại D-JOBS</p>
+    </div>
+    <a href="@Url.Action("Index", "CATEGORies")" class="btn btn-primary-custom px-3 py-2 d-inline-flex align-items-center gap-2 small shadow-sm">
+        <i class="bi bi-grid-fill"></i>
+        <span>Quản lý Ngành nghề</span>
+    </a>
+</div>
 
-    <!-- Thống kê nhanh -->
-    <div class="row text-center" style="margin-bottom: 30px;">
-        <div class="col-md-3">
-            <div class="well" style="background-color: #d9edf7; padding: 15px; border-radius: 5px;">
-                <h3>@ViewBag.TotalUsers</h3>
-                <p><strong>Người dùng</strong></p>
-            </div>
+<!-- 4 THẺ KPI THỐNG KÊ HỆ THỐNG -->
+<div class="admin-kpi-grid">
+    <div class="admin-kpi-card">
+        <div>
+            <div class="admin-kpi-num">@ViewBag.TotalUsers</div>
+            <div class="admin-kpi-label">Người dùng</div>
         </div>
-        <div class="col-md-3">
-            <div class="well" style="background-color: #dff0d8; padding: 15px; border-radius: 5px;">
-                <h3>@ViewBag.TotalCompanies</h3>
-                <p><strong>Công ty</strong></p>
-            </div>
+        <div class="admin-kpi-icon kpi-users">
+            <i class="bi bi-people-fill"></i>
         </div>
-        <div class="col-md-3">
-            <div class="well" style="background-color: #fcf8e3; padding: 15px; border-radius: 5px;">
-                <h3>@ViewBag.TotalJobs</h3>
-                <p><strong>Tin tuyển dụng</strong></p>
-            </div>
+    </div>
+
+    <div class="admin-kpi-card">
+        <div>
+            <div class="admin-kpi-num">@ViewBag.TotalCompanies</div>
+            <div class="admin-kpi-label">Công ty</div>
         </div>
-        <div class="col-md-3">
-            <div class="well" style="background-color: #f2dede; padding: 15px; border-radius: 5px;">
-                <h3>@ViewBag.TotalApplications</h3>
-                <p><strong>Đơn ứng tuyển</strong></p>
+        <div class="admin-kpi-icon kpi-companies">
+            <i class="bi bi-buildings-fill"></i>
+        </div>
+    </div>
+
+    <div class="admin-kpi-card">
+        <div>
+            <div class="admin-kpi-num">@ViewBag.TotalJobs</div>
+            <div class="admin-kpi-label">Tin tuyển dụng</div>
+        </div>
+        <div class="admin-kpi-icon kpi-jobs">
+            <i class="bi bi-briefcase-fill"></i>
+        </div>
+    </div>
+
+    <div class="admin-kpi-card">
+        <div>
+            <div class="admin-kpi-num">@ViewBag.TotalApplications</div>
+            <div class="admin-kpi-label">Đơn ứng tuyển</div>
+        </div>
+        <div class="admin-kpi-icon kpi-apps">
+            <i class="bi bi-file-earmark-check-fill"></i>
+        </div>
+    </div>
+</div>
+
+<!-- BẢNG QUẢN LÝ TÀI KHOẢN HỆ THỐNG -->
+<div class="admin-users-card mb-4">
+    <!-- THANH CÔNG CỤ TÌM KIẾM & LỌC VAI TRÒ -->
+    <div class="admin-users-toolbar">
+        <div>
+            <h5 class="fw-bold text-dark mb-0" style="font-size: 17px;">
+                Danh sách tài khoản hệ thống
+            </h5>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="admin-filter-pills" id="adminRoleFilters">
+                <button type="button" class="admin-filter-btn active" data-role="all">Tất cả</button>
+                <button type="button" class="admin-filter-btn" data-role="Candidate">Candidate</button>
+                <button type="button" class="admin-filter-btn" data-role="Employer">Employer</button>
+                <button type="button" class="admin-filter-btn" data-role="Admin">Admin</button>
+            </div>
+
+            <div class="admin-search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="adminUserSearch" placeholder="Tìm tên, email, SĐT..." />
             </div>
         </div>
     </div>
 
-    <!-- Quản lý danh sách tài khoản -->
-    <h4>Danh sách tài khoản hệ thống</h4>
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Họ và tên</th>
-                <th>Email</th>
-                <th>Số điện thoại</th>
-                <th>Vai trò</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                string rName = item.ROLE != null ? item.ROLE.RoleName : "";
-                string displayRole = rName == "Recruiter" ? "Employer" : rName;
+    <!-- BẢNG DỮ LIỆU -->
+    <div class="table-responsive">
+        <table class="admin-users-table" id="adminUsersTable">
+            <thead>
                 <tr>
-                    <td>@item.UserId</td>
-                    <td>@item.FullName</td>
-                    <td>@item.Email</td>
-                    <td>@item.Phone</td>
-                    <td>@displayRole</td>
-                    <td>
-                        @if (item.IsActive == true)
-                        {
-                            <span class="label label-success" style="color: green; font-weight: bold;">Hoạt động</span>
-                        }
-                        else
-                        {
-                            <span class="label label-danger" style="color: red; font-weight: bold;">Đã khóa</span>
-                        }
-                    </td>
-                    <td>
-                        @using (Html.BeginForm("ToggleUserStatus", "Admin", new { id = item.UserId }, FormMethod.Post, new { style = "display:inline;" }))
-                        {
-                            <button type="submit" class="btn btn-sm @(item.IsActive == true ? "btn-warning" : "btn-success")">
-                                @(item.IsActive == true ? "Khóa" : "Mở khóa")
-                            </button>
-                        }
-                    </td>
+                    <th style="width: 8%;">ID</th>
+                    <th style="width: 26%;">Người dùng</th>
+                    <th style="width: 28%;">Thông tin liên hệ</th>
+                    <th class="text-center" style="width: 13%;">Vai trò</th>
+                    <th class="text-center" style="width: 13%;">Trạng thái</th>
+                    <th class="text-end" style="width: 12%;">Thao tác</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in usersList)
+                {
+                    string rName = item.ROLE != null ? item.ROLE.RoleName : "";
+                    string displayRole = rName == "Recruiter" ? "Employer" : rName;
+                    string fullName = !string.IsNullOrWhiteSpace(item.FullName) ? item.FullName.Trim() : "U";
+                    string initial = fullName.Substring(0, 1).ToUpper();
+
+                    string avClass = displayRole == "Admin" ? "av-admin" : (displayRole == "Employer" ? "av-employer" : "av-candidate");
+                    string roleClass = displayRole == "Admin" ? "role-admin" : (displayRole == "Employer" ? "role-employer" : "role-candidate");
+                    string roleIcon = displayRole == "Admin" ? "bi-shield-lock-fill" : (displayRole == "Employer" ? "bi-building" : "bi-person-fill");
+
+                    <tr data-role="@displayRole">
+                        <td>
+                            <span class="cat-id-badge" style="background-color: #f1f5f9; color: #475569; font-size: 12px; font-weight: 700; padding: 4px 9px; border-radius: 8px;">
+                                #@item.UserId
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="admin-user-info">
+                                <div class="admin-avatar @avClass">@initial</div>
+                                <div>
+                                    <div class="fw-bold text-dark">@item.FullName</div>
+                                    <div class="text-muted" style="font-size: 12px;">
+                                        Tạo: @item.CreatedAt.ToString("dd/MM/yyyy")
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="fw-medium text-dark">@item.Email</div>
+                            <div class="text-muted" style="font-size: 12.5px;">
+                                <i class="bi bi-telephone me-1 text-orange"></i>@item.Phone
+                            </div>
+                        </td>
+
+                        <td class="text-center">
+                            <span class="admin-role-pill @roleClass">
+                                <i class="bi @roleIcon"></i> @displayRole
+                            </span>
+                        </td>
+
+                        <td class="text-center">
+                            @if (item.IsActive == true)
+                            {
+                                <span class="admin-status-pill is-active">
+                                    <i class="bi bi-check-circle-fill"></i> Hoạt động
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="admin-status-pill is-locked">
+                                    <i class="bi bi-slash-circle-fill"></i> Đã khóa
+                                </span>
+                            }
+                        </td>
+
+                        <td class="text-end">
+                            @if (item.UserId == currentAdminId)
+                            {
+                                <span class="badge bg-light text-secondary border fw-semibold px-2 py-1">Đang dùng</span>
+                            }
+                            else
+                            {
+                                using (Html.BeginForm("ToggleUserStatus", "Admin", new { id = item.UserId }, FormMethod.Post, new { style = "display:inline;" }))
+                                {
+                                    if (item.IsActive == true)
+                                    {
+                                        <button type="submit" class="btn-admin-lock">
+                                            <i class="bi bi-lock-fill"></i> Khóa
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn-admin-unlock">
+                                            <i class="bi bi-unlock-fill"></i> Mở khóa
+                                        </button>
+                                    }
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
+
+@section scripts {
+    <script>
+        (function () {
+            var searchInput = document.getElementById('adminUserSearch');
+            var filterBtns = document.querySelectorAll('#adminRoleFilters .admin-filter-btn');
+            var rows = document.querySelectorAll('#adminUsersTable tbody tr');
+            var activeRole = 'all';
+
+            function applyFilter() {
+                var kw = (searchInput ? searchInput.value : '').toLowerCase().trim();
+                rows.forEach(function (row) {
+                    var role = row.getAttribute('data-role') || '';
+                    var text = row.innerText.toLowerCase();
+                    var matchRole = (activeRole === 'all' || role === activeRole);
+                    var matchKw = (kw === '' || text.indexOf(kw) !== -1);
+                    row.style.display = (matchRole && matchKw) ? '' : 'none';
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', applyFilter);
+            }
+
+            filterBtns.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    filterBtns.forEach(function (b) { b.classList.remove('active'); });
+                    this.classList.add('active');
+                    activeRole = this.getAttribute('data-role');
+                    applyFilter();
+                });
+            });
+        })();
+    </script>
+}

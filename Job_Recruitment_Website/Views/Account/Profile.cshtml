@@ -20,176 +20,222 @@
 
     var candidateProfile = ViewBag.CandidateProfile as CANDIDATEPROFILE;
 
+    string emailError = ViewBag.EmailError as string;
+    string emailValue = (ViewBag.EmailValue as string) ?? (Model != null ? Model.Email : "");
+
     string phoneError = ViewBag.PhoneError as string;
     string phoneValue = (ViewBag.PhoneValue as string) ?? (Model != null ? Model.Phone : "");
 }
 
 <!-- TIÊU ĐỀ TRANG -->
-<div class="job-section-header mb-4">
-    <h2 class="fw-bold text-dark mb-1">Hồ sơ cá nhân</h2>
-    <p class="text-muted small mb-0">Quản lý thông tin tài khoản và hồ sơ năng lực (Profile & CV) tại D-JOBS.</p>
+<div class="job-section-header mb-3">
+    <h2 class="fw-bold text-dark mb-1">@(isCandidate ? "Hồ sơ ứng viên" : "Hồ sơ cá nhân")</h2>
+    <p class="text-muted small mb-0">
+        @(isCandidate
+            ? "Quản lý thông tin tài khoản và hồ sơ năng lực (Profile & CV) tại D-JOBS"
+            : "Quản lý thông tin liên hệ và tài khoản quản trị trên hệ thống D-JOBS")
+    </p>
 </div>
 
-<!-- KHUNG THÔNG TIN HỒ SƠ -->
-<div class="card shadow-sm border-0 rounded-4 p-4 p-md-5 bg-white mb-4" style="max-width: 780px; border: 1px solid #f1f5f9 !important;">
+<!-- THÔNG BÁO CẬP NHẬT THÀNH CÔNG / LỖI TỪ SERVER -->
+@if (ViewBag.Success != null)
+{
+    <div class="alert alert-success rounded-3 py-2 small fw-semibold mb-3">
+        ✔ @ViewBag.Success
+    </div>
+}
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger rounded-3 py-2 small fw-semibold mb-3">
+        ⚠ @ViewBag.Error
+    </div>
+}
 
-    <!-- Avatar / Tóm tắt nhanh -->
-    <div class="d-flex align-items-center gap-3 pb-4 mb-4 border-bottom">
-        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
-             style="width: 64px; height: 64px; background-color: #f7931e; font-size: 24px; flex-shrink: 0;">
-            @avatarLetter
-        </div>
-        <div>
-            <h4 class="fw-bold text-dark mb-1">@(fullName.Length > 0 ? fullName : "Người dùng")</h4>
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge rounded-pill px-3 py-1 fw-semibold" style="background-color: #fff3e0; color: #f7931e;">
-                    @roleDisplay
-                </span>
-                <span class="text-muted small">• Mã TK: #@(Model != null ? Model.UserId : 0)</span>
+<!-- KHUNG HỒ SƠ CÁ NHÂN -->
+<div class="profile-main-card mb-4">
+    <!-- HEADER AVATAR & TÓM TẮT TÀI KHOẢN -->
+    <div class="profile-hero">
+        <div class="profile-hero-left">
+            <div class="profile-avatar-circle">
+                @avatarLetter
+            </div>
+            <div>
+                <div class="profile-hero-name">@(fullName.Length > 0 ? fullName : "Người dùng")</div>
+                <div class="profile-hero-badges">
+                    <span class="profile-role-badge">
+                        <i class="bi @(isAdmin ? "bi-shield-lock-fill" : (isRecruiter ? "bi-building" : "bi-person-badge-fill"))"></i>
+                        @roleDisplay
+                    </span>
+                    <span class="profile-meta-chip">
+                        <i class="bi bi-hash text-orange"></i> Mã TK: @(Model != null ? Model.UserId : 0)
+                    </span>
+                    <span class="profile-meta-chip">
+                        <i class="bi bi-check-circle-fill text-success"></i> Đang hoạt động
+                    </span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Thông báo lỗi từ phía trình duyệt (hiện khi bấm Lưu mà nhập sai) -->
-    <div id="clientAlert" class="alert alert-danger rounded-3 py-2 small fw-semibold d-none" role="alert"></div>
-
-    <!-- Thông báo Cập nhật thành công / lỗi từ server -->
-    @if (ViewBag.Success != null)
-    {
-        <div class="alert alert-success rounded-3 py-2 small fw-semibold">
-            ✔ @ViewBag.Success
-        </div>
-    }
-    @if (ViewBag.Error != null)
-    {
-        <div class="alert alert-danger rounded-3 py-2 small fw-semibold">
-            ⚠ @ViewBag.Error
-        </div>
-    }
-    @if (phoneError != null)
-    {
-        <div class="alert alert-danger rounded-3 py-2 small fw-semibold">
-            ⚠ @phoneError
-        </div>
-    }
-
-    <!-- FORM CẬP NHẬT HỒ SƠ -->
-    @using (Html.BeginForm("Profile", "Account", FormMethod.Post, new { enctype = "multipart/form-data", id = "profileForm", novalidate = "novalidate" }))
-    {
-        @Html.AntiForgeryToken()
-
-        <h6 class="fw-bold text-dark mb-3">1. Thông tin tài khoản</h6>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label fw-semibold small text-secondary">Họ và tên <span class="text-danger">*</span></label>
-                <input type="text" name="FullName" class="form-control rounded-3 py-2"
-                       value="@(Model != null ? Model.FullName : "")"
-                       placeholder="Nhập họ và tên..." maxlength="150" />
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-semibold small text-secondary">Số điện thoại <span class="text-danger">*</span></label>
-                <input type="tel" id="Phone" name="Phone"
-                       class="form-control rounded-3 py-2 @(phoneError != null ? "is-invalid" : "")"
-                       value="@phoneValue"
-                       placeholder="Nhập 10-11 chữ số..."
-                       inputmode="numeric" maxlength="11" />
-                <div id="PhoneError" class="invalid-feedback">
-                    @(phoneError ?? "Số điện thoại phải gồm 10 hoặc 11 chữ số.")
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-semibold small text-secondary">Email đăng nhập (Không thể thay đổi)</label>
-                <input type="email" class="form-control rounded-3 py-2 bg-light text-muted" value="@(Model != null ? Model.Email : "")" readonly />
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-semibold small text-secondary">Ngày tham gia hệ thống</label>
-                <input type="text" class="form-control rounded-3 py-2 bg-light text-muted"
-                       value="@(Model != null ? string.Format("{0:dd/MM/yyyy}", Model.CreatedAt) : "Đang cập nhật")" readonly />
-            </div>
-        </div>
-
-        if (isCandidate)
+    <!-- NỘI DUNG FORM -->
+    <div class="profile-body">
+        @using (Html.BeginForm("Profile", "Account", FormMethod.Post, new { enctype = "multipart/form-data", id = "profileForm", novalidate = "novalidate" }))
         {
-            <hr class="my-4 text-muted opacity-25" />
-            <h6 class="fw-bold text-dark mb-3">2. Hồ sơ năng lực & CV ứng viên (Profile - CV)</h6>
+            @Html.AntiForgeryToken()
 
+            <h6 class="profile-section-heading">1. Thông tin tài khoản</h6>
             <div class="row g-3">
-                <div class="col-md-12">
-                    <label class="form-label fw-semibold small text-secondary">Trình độ học vấn (Education)</label>
-                    <input type="text" name="Education" class="form-control rounded-3 py-2"
-                           value="@(candidateProfile != null ? candidateProfile.Education : "")"
-                           placeholder="VD: Cử nhân CNTT - ĐH Bách Khoa..." maxlength="255" />
+                <div class="col-md-6">
+                    <label class="job-label" for="FullName">
+                        <i class="bi bi-person-vcard-fill"></i>
+                        <span>Họ và tên <span class="text-danger">*</span></span>
+                    </label>
+                    <input type="text" id="FullName" name="FullName"
+                           class="form-control job-input"
+                           value="@(Model != null ? Model.FullName : "")"
+                           placeholder="Nhập họ và tên..." maxlength="150" />
+                    <div id="FullNameError" class="invalid-feedback">
+                        Vui lòng nhập họ và tên.
+                    </div>
                 </div>
 
-                <div class="col-md-12">
-                    <label class="form-label fw-semibold small text-secondary">Kỹ năng chuyên môn (Skills)</label>
-                    <input type="text" name="Skills" class="form-control rounded-3 py-2"
-                           value="@(candidateProfile != null ? candidateProfile.Skills : "")"
-                           placeholder="VD: C#, ASP.NET MVC, SQL Server, ReactJS..." maxlength="255" />
+                <div class="col-md-6">
+                    <label class="job-label" for="Phone">
+                        <i class="bi bi-telephone-fill"></i>
+                        <span>Số điện thoại <span class="text-danger">*</span></span>
+                    </label>
+                    <input type="tel" id="Phone" name="Phone"
+                           class="form-control job-input @(phoneError != null ? "is-invalid" : "")"
+                           value="@phoneValue"
+                           placeholder="Nhập 10-11 chữ số..."
+                           inputmode="numeric" maxlength="11" />
+                    <div id="PhoneError" class="invalid-feedback">
+                        @(phoneError ?? "Số điện thoại phải gồm 10 hoặc 11 chữ số.")
+                    </div>
                 </div>
 
-                <div class="col-md-12">
-                    <label class="form-label fw-semibold small text-secondary">Kinh nghiệm làm việc (Experience)</label>
-                    <input type="text" name="Experience" class="form-control rounded-3 py-2"
-                           value="@(candidateProfile != null ? candidateProfile.Experience : "")"
-                           placeholder="VD: 2 năm kinh nghiệm lập trình Web..." maxlength="255" />
+                <div class="col-md-6">
+                    <label class="job-label" for="Email">
+                        <i class="bi bi-envelope-at-fill"></i>
+                        <span>Email đăng nhập <span class="text-danger">*</span></span>
+                    </label>
+                    <input type="email" id="Email" name="Email"
+                           class="form-control job-input @(emailError != null ? "is-invalid" : "")"
+                           value="@emailValue"
+                           placeholder="name@example.com" maxlength="150" />
+                    <div id="EmailError" class="invalid-feedback">
+                        @(emailError ?? "Vui lòng nhập địa chỉ email hợp lệ.")
+                    </div>
                 </div>
 
-                <div class="col-md-12">
-                    <label class="form-label fw-semibold small text-secondary">Cập nhật CV đính kèm (PDF, tối đa 5MB)</label>
-                    <input type="file" name="cvFile" class="form-control rounded-3 py-2" accept=".pdf" />
-                    @if (candidateProfile != null && !string.IsNullOrEmpty(candidateProfile.CV_Url) && candidateProfile.CV_Url != "Đang cập nhật")
+                <div class="col-md-6">
+                    <label class="job-label">
+                        <i class="bi bi-calendar-check-fill"></i>
+                        <span>Ngày tham gia hệ thống</span>
+                    </label>
+                    <input type="text" class="form-control job-input profile-readonly-input"
+                           value="@(Model != null ? string.Format("{0:dd/MM/yyyy}", Model.CreatedAt) : "Đang cập nhật")" readonly />
+                </div>
+            </div>
+
+            if (isCandidate)
+            {
+                <hr class="my-4 text-secondary opacity-25" />
+                <h6 class="profile-section-heading">2. Hồ sơ năng lực & CV ứng viên</h6>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="job-label">
+                            <i class="bi bi-mortarboard-fill"></i>
+                            <span>Trình độ học vấn (Education)</span>
+                        </label>
+                        <input type="text" name="Education" class="form-control job-input"
+                               value="@(candidateProfile != null ? candidateProfile.Education : "")"
+                               placeholder="VD: Cử nhân CNTT - ĐH Bách Khoa..." maxlength="255" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="job-label">
+                            <i class="bi bi-briefcase-fill"></i>
+                            <span>Kinh nghiệm làm việc (Experience)</span>
+                        </label>
+                        <input type="text" name="Experience" class="form-control job-input"
+                               value="@(candidateProfile != null ? candidateProfile.Experience : "")"
+                               placeholder="VD: 2 năm kinh nghiệm lập trình Web..." maxlength="255" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="job-label">
+                            <i class="bi bi-stars"></i>
+                            <span>Kỹ năng chuyên môn (Skills)</span>
+                        </label>
+                        <input type="text" name="Skills" class="form-control job-input"
+                               value="@(candidateProfile != null ? candidateProfile.Skills : "")"
+                               placeholder="VD: C#, ASP.NET MVC, SQL Server, ReactJS..." maxlength="255" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="job-label">
+                            <i class="bi bi-file-earmark-pdf-fill"></i>
+                            <span>Cập nhật CV đính kèm (Chỉ nhận PDF chuẩn, tối đa 5MB)</span>
+                        </label>
+                        <input type="file" name="cvFile" class="form-control job-input" accept=".pdf" />
+
+                        @if (candidateProfile != null && !string.IsNullOrEmpty(candidateProfile.CV_Url) && candidateProfile.CV_Url != "Đang cập nhật")
+                        {
+                            <div class="profile-cv-box">
+                                <div class="d-flex align-items-center gap-2 small">
+                                    <i class="bi bi-file-earmark-check-fill text-orange fs-5"></i>
+                                    <span class="text-dark fw-semibold">
+                                        Đã lưu hồ sơ CV (Cập nhật ngày: @candidateProfile.UpdatedAt.ToString("dd/MM/yyyy"))
+                                    </span>
+                                </div>
+                                <a href="@Url.Action("MyCv", "Account")" target="_blank" class="btn-view-cv-soft">
+                                    <i class="bi bi-eye-fill"></i>
+                                    <span>Xem file CV đã lưu</span>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- THANH NÚT THAO TÁC DƯỚI CÙNG -->
+            <div class="profile-footer-bar">
+                <button type="submit" class="btn-submit-job d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-check2-circle"></i>
+                    <span>Lưu thay đổi</span>
+                </button>
+
+                <div class="d-flex flex-wrap gap-2">
+                    @if (isRecruiter)
                     {
-                        <div class="mt-2 small">
-                            <span class="text-muted">CV hiện tại:</span>
-                            <a href="@Url.Content(candidateProfile.CV_Url)" target="_blank" class="fw-bold text-orange ms-1">
-                                Xem file CV đã lưu (Cập nhật: @candidateProfile.UpdatedAt.ToString("dd/MM/yyyy"))
-                            </a>
-                        </div>
+                        <a href="@Url.Action("MyJobs", "Jobs")" class="btn-profile-nav">
+                            <i class="bi bi-briefcase"></i> Quản lý tin đăng
+                        </a>
+                        <a href="@Url.Action("MyCompany", "Companies")" class="btn-profile-nav">
+                            <i class="bi bi-building"></i> Công ty của tôi
+                        </a>
+                    }
+                    else if (isAdmin)
+                    {
+                        <a href="@Url.Action("Index", "Admin")" class="btn-profile-nav">
+                            <i class="bi bi-speedometer2"></i> Quản trị hệ thống
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("MyApplications", "Applications")" class="btn-profile-nav">
+                            <i class="bi bi-send-check"></i> Xem đơn ứng tuyển
+                        </a>
+                        <a href="@Url.Action("Index", "Jobs")" class="btn-profile-nav">
+                            <i class="bi bi-search"></i> Tìm việc làm
+                        </a>
                     }
                 </div>
             </div>
         }
-
-        <hr class="my-4 text-muted opacity-25" />
-
-        <!-- NÚT THAO TÁC (THEO VAI TRÒ) -->
-        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
-            <button type="submit" class="btn text-white fw-bold px-4 py-2 rounded-3 shadow-sm" style="background-color: #f7931e; border: none;">
-                Lưu thay đổi
-            </button>
-
-            <div class="d-flex gap-2">
-                @if (isRecruiter)
-                {
-                    <a href="@Url.Action("MyJobs", "Jobs")" class="btn btn-outline-secondary fw-semibold px-3 py-2 rounded-3 small">
-                        Quản lý tin đăng
-                    </a>
-                    <a href="@Url.Action("MyCompany", "Companies")" class="btn btn-light border fw-semibold px-3 py-2 rounded-3 small text-dark">
-                        Công ty của tôi
-                    </a>
-                }
-                else if (isAdmin)
-                {
-                    <a href="@Url.Action("Index", "Admin")" class="btn btn-outline-secondary fw-semibold px-3 py-2 rounded-3 small">
-                        Quản trị hệ thống
-                    </a>
-                }
-                else
-                {
-                    <a href="@Url.Action("MyApplications", "Applications")" class="btn btn-outline-secondary fw-semibold px-3 py-2 rounded-3 small">
-                        Xem đơn ứng tuyển
-                    </a>
-                    <a href="@Url.Action("Index", "Jobs")" class="btn btn-light border fw-semibold px-3 py-2 rounded-3 small text-dark">
-                        Tìm việc làm
-                    </a>
-                }
-            </div>
-        </div>
-    }
+    </div>
 </div>
 
 @section scripts {
@@ -198,52 +244,78 @@
             var form = document.getElementById('profileForm');
             if (!form) return;
 
-            var fullName = form.querySelector('[name="FullName"]');
+            var fullName = document.getElementById('FullName');
+            var email = document.getElementById('Email');
             var phone = document.getElementById('Phone');
-            var phoneMsg = document.getElementById('PhoneError');
-            var alertBox = document.getElementById('clientAlert');
-            var re = /^[0-9]{10,11}$/;
 
-            function phoneProblem() {
-                var v = phone.value.trim();
-                if (v.length === 0) return 'Vui lòng nhập số điện thoại!';
-                if (!re.test(v)) return 'Số điện thoại không hợp lệ! Chỉ nhập 10 hoặc 11 chữ số (VD: 0912345678).';
-                return '';
-            }
+            var nameErr = document.getElementById('FullNameError');
+            var emailErr = document.getElementById('EmailError');
+            var phoneErr = document.getElementById('PhoneError');
 
-            function showPhone(msg) {
-                phone.classList.toggle('is-invalid', !!msg);
-                if (msg) phoneMsg.textContent = msg;
-            }
+            var emailRe = /^[^\s@@]+@@[^\s@@]{2,}\.[^\s@@]{2,}$/;
+            var phoneRe = /^[0-9]{10,11}$/;
 
-            // Báo lỗi ngay khi đang gõ (chỉ khi đã nhập gì đó)
-            phone.addEventListener('input', function () {
-                showPhone(phone.value.trim().length > 0 ? phoneProblem() : '');
-            });
-
-            // Báo lỗi khi bấm "Lưu thay đổi"
-            form.addEventListener('submit', function (e) {
-                var errors = [];
-
-                if (fullName.value.trim() === '') {
-                    errors.push('Vui lòng nhập họ và tên!');
-                    fullName.classList.add('is-invalid');
-                } else {
-                    fullName.classList.remove('is-invalid');
+            function checkName(forceEmptyCheck) {
+                var v = fullName.value.trim();
+                if (v.length === 0) {
+                    fullName.classList.toggle('is-invalid', forceEmptyCheck);
+                    if (nameErr) nameErr.textContent = 'Vui lòng nhập họ và tên.';
+                    return false;
                 }
+                fullName.classList.remove('is-invalid');
+                return true;
+            }
 
-                var pm = phoneProblem();
-                showPhone(pm);
-                if (pm) errors.push(pm);
+            function checkEmail(forceEmptyCheck) {
+                var v = email.value.trim();
+                if (v.length === 0) {
+                    email.classList.toggle('is-invalid', forceEmptyCheck);
+                    if (emailErr) emailErr.textContent = 'Vui lòng nhập địa chỉ email.';
+                    return false;
+                }
+                if (!emailRe.test(v)) {
+                    email.classList.add('is-invalid');
+                    if (emailErr) emailErr.textContent = 'Email không đúng định dạng (ví dụ: name@example.com).';
+                    return false;
+                }
+                email.classList.remove('is-invalid');
+                return true;
+            }
 
-                if (errors.length > 0) {
+            function checkPhone(forceEmptyCheck) {
+                var v = phone.value.trim();
+                if (v.length === 0) {
+                    phone.classList.toggle('is-invalid', forceEmptyCheck);
+                    if (phoneErr) phoneErr.textContent = 'Vui lòng nhập số điện thoại.';
+                    return false;
+                }
+                if (!phoneRe.test(v)) {
+                    phone.classList.add('is-invalid');
+                    if (phoneErr) phoneErr.textContent = 'Số điện thoại không hợp lệ! Chỉ nhập 10 hoặc 11 chữ số.';
+                    return false;
+                }
+                phone.classList.remove('is-invalid');
+                return true;
+            }
+
+            fullName.addEventListener('input', function () { checkName(false); });
+            fullName.addEventListener('blur', function () { checkName(true); });
+
+            email.addEventListener('input', function () { checkEmail(false); });
+            email.addEventListener('blur', function () { checkEmail(true); });
+
+            phone.addEventListener('input', function () { checkPhone(false); });
+            phone.addEventListener('blur', function () { checkPhone(true); });
+
+            form.addEventListener('submit', function (e) {
+                var okName = checkName(true);
+                var okEmail = checkEmail(true);
+                var okPhone = checkPhone(true);
+
+                if (!okName || !okEmail || !okPhone) {
                     e.preventDefault();
-                    alertBox.innerHTML = '⚠ ' + errors.join('<br>⚠ ');
-                    alertBox.classList.remove('d-none');
-                    alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    (fullName.classList.contains('is-invalid') ? fullName : phone).focus();
-                } else {
-                    alertBox.classList.add('d-none');
+                    var firstInvalid = form.querySelector('.is-invalid');
+                    if (firstInvalid) firstInvalid.focus();
                 }
             });
         })();
